@@ -56,8 +56,9 @@
     gap: 10px;
     margin-bottom: 14px;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: center;   /* keep items centered horizontally */
   }
+
 
   #listType {
     padding: 9px 12px;
@@ -179,15 +180,15 @@
 
     <h2>What kind of list do you want to make?</h2>
     <div class="subtitle">Switch between shopping, reminders and packing lists in one place.</div>
-
-<select id="listType" onchange="changeListType()">
-  <option value="shopping">Shopping</option>
-  <option value="reminder">Reminder</option>
-  <option value="todo">To-do</option>
-  <option value="__new__">+ New list type…</option>
-</select>
-
-    </div>
+    
+<div class="controls-row">
+  <select id="listType" onchange="changeListType()">
+    <option value="shopping">Shopping</option>
+    <option value="reminder">Reminder</option>
+    <option value="todo">To-do list</option>
+    <option value="__new__">+ New list type…</option>
+  </select>
+</div>
 
     <div class="input-row">
       <input id="itemInput" placeholder="Add item...">
@@ -339,6 +340,7 @@ attachListeners();
 
 </body>
 </html>
+
 
 
 
