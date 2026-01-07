@@ -130,6 +130,11 @@
     background: #fee2e2;
     color: #b91c1c;
   }
+  
+  .delete-list-btn {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
 
   ul {
     list-style: none;
@@ -188,7 +193,9 @@
     <option value="todo">To-do list</option>
     <option value="__new__">+ New list type…</option>
   </select>
+  <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
 </div>
+
 
     <div class="input-row">
       <input id="itemInput" placeholder="Add item...">
@@ -299,6 +306,47 @@ function changeListType() {
   attachListeners();
 }
 
+  // delete the currently selected list (not the defaults)
+function deleteCurrentList() {
+  const select = document.getElementById('listType');
+
+  // Protect default lists
+  if (currentType === 'shopping' || currentType === 'reminder' || currentType === 'todo') {
+    alert('Default lists (Shopping, Reminder, To-do) cannot be deleted.');
+    return;
+  }
+
+  const label = select.options[select.selectedIndex].textContent;
+  const ok = confirm(`Delete the list "${label}" and all its items?`);
+  if (!ok) return;
+
+  // 1) Remove all items under this list
+  db.ref('nexuslist/' + currentType).remove();
+
+  // 2) Remove this type from listTypes node
+  listTypesRef.once('value', snap => {
+    const data = snap.val();
+    if (!data) return;
+
+    Object.entries(data).forEach(([id, t]) => {
+      if (t.key === currentType) {
+        listTypesRef.child(id).remove();
+      }
+    });
+  });
+
+  // 3) Remove option from dropdown and switch back to Shopping
+  select.remove(select.selectedIndex);
+  currentType = 'shopping';
+  select.value = 'shopping';
+
+  listRef = db.ref('nexuslist/' + currentType);
+  document.getElementById('list').innerHTML = '';
+  listRef.off();
+  attachListeners();
+}
+
+
 // ---------- ITEMS (ADD / CHECK / DELETE) ----------
 
 // add new item
@@ -393,6 +441,7 @@ attachListeners();
 
 </body>
 </html>
+
 
 
 
