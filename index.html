@@ -256,6 +256,7 @@ function attachListeners() {
     span.textContent = snap.val().text;
     span.classList.toggle('done', snap.val().done);
     checkBtn.textContent = snap.val().done ? 'Uncheck' : 'Check';
+    checkBtn.classList.toggle('checked', snap.val().done);
   });
 
   // when item deleted
@@ -276,27 +277,23 @@ function createListItemElement(key, data) {
   span.textContent = data.text;
   if (data.done) span.classList.add('done');
 
-const checkBtn = li.querySelector('.check-btn');
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'check-btn' + (data.done ? ' checked' : '');
+  checkBtn.textContent = data.done ? 'Uncheck' : 'Check';
+  checkBtn.onclick = () => toggle(key);
 
-span.textContent = snap.val().text;
-span.classList.toggle('done', snap.val().done);
-checkBtn.textContent = snap.val().done ? 'Uncheck' : 'Check';
-checkBtn.classList.toggle('checked', snap.val().done);
+  const delBtn = document.createElement('button');
+  delBtn.className = 'delete-btn';
+  delBtn.textContent = 'Delete';
+  delBtn.onclick = () => listRef.child(key).remove();
 
+  const btnWrapper = document.createElement('div');
+  btnWrapper.className = 'item-buttons';
+  btnWrapper.appendChild(checkBtn);
+  btnWrapper.appendChild(delBtn);
 
-const delBtn = document.createElement('button');
-delBtn.className = 'delete-btn';
-delBtn.textContent = 'Delete';
-delBtn.onclick = () => listRef.child(key).remove();
-
-const btnWrapper = document.createElement('div');
-btnWrapper.className = 'item-buttons';
-btnWrapper.appendChild(checkBtn);
-btnWrapper.appendChild(delBtn);
-
-li.appendChild(span);
-li.appendChild(btnWrapper);
-
+  li.appendChild(span);
+  li.appendChild(btnWrapper);
 
   document.getElementById('list').appendChild(li);
 }
@@ -315,8 +312,10 @@ attachListeners();
 </script>
 
 
+
 </body>
 </html>
+
 
 
 
