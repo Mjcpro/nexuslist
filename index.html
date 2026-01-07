@@ -171,26 +171,31 @@
 </head>
 
 <body>
-  <!-- Logo only, centered -->
-  <div class="logo-wrapper">
-    <img src="nexuslist-icon.png" alt="NexusList logo">
+  <div class="card">
+    <!-- Logo only, centered -->
+    <div class="logo-wrapper">
+      <img src="nexuslist-icon.png" alt="NexusList logo">
+    </div>
+
+    <h2>What kind of list do you want to make?</h2>
+    <div class="subtitle">Switch between shopping, reminders and packing lists in one place.</div>
+
+    <div class="controls-row">
+      <select id="listType" onchange="changeListType()">
+        <option value="shopping">Shopping</option>
+        <option value="reminder">Reminder</option>
+        <option value="packing">Packing list</option>
+      </select>
+    </div>
+
+    <div class="input-row">
+      <input id="itemInput" placeholder="Add item...">
+      <button onclick="addItem()">Add</button>
+    </div>
+
+    <ul id="list"></ul>
   </div>
 
-  <h2 style="text-align:center;color:#1E3A8A;">
-    What kind of list do you want to make?
-  </h2>
-
-  <div style="text-align:center;margin-bottom:16px;">
-    <select id="listType" onchange="changeListType()" style="padding:8px;border-radius:5px;border:1px solid #10B981;">
-      <option value="shopping">Shopping</option>
-      <option value="reminder">Reminder</option>
-      <option value="packing">Packing list</option>
-    </select>
-  </div>
-
-  <input id="itemInput" placeholder="Add item...">
-  <button onclick="addItem()">Add</button>
-  <ul id="list"></ul>
 
 
 <script>
@@ -271,19 +276,27 @@ function createListItemElement(key, data) {
   span.textContent = data.text;
   if (data.done) span.classList.add('done');
 
-  const checkBtn = document.createElement('button');
-  checkBtn.className = 'check-btn';
-  checkBtn.textContent = data.done ? 'Uncheck' : 'Check';
-  checkBtn.onclick = () => toggle(key);
+const checkBtn = li.querySelector('.check-btn');
 
-  const delBtn = document.createElement('button');
-  delBtn.textContent = 'Delete';
-  delBtn.style.background = '#EF4444';
-  delBtn.onclick = () => listRef.child(key).remove();
+span.textContent = snap.val().text;
+span.classList.toggle('done', snap.val().done);
+checkBtn.textContent = snap.val().done ? 'Uncheck' : 'Check';
+checkBtn.classList.toggle('checked', snap.val().done);
 
-  li.appendChild(span);
-  li.appendChild(checkBtn);
-  li.appendChild(delBtn);
+
+const delBtn = document.createElement('button');
+delBtn.className = 'delete-btn';
+delBtn.textContent = 'Delete';
+delBtn.onclick = () => listRef.child(key).remove();
+
+const btnWrapper = document.createElement('div');
+btnWrapper.className = 'item-buttons';
+btnWrapper.appendChild(checkBtn);
+btnWrapper.appendChild(delBtn);
+
+li.appendChild(span);
+li.appendChild(btnWrapper);
+
 
   document.getElementById('list').appendChild(li);
 }
@@ -304,5 +317,6 @@ attachListeners();
 
 </body>
 </html>
+
 
 
