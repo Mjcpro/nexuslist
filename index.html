@@ -180,12 +180,13 @@
     <h2>What kind of list do you want to make?</h2>
     <div class="subtitle">Switch between shopping, reminders and packing lists in one place.</div>
 
-    <div class="controls-row">
-      <select id="listType" onchange="changeListType()">
-        <option value="shopping">Shopping</option>
-        <option value="reminder">Reminder</option>
-        <option value="packing">Packing list</option>
-      </select>
+<select id="listType" onchange="changeListType()">
+  <option value="shopping">Shopping</option>
+  <option value="reminder">Reminder</option>
+  <option value="todo">To-do</option>
+  <option value="__new__">+ New list type…</option>
+</select>
+
     </div>
 
     <div class="input-row">
@@ -219,7 +220,29 @@ let listRef = db.ref('nexuslist/' + currentType);
 // change list type (shopping / reminder / packing)
 function changeListType() {
   const select = document.getElementById('listType');
-  currentType = select.value;
+  let value = select.value;
+
+  // If user chose "+ New list type…"
+  if (value === '__new__') {
+    const name = prompt('What do you want to call this list? (e.g. Christmas gifts)');
+    if (!name || !name.trim()) {
+      // user cancelled → go back to previous type
+      select.value = currentType;
+      return;
+    }
+
+    // sanitize name for Firebase path
+    value = name.trim().toLowerCase().replace(/\s+/g, '-'); // "Christmas gifts" -> "christmas-gifts"
+
+    // add it as a new option in the dropdown (before "+ New list type…")
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = name.trim();
+    select.insertBefore(opt, select.lastElementChild);
+    select.value = value;
+  }
+
+  currentType = value;
   listRef = db.ref('nexuslist/' + currentType);
 
   // clear current list in UI
@@ -229,6 +252,7 @@ function changeListType() {
   listRef.off();
   attachListeners();
 }
+
 
 // add new item
 function addItem() {
@@ -315,6 +339,7 @@ attachListeners();
 
 </body>
 </html>
+
 
 
 
