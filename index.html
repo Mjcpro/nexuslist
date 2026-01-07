@@ -222,6 +222,21 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+const auth = firebase.auth();
+let currentUser = null;
+
+auth.signInAnonymously().catch(console.error);
+
+auth.onAuthStateChanged(user => {
+  if (!user) return;
+  currentUser = user;
+  currentType = 'shopping';
+  listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
+  loadListTypes();
+  attachListeners();
+});
+
+
 // reference for list types
 const listTypesRef = db.ref('nexuslist/listTypes');
 
@@ -441,6 +456,7 @@ attachListeners();
 
 </body>
 </html>
+
 
 
 
