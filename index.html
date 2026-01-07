@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NexusList - Shared Lists</title>
+<meta name="viewport" content="width=device-width">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="nexuslist-icon.png">
+<style>
+body { font-family: Arial; max-width: 600px; margin: auto; padding: 20px; background: #f0f8ff; }
+h1 { color: #1E3A8A; text-align: center; }
+input { width: 70%; padding: 12px; border: 1px solid #10B981; border-radius: 5px; }
+button { padding: 12px 20px; background: #10B981; color: white; border: none; border-radius: 5px; margin-left: 5px; }
+ul { list-style: none; padding: 0; }
+li { padding: 15px; background: white; margin: 10px 0; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+.done { text-decoration: line-through; opacity: 0.6; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
+</head>
+<body>
+<h1>🛒 NexusList</h1>
+<input id="itemInput" placeholder="Add shopping item or task...">
+<button onclick="addItem()">Add</button>
+<ul id="list"></ul>
+<script>
+// Replace with YOUR Firebase config from console.firebase.google.com
+const firebaseConfig = {
+  apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY",
+  authDomain: "nexuslist-380ff.firebaseapp.com",
+  databaseURL: "https://nexuslist-380ff-default-rtdb.firebaseio.com",
+  projectId: "nexuslist-380ff",
+  storageBucket: "nexuslist-380ff.firebasestorage.app",
+  messagingSenderId: "950145923798",
+  appId: "1:950145923798:web:050a4a08f99cae13e72777",
+  measurementId: "G-8X3506GVGQ"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const listRef = db.ref('nexuslist');  // Your shared list
+
+function addItem() {
+  const input = document.getElementById('itemInput');
+  if (input.value.trim()) {
+    listRef.push({text: input.value.trim(), done: false});
+    input.value = '';
+  }
+}
+
+listRef.on('child_added', snap => {
+  const li = document.createElement('li');
+  const span = document.createElement('span');
+  span.textContent = snap.val().text;
+  const toggleBtn = document.createElement('button');
+  toggleBtn.textContent = 'Done';
+  toggleBtn.onclick = () => toggle(snap.key);
+  const delBtn = document.createElement('button');
+  delBtn.textContent = 'Delete';
+  delBtn.onclick = () => listRef.child(snap.key).remove();
+  li.appendChild(span);
+  li.appendChild(toggleBtn);
+  li.appendChild(delBtn);
+  document.getElementById('list').appendChild(li);
+});
+
+listRef.on('child_changed', snap => {
+  const items = document.querySelectorAll('li');
+  items.forEach(item => {
+    if (item.firstChild.textContent === snap.val().text) {
+      item.firstChild.classList.toggle('done', snap.val().done);
+    }
+  });
+});
+
+function toggle(key) {
+  const item = listRef.child(key);
+  item.once('value', snap => {
+    item.update({done: !snap.val().done});
+  });
+}
+</script>
+</body>
+</html>
