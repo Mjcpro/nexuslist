@@ -15,22 +15,18 @@
     background: #f0f8ff;
   }
 
-  /* Header with logo + text */
-  h1 {
-    color: #1E3A8A;
-    text-align: center;
-    font-size: 32px;
+  /* BIG centered logo only */
+  .logo-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
     margin-top: 16px;
     margin-bottom: 24px;
   }
 
-  h1 img {
-    height: 60px;               /* bigger logo */
-    border-radius: 8px;          /* softer corners */
+  .logo-wrapper img {
+    height: 180px;          /* 3× bigger than 60px */
+    border-radius: 16px;
   }
 
   input {
@@ -77,10 +73,10 @@
 </head>
 
 <body>
-  <h1>
+  <!-- Logo only, centered -->
+  <div class="logo-wrapper">
     <img src="nexuslist-icon.png" alt="NexusList logo">
-    NexusList
-  </h1>
+  </div>
 
   <input id="itemInput" placeholder="Add shopping item or task...">
   <button onclick="addItem()">Add</button>
