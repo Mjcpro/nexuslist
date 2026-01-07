@@ -37,13 +37,14 @@
   }
 
   button {
-    padding: 12px 20px;
+    padding: 8px 14px;
     background: #10B981;
     color: white;
     border: none;
     border-radius: 5px;
     margin-left: 5px;
     cursor: pointer;
+    font-size: 14px;
   }
 
   ul {
@@ -78,9 +79,22 @@
     <img src="nexuslist-icon.png" alt="NexusList logo">
   </div>
 
-  <input id="itemInput" placeholder="Add shopping item or task...">
+  <h2 style="text-align:center;color:#1E3A8A;">
+    What kind of list do you want to make?
+  </h2>
+
+  <div style="text-align:center;margin-bottom:16px;">
+    <select id="listType" onchange="changeListType()" style="padding:8px;border-radius:5px;border:1px solid #10B981;">
+      <option value="shopping">Shopping</option>
+      <option value="reminder">Reminder</option>
+      <option value="packing">Packing list</option>
+    </select>
+  </div>
+
+  <input id="itemInput" placeholder="Add item...">
   <button onclick="addItem()">Add</button>
   <ul id="list"></ul>
+
 
 <script>
 const firebaseConfig = {
@@ -96,8 +110,25 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const listRef = db.ref('nexuslist');
 
+let currentType = 'shopping';
+let listRef = db.ref('nexuslist/' + currentType);
+
+// change list type (shopping / reminder / packing)
+function changeListType() {
+  const select = document.getElementById('listType');
+  currentType = select.value;
+  listRef = db.ref('nexuslist/' + currentType);
+
+  // clear current list in UI
+  document.getElementById('list').innerHTML = '';
+
+  // detach old listeners, then attach new ones
+  listRef.off();
+  attachListeners();
+}
+
+// add new item
 function addItem() {
   const input = document.getElementById('itemInput');
   if (input.value.trim()) {
@@ -106,41 +137,74 @@ function addItem() {
   }
 }
 
-listRef.on('child_added', snap => {
-  const li = document.createElement('li');
-  const span = document.createElement('span');
-  span.textContent = snap.val().text;
+// attach listeners for current list type
+function attachListeners() {
+  // when item added
+  listRef.on('child_added', snap => {
+    createListItemElement(snap.key, snap.val());
+  });
 
-  const toggleBtn = document.createElement('button');
-  toggleBtn.textContent = 'Done';
-  toggleBtn.onclick = () => toggle(snap.key);
+  // when item changed (check / uncheck)
+  listRef.on('child_changed', snap => {
+    const li = document.getElementById('item-' + snap.key);
+    if (!li) return;
+    const span = li.querySelector('span');
+    const checkBtn = li.querySelector('.check-btn');
+
+    span.textContent = snap.val().text;
+    span.classList.toggle('done', snap.val().done);
+    checkBtn.textContent = snap.val().done ? 'Uncheck' : 'Check';
+  });
+
+  // when item deleted
+  listRef.on('child_removed', snap => {
+    const li = document.getElementById('item-' + snap.key);
+    if (li && li.parentNode) {
+      li.parentNode.removeChild(li); // remove instantly from page
+    }
+  });
+}
+
+// create <li> in DOM
+function createListItemElement(key, data) {
+  const li = document.createElement('li');
+  li.id = 'item-' + key;
+
+  const span = document.createElement('span');
+  span.textContent = data.text;
+  if (data.done) span.classList.add('done');
+
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'check-btn';
+  checkBtn.textContent = data.done ? 'Uncheck' : 'Check';
+  checkBtn.onclick = () => toggle(key);
 
   const delBtn = document.createElement('button');
   delBtn.textContent = 'Delete';
-  delBtn.onclick = () => listRef.child(snap.key).remove();
+  delBtn.style.background = '#EF4444';
+  delBtn.onclick = () => listRef.child(key).remove();
 
   li.appendChild(span);
-  li.appendChild(toggleBtn);
+  li.appendChild(checkBtn);
   li.appendChild(delBtn);
+
   document.getElementById('list').appendChild(li);
-});
+}
 
-listRef.on('child_changed', snap => {
-  const items = document.querySelectorAll('li');
-  items.forEach(item => {
-    if (item.firstChild.textContent === snap.val().text) {
-      item.firstChild.classList.toggle('done', snap.val().done);
-    }
-  });
-});
-
+// toggle between checked/unchecked
 function toggle(key) {
   const item = listRef.child(key);
   item.once('value', snap => {
-    item.update({ done: !snap.val().done });
+    const current = snap.val();
+    item.update({ done: !current.done });
   });
 }
+
+// start listeners for default type
+attachListeners();
 </script>
+
 
 </body>
 </html>
+
