@@ -215,10 +215,48 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// reference for list types
+const listTypesRef = db.ref('nexuslist/listTypes');
+
 let currentType = 'shopping';
 let listRef = db.ref('nexuslist/' + currentType);
 
-// change list type (shopping / reminder / packing)
+// ---------- LIST TYPES ----------
+
+// load saved custom list types from Firebase on start
+function loadListTypes() {
+  const select = document.getElementById('listType');
+
+  // keep the last option ("+ New list type…") for later
+  const newOption = document.querySelector('#listType option[value="__new__"]');
+
+  // remove all options except defaults and "+ new..."
+  select.innerHTML = `
+    <option value="shopping">Shopping</option>
+    <option value="reminder">Reminder</option>
+    <option value="todo">To-do list</option>
+  `;
+  select.appendChild(newOption);
+
+  listTypesRef.once('value', snap => {
+    const data = snap.val();
+    if (!data) return;
+
+    Object.values(data).forEach(t => {
+      // t.key = firebase-safe key, t.label = nice label
+      const opt = document.createElement('option');
+      opt.value = t.key;
+      opt.textContent = t.label;
+      // insert before "+ New list type…"
+      select.insertBefore(opt, select.lastElementChild);
+    });
+
+    // ensure currentType is selected
+    select.value = currentType;
+  });
+}
+
+// handle changing list type or creating a new one
 function changeListType() {
   const select = document.getElementById('listType');
   let value = select.value;
@@ -232,15 +270,22 @@ function changeListType() {
       return;
     }
 
-    // sanitize name for Firebase path
-    value = name.trim().toLowerCase().replace(/\s+/g, '-'); // "Christmas gifts" -> "christmas-gifts"
+    const label = name.trim();
+    // sanitize name for Firebase path (no spaces)
+    const key = label.toLowerCase().replace(/\s+/g, '-'); // "Christmas gifts" -> "christmas-gifts"
+
+    value = key;
+
+    // save this new list type in Firebase so it survives refresh
+    const newTypeRef = listTypesRef.push();
+    newTypeRef.set({ key, label });
 
     // add it as a new option in the dropdown (before "+ New list type…")
     const opt = document.createElement('option');
-    opt.value = value;
-    opt.textContent = name.trim();
+    opt.value = key;
+    opt.textContent = label;
     select.insertBefore(opt, select.lastElementChild);
-    select.value = value;
+    select.value = key;
   }
 
   currentType = value;
@@ -253,14 +298,8 @@ function changeListType() {
   listRef.off();
   attachListeners();
 }
-  
-// allow pressing Enter to add item
-document.getElementById('itemInput').addEventListener('keyup', function (e) {
-  if (e.key === 'Enter') {
-    addItem();
-  }
-});
 
+// ---------- ITEMS (ADD / CHECK / DELETE) ----------
 
 // add new item
 function addItem() {
@@ -339,14 +378,22 @@ function toggle(key) {
   });
 }
 
-// start listeners for default type
+// allow pressing Enter to add item
+document.getElementById('itemInput').addEventListener('keyup', function (e) {
+  if (e.key === 'Enter') {
+    addItem();
+  }
+});
+
+// initial load
+loadListTypes();
 attachListeners();
 </script>
 
 
-
 </body>
 </html>
+
 
 
 
