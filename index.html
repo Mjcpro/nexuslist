@@ -253,6 +253,13 @@ function changeListType() {
   listRef.off();
   attachListeners();
 }
+  
+// allow pressing Enter to add item
+document.getElementById('itemInput').addEventListener('keyup', function (e) {
+  if (e.key === 'Enter') {
+    addItem();
+  }
+});
 
 
 // add new item
@@ -340,6 +347,7 @@ attachListeners();
 
 </body>
 </html>
+
 
 
 
