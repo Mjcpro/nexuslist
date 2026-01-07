@@ -221,38 +221,40 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-
 const auth = firebase.auth();
+
 let currentUser = null;
+let currentType = 'shopping';
+let listRef = null;
+let listTypesRef = null;
+
+// ---------- AUTH ----------
 
 auth.signInAnonymously().catch(console.error);
 
 auth.onAuthStateChanged(user => {
   if (!user) return;
   currentUser = user;
-  currentType = 'shopping';
-  listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
+
+  // user-specific references
+  listTypesRef = db.ref('nexuslist/' + currentUser.uid + '/listTypes');
+  listRef      = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
+
   loadListTypes();
   attachListeners();
 });
-
-
-// reference for list types
-const listTypesRef = db.ref('nexuslist/listTypes');
-
-let currentType = 'shopping';
-let listRef = db.ref('nexuslist/' + currentType);
 
 // ---------- LIST TYPES ----------
 
 // load saved custom list types from Firebase on start
 function loadListTypes() {
   const select = document.getElementById('listType');
+  if (!select) return;
 
-  // keep the last option ("+ New list type…") for later
+  // keep the "+ New list type…" option
   const newOption = document.querySelector('#listType option[value="__new__"]');
 
-  // remove all options except defaults and "+ new..."
+  // reset to defaults
   select.innerHTML = `
     <option value="shopping">Shopping</option>
     <option value="reminder">Reminder</option>
@@ -260,20 +262,19 @@ function loadListTypes() {
   `;
   select.appendChild(newOption);
 
+  if (!listTypesRef) return;
+
   listTypesRef.once('value', snap => {
     const data = snap.val();
     if (!data) return;
 
     Object.values(data).forEach(t => {
-      // t.key = firebase-safe key, t.label = nice label
       const opt = document.createElement('option');
-      opt.value = t.key;
-      opt.textContent = t.label;
-      // insert before "+ New list type…"
+      opt.value = t.key;   // firebase-safe key
+      opt.textContent = t.label; // nice label
       select.insertBefore(opt, select.lastElementChild);
     });
 
-    // ensure currentType is selected
     select.value = currentType;
   });
 }
@@ -283,26 +284,22 @@ function changeListType() {
   const select = document.getElementById('listType');
   let value = select.value;
 
-  // If user chose "+ New list type…"
   if (value === '__new__') {
     const name = prompt('What do you want to call this list? (e.g. Christmas gifts)');
     if (!name || !name.trim()) {
-      // user cancelled → go back to previous type
       select.value = currentType;
       return;
     }
 
     const label = name.trim();
-    // sanitize name for Firebase path (no spaces)
-    const key = label.toLowerCase().replace(/\s+/g, '-'); // "Christmas gifts" -> "christmas-gifts"
-
+    const key   = label.toLowerCase().replace(/\s+/g, '-'); // "Christmas gifts" -> "christmas-gifts"
     value = key;
 
-    // save this new list type in Firebase so it survives refresh
-    const newTypeRef = listTypesRef.push();
-    newTypeRef.set({ key, label });
+    if (listTypesRef) {
+      const newTypeRef = listTypesRef.push();
+      newTypeRef.set({ key, label });
+    }
 
-    // add it as a new option in the dropdown (before "+ New list type…")
     const opt = document.createElement('option');
     opt.value = key;
     opt.textContent = label;
@@ -311,21 +308,20 @@ function changeListType() {
   }
 
   currentType = value;
-  listRef = db.ref('nexuslist/' + currentType);
 
-  // clear current list in UI
+  if (!currentUser) return;
+
+  listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
+
   document.getElementById('list').innerHTML = '';
-
-  // detach old listeners, then attach new ones
   listRef.off();
   attachListeners();
 }
 
-  // delete the currently selected list (not the defaults)
+// delete the currently selected list (not the defaults)
 function deleteCurrentList() {
   const select = document.getElementById('listType');
 
-  // Protect default lists
   if (currentType === 'shopping' || currentType === 'reminder' || currentType === 'todo') {
     alert('Default lists (Shopping, Reminder, To-do) cannot be deleted.');
     return;
@@ -333,39 +329,40 @@ function deleteCurrentList() {
 
   const label = select.options[select.selectedIndex].textContent;
   const ok = confirm(`Delete the list "${label}" and all its items?`);
-  if (!ok) return;
+  if (!ok || !currentUser) return;
 
-  // 1) Remove all items under this list
-  db.ref('nexuslist/' + currentType).remove();
+  // remove all items under this list for this user
+  db.ref('nexuslist/' + currentUser.uid + '/' + currentType).remove();
 
-  // 2) Remove this type from listTypes node
-  listTypesRef.once('value', snap => {
-    const data = snap.val();
-    if (!data) return;
+  // remove this type from listTypes node
+  if (listTypesRef) {
+    listTypesRef.once('value', snap => {
+      const data = snap.val();
+      if (!data) return;
 
-    Object.entries(data).forEach(([id, t]) => {
-      if (t.key === currentType) {
-        listTypesRef.child(id).remove();
-      }
+      Object.entries(data).forEach(([id, t]) => {
+        if (t.key === currentType) {
+          listTypesRef.child(id).remove();
+        }
+      });
     });
-  });
+  }
 
-  // 3) Remove option from dropdown and switch back to Shopping
+  // remove option from dropdown and switch back to Shopping
   select.remove(select.selectedIndex);
   currentType = 'shopping';
   select.value = 'shopping';
 
-  listRef = db.ref('nexuslist/' + currentType);
+  listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
   document.getElementById('list').innerHTML = '';
   listRef.off();
   attachListeners();
 }
 
-
 // ---------- ITEMS (ADD / CHECK / DELETE) ----------
 
-// add new item
 function addItem() {
+  if (!listRef) return;
   const input = document.getElementById('itemInput');
   if (input.value.trim()) {
     listRef.push({ text: input.value.trim(), done: false });
@@ -373,14 +370,13 @@ function addItem() {
   }
 }
 
-// attach listeners for current list type
 function attachListeners() {
-  // when item added
+  if (!listRef) return;
+
   listRef.on('child_added', snap => {
     createListItemElement(snap.key, snap.val());
   });
 
-  // when item changed (check / uncheck)
   listRef.on('child_changed', snap => {
     const li = document.getElementById('item-' + snap.key);
     if (!li) return;
@@ -393,16 +389,14 @@ function attachListeners() {
     checkBtn.classList.toggle('checked', snap.val().done);
   });
 
-  // when item deleted
   listRef.on('child_removed', snap => {
     const li = document.getElementById('item-' + snap.key);
     if (li && li.parentNode) {
-      li.parentNode.removeChild(li); // remove instantly from page
+      li.parentNode.removeChild(li);
     }
   });
 }
 
-// create <li> in DOM
 function createListItemElement(key, data) {
   const li = document.createElement('li');
   li.id = 'item-' + key;
@@ -432,8 +426,8 @@ function createListItemElement(key, data) {
   document.getElementById('list').appendChild(li);
 }
 
-// toggle between checked/unchecked
 function toggle(key) {
+  if (!listRef) return;
   const item = listRef.child(key);
   item.once('value', snap => {
     const current = snap.val();
@@ -441,21 +435,18 @@ function toggle(key) {
   });
 }
 
-// allow pressing Enter to add item
+// Enter key adds item
 document.getElementById('itemInput').addEventListener('keyup', function (e) {
   if (e.key === 'Enter') {
     addItem();
   }
 });
-
-// initial load
-loadListTypes();
-attachListeners();
 </script>
 
 
 </body>
 </html>
+
 
 
 
