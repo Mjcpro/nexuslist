@@ -445,3 +445,49 @@ function createListItemElement(key, data) {
   delBtn.className = 'delete-btn';
   delBtn.textContent = 'Delete';
   delBtn.onclick = () => listRef.child(key
+).remove();
+
+  const btnWrapper = document.createElement('div');
+  btnWrapper.className = 'item-buttons';
+  btnWrapper.appendChild(checkBtn);
+  btnWrapper.appendChild(delBtn);
+
+  li.appendChild(span);
+  li.appendChild(btnWrapper);
+
+  document.getElementById('list').appendChild(li);
+}
+
+function toggle(key) {
+  if (!listRef) return;
+  const item = listRef.child(key);
+  item.once('value', snap => {
+    const current = snap.val();
+    item.update({ done: !current.done });
+  });
+}
+
+// Enter key adds item
+document.getElementById('itemInput').addEventListener('keyup', function (e) {
+  if (e.key === 'Enter') {
+    addItem();
+  }
+});
+</script>
+
+<script>
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js')
+    .then(function(registration) {
+      console.log('Service Worker registered:', registration);
+    })
+    .catch(function(error) {
+      console.log('Service Worker failed:', error);
+    });
+}
+</script>
+
+</body>
+</html>
+
