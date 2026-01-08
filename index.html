@@ -7,7 +7,6 @@
 <link rel="apple-touch-icon" href="nexuslist-icon.png">
 <link rel="manifest" href="manifest.json">
 
-
 <style>
   body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -25,7 +24,6 @@
     border: 1px solid rgba(148, 163, 184, 0.3);
   }
 
-  /* BIG centered logo only */
   .logo-wrapper {
     display: flex;
     justify-content: center;
@@ -58,9 +56,8 @@
     gap: 10px;
     margin-bottom: 14px;
     flex-wrap: wrap;
-    justify-content: center;   /* keep items centered horizontally */
+    justify-content: center;
   }
-
 
   #listType {
     padding: 9px 12px;
@@ -176,11 +173,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
-
 </head>
 
 <body>
-  <!-- Sign-in screen (shown when not logged in) -->
+  <!-- Sign-in screen -->
   <div id="signin-container" style="display:none;">
     <div class="card" style="text-align:center;">
       <div class="logo-wrapper">
@@ -194,37 +190,31 @@
     </div>
   </div>
 
-  <!-- Main app (shown after login) -->
+  <!-- Main app -->
   <div id="app-container" style="display:none;">
     <div class="card">
-      <!-- Logo only, centered -->
       <div class="logo-wrapper">
+        <img src="nexuslist-icon.png" alt="NexusList logo">
+      </div>
 
-      <img src="nexuslist-icon.png" alt="NexusList logo">
-    </div>
+      <h2>What kind of list do you want to make?</h2>
+      <div class="subtitle">Switch between shopping, reminders and to-do lists in one place.</div>
+      
+      <div class="controls-row">
+        <select id="listType" onchange="changeListType()">
+          <option value="shopping">Shopping</option>
+          <option value="reminder">Reminder</option>
+          <option value="todo">To-do list</option>
+          <option value="__new__">+ New list type…</option>
+        </select>
+        <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
+      </div>
 
-    <h2>What kind of list do you want to make?</h2>
-    <div class="subtitle">Switch between shopping, reminders and packing lists in one place.</div>
-    
-<div class="controls-row">
-  <select id="listType" onchange="changeListType()">
-    <option value="shopping">Shopping</option>
-    <option value="reminder">Reminder</option>
-    <option value="todo">To-do list</option>
-    <option value="__new__">+ New list type…</option>
-  </select>
-  <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
-</div>
+      <div class="input-row">
+        <input id="itemInput" placeholder="Add item...">
+        <button onclick="addItem()">Add</button>
+      </div>
 
-
-    <div class="input-row">
-      <input id="itemInput" placeholder="Add item...">
-      <button onclick="addItem()">Add</button>
-    </div>
-
-    <ul id="list"></ul>
-  </div>
-    
       <ul id="list"></ul>
       
       <div style="text-align:center;margin-top:20px;">
@@ -232,8 +222,6 @@
       </div>
     </div>
   </div>
-
-
 
 <script>
 const firebaseConfig = {
@@ -251,10 +239,10 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-// Enable auth persistence so user stays logged in offline
+// Enable auth persistence
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-// Monitor connection status
+// Monitor connection
 firebase.database().ref('.info/connected').on('value', function(snapshot) {
   if (snapshot.val() === true) {
     console.log('Connected to Firebase');
@@ -268,64 +256,44 @@ let currentType = 'shopping';
 let listRef = null;
 let listTypesRef = null;
 
-// ---------- AUTH ----------
-
-auth.signInAnonymously().catch(function(error) {
-  console.log('Auth error (may be offline):', error);
-});
-
-// ---------- AUTH ----------
-
-// Check if user is already signed in
+// AUTH
 auth.onAuthStateChanged(user => {
   if (user) {
-    // User is signed in
     currentUser = user;
     console.log('Signed in as:', user.displayName || user.email);
     
-    // user-specific references
     listTypesRef = db.ref('nexuslist/' + currentUser.uid + '/listTypes');
-    listRef      = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
+    listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
 
     loadListTypes();
     attachListeners();
     
-    // Hide sign-in button, show app
     document.getElementById('signin-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
   } else {
-    // User is signed out, show sign-in button
     document.getElementById('signin-container').style.display = 'block';
     document.getElementById('app-container').style.display = 'none';
   }
 });
 
-// Google Sign-In function
 function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider)
-    .catch(function(error) {
-      console.log('Sign-in error:', error);
-      alert('Sign-in failed. Please try again.');
-    });
+  auth.signInWithPopup(provider).catch(function(error) {
+    console.log('Sign-in error:', error);
+    alert('Sign-in failed. Please try again.');
+  });
 }
 
 function signOut() {
   auth.signOut();
 }
 
-
-// ---------- LIST TYPES ----------
-
-// load saved custom list types from Firebase on start
+// LIST TYPES
 function loadListTypes() {
   const select = document.getElementById('listType');
   if (!select) return;
 
-  // keep the "+ New list type…" option
   const newOption = document.querySelector('#listType option[value="__new__"]');
-
-  // reset to defaults
   select.innerHTML = `
     <option value="shopping">Shopping</option>
     <option value="reminder">Reminder</option>
@@ -341,8 +309,8 @@ function loadListTypes() {
 
     Object.values(data).forEach(t => {
       const opt = document.createElement('option');
-      opt.value = t.key;   // firebase-safe key
-      opt.textContent = t.label; // nice label
+      opt.value = t.key;
+      opt.textContent = t.label;
       select.insertBefore(opt, select.lastElementChild);
     });
 
@@ -350,7 +318,6 @@ function loadListTypes() {
   });
 }
 
-// handle changing list type or creating a new one
 function changeListType() {
   const select = document.getElementById('listType');
   let value = select.value;
@@ -363,7 +330,7 @@ function changeListType() {
     }
 
     const label = name.trim();
-    const key   = label.toLowerCase().replace(/\s+/g, '-'); // "Christmas gifts" -> "christmas-gifts"
+    const key = label.toLowerCase().replace(/\s+/g, '-');
     value = key;
 
     if (listTypesRef) {
@@ -379,17 +346,14 @@ function changeListType() {
   }
 
   currentType = value;
-
   if (!currentUser) return;
 
   listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
-
   document.getElementById('list').innerHTML = '';
   listRef.off();
   attachListeners();
 }
 
-// delete the currently selected list (not the defaults)
 function deleteCurrentList() {
   const select = document.getElementById('listType');
 
@@ -402,10 +366,8 @@ function deleteCurrentList() {
   const ok = confirm(`Delete the list "${label}" and all its items?`);
   if (!ok || !currentUser) return;
 
-  // remove all items under this list for this user
   db.ref('nexuslist/' + currentUser.uid + '/' + currentType).remove();
 
-  // remove this type from listTypes node
   if (listTypesRef) {
     listTypesRef.once('value', snap => {
       const data = snap.val();
@@ -419,7 +381,6 @@ function deleteCurrentList() {
     });
   }
 
-  // remove option from dropdown and switch back to Shopping
   select.remove(select.selectedIndex);
   currentType = 'shopping';
   select.value = 'shopping';
@@ -430,8 +391,7 @@ function deleteCurrentList() {
   attachListeners();
 }
 
-// ---------- ITEMS (ADD / CHECK / DELETE) ----------
-
+// ITEMS
 function addItem() {
   if (!listRef) return;
   const input = document.getElementById('itemInput');
@@ -484,65 +444,4 @@ function createListItemElement(key, data) {
   const delBtn = document.createElement('button');
   delBtn.className = 'delete-btn';
   delBtn.textContent = 'Delete';
-  delBtn.onclick = () => listRef.child(key).remove();
-
-  const btnWrapper = document.createElement('div');
-  btnWrapper.className = 'item-buttons';
-  btnWrapper.appendChild(checkBtn);
-  btnWrapper.appendChild(delBtn);
-
-  li.appendChild(span);
-  li.appendChild(btnWrapper);
-
-  document.getElementById('list').appendChild(li);
-}
-
-function toggle(key) {
-  if (!listRef) return;
-  const item = listRef.child(key);
-  item.once('value', snap => {
-    const current = snap.val();
-    item.update({ done: !current.done });
-  });
-}
-
-// Enter key adds item
-document.getElementById('itemInput').addEventListener('keyup', function (e) {
-  if (e.key === 'Enter') {
-    addItem();
-  }
-});
-</script>
-
-
-<script>
-// Register service worker for offline support
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js')
-    .then(function(registration) {
-      console.log('Service Worker registered successfully:', registration);
-    })
-    .catch(function(error) {
-      console.log('Service Worker registration failed:', error);
-    });
-}
-</script>
-
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  delBtn.onclick = () => listRef.child(key
