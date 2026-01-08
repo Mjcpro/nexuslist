@@ -1,15 +1,17 @@
 {
   "name": "NexusList - Shared Lists",
   "short_name": "NexusList",
-  "start_url": ".",
+  "description": "Create and share shopping lists, reminders, and to-do lists with your family in real-time",
+  "start_url": "/nexuslist/",
   "display": "standalone",
   "background_color": "#f0f8ff",
-  "theme_color": "#10B981",
+  "theme_color": "#4f46e5",
   "icons": [
     {
       "src": "nexuslist-icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
