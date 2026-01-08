@@ -226,6 +226,18 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
+// Enable auth persistence so user stays logged in offline
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+// Monitor connection status
+firebase.database().ref('.info/connected').on('value', function(snapshot) {
+  if (snapshot.val() === true) {
+    console.log('Connected to Firebase');
+  } else {
+    console.log('Offline - changes will sync when back online');
+  }
+});
+
 let currentUser = null;
 let currentType = 'shopping';
 let listRef = null;
@@ -233,7 +245,9 @@ let listTypesRef = null;
 
 // ---------- AUTH ----------
 
-auth.signInAnonymously().catch(console.error);
+auth.signInAnonymously().catch(function(error) {
+  console.log('Auth error (may be offline):', error);
+});
 
 auth.onAuthStateChanged(user => {
   if (!user) return;
@@ -446,6 +460,7 @@ document.getElementById('itemInput').addEventListener('keyup', function (e) {
 });
 </script>
 
+
 <script>
 // Register service worker for offline support
 if ('serviceWorker' in navigator) {
@@ -461,6 +476,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
