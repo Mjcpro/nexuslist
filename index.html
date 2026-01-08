@@ -446,9 +446,15 @@ document.getElementById('itemInput').addEventListener('keyup', function (e) {
 });
 </script>
 
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js');
+}
+</script>
 
 </body>
 </html>
+
 
 
 
