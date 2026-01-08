@@ -1,6 +1,8 @@
 {
-  "name": "NexusList - Shared Lists",
+ "name": "NexusList - Shared Lists",
   "short_name": "NexusList",
+  "id": "/nexuslist/",
+  "orientation": "portrait",
   "description": "Create and share shopping lists, reminders, and to-do lists with your family in real-time",
   "start_url": "/nexuslist/",
   "display": "standalone",
@@ -15,3 +17,4 @@
     }
   ]
 }
+
