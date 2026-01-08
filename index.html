@@ -180,9 +180,26 @@
 </head>
 
 <body>
-  <div class="card">
-    <!-- Logo only, centered -->
-    <div class="logo-wrapper">
+  <!-- Sign-in screen (shown when not logged in) -->
+  <div id="signin-container" style="display:none;">
+    <div class="card" style="text-align:center;">
+      <div class="logo-wrapper">
+        <img src="nexuslist-icon.png" alt="NexusList logo">
+      </div>
+      <h2>Welcome to NexusList</h2>
+      <p class="subtitle">Sign in with Google to sync your lists across devices</p>
+      <button onclick="signInWithGoogle()" style="margin-top:20px;">
+        🔐 Sign in with Google
+      </button>
+    </div>
+  </div>
+
+  <!-- Main app (shown after login) -->
+  <div id="app-container" style="display:none;">
+    <div class="card">
+      <!-- Logo only, centered -->
+      <div class="logo-wrapper">
+
       <img src="nexuslist-icon.png" alt="NexusList logo">
     </div>
 
@@ -206,6 +223,14 @@
     </div>
 
     <ul id="list"></ul>
+  </div>
+    
+      <ul id="list"></ul>
+      
+      <div style="text-align:center;margin-top:20px;">
+        <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
+      </div>
+    </div>
   </div>
 
 
@@ -249,17 +274,46 @@ auth.signInAnonymously().catch(function(error) {
   console.log('Auth error (may be offline):', error);
 });
 
+// ---------- AUTH ----------
+
+// Check if user is already signed in
 auth.onAuthStateChanged(user => {
-  if (!user) return;
-  currentUser = user;
+  if (user) {
+    // User is signed in
+    currentUser = user;
+    console.log('Signed in as:', user.displayName || user.email);
+    
+    // user-specific references
+    listTypesRef = db.ref('nexuslist/' + currentUser.uid + '/listTypes');
+    listRef      = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
 
-  // user-specific references
-  listTypesRef = db.ref('nexuslist/' + currentUser.uid + '/listTypes');
-  listRef      = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
-
-  loadListTypes();
-  attachListeners();
+    loadListTypes();
+    attachListeners();
+    
+    // Hide sign-in button, show app
+    document.getElementById('signin-container').style.display = 'none';
+    document.getElementById('app-container').style.display = 'block';
+  } else {
+    // User is signed out, show sign-in button
+    document.getElementById('signin-container').style.display = 'block';
+    document.getElementById('app-container').style.display = 'none';
+  }
 });
+
+// Google Sign-In function
+function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider)
+    .catch(function(error) {
+      console.log('Sign-in error:', error);
+      alert('Sign-in failed. Please try again.');
+    });
+}
+
+function signOut() {
+  auth.signOut();
+}
+
 
 // ---------- LIST TYPES ----------
 
@@ -476,6 +530,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
