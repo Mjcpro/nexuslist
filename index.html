@@ -447,8 +447,15 @@ document.getElementById('itemInput').addEventListener('keyup', function (e) {
 </script>
 
 <script>
+// Register service worker for offline support
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js');
+  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js')
+    .then(function(registration) {
+      console.log('Service Worker registered successfully:', registration);
+    })
+    .catch(function(error) {
+      console.log('Service Worker registration failed:', error);
+    });
 }
 </script>
 
