@@ -303,20 +303,35 @@ function loadListTypes() {
 
   if (!listTypesRef) return;
 
-  listTypesRef.once('value', snap => {
-    const data = snap.val();
-    if (!data) return;
-
-    Object.values(data).forEach(t => {
+  // Use 'on' instead of 'once' to listen for real-time changes
+  listTypesRef.on('child_added', snap => {
+    const t = snap.val();
+    // Check if this option already exists
+    const existingOpt = document.querySelector(`#listType option[value="${t.key}"]`);
+    if (!existingOpt && t.key !== 'shopping' && t.key !== 'reminder' && t.key !== 'todo') {
       const opt = document.createElement('option');
       opt.value = t.key;
       opt.textContent = t.label;
       select.insertBefore(opt, select.lastElementChild);
-    });
+    }
+  });
 
-    select.value = currentType;
+  // Listen for deleted list types
+  listTypesRef.on('child_removed', snap => {
+    const t = snap.val();
+    const optToRemove = document.querySelector(`#listType option[value="${t.key}"]`);
+    if (optToRemove) {
+      optToRemove.remove();
+      // If the deleted list was currently selected, switch to Shopping
+      if (currentType === t.key) {
+        currentType = 'shopping';
+        select.value = 'shopping';
+        changeListType();
+      }
+    }
   });
 }
+
 
 function changeListType() {
   const select = document.getElementById('listType');
@@ -490,4 +505,5 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
