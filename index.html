@@ -210,12 +210,29 @@
         <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
       </div>
 
-      <div class="input-row">
-        <input id="itemInput" placeholder="Add item...">
-        <button onclick="addItem()">Add</button>
-      </div>
+<!-- Search bar -->
+<div style="margin-bottom:12px;">
+  <input type="text" id="searchInput" placeholder="🔍 Search items..." style="width:100%;padding:10px 14px;border:1px solid #cbd5e1;border-radius:999px;font-size:14px;outline:none;background:#f8fafc;">
+</div>
 
-      <ul id="list"></ul>
+<!-- Add item form -->
+<div class="input-row" style="flex-wrap:wrap;">
+  <input id="itemInput" placeholder="Add item..." style="flex:1;min-width:200px;">
+  <input id="quantityInput" placeholder="Qty" style="width:60px;padding:12px 8px;border:1px solid #cbd5f5;border-radius:999px;font-size:14px;text-align:center;">
+  <select id="priorityInput" style="padding:12px 12px;border:1px solid #cbd5f5;border-radius:999px;font-size:13px;">
+    <option value="">Priority</option>
+    <option value="high">🔴 High</option>
+    <option value="medium">🟡 Medium</option>
+    <option value="low">🟢 Low</option>
+  </select>
+  <button onclick="addItem()">Add</button>
+</div>
+<div style="margin-top:8px;">
+  <input id="noteInput" placeholder="Add note (optional)..." style="width:100%;padding:8px 14px;border:1px solid #e2e8f0;border-radius:12px;font-size:13px;color:#64748b;">
+</div>
+
+<ul id="list"></ul>
+
       
       <div style="text-align:center;margin-top:20px;">
         <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
@@ -505,5 +522,6 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
