@@ -252,6 +252,15 @@ h2 {
                               <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">✓ To-do</button>
                               <button class="bubble-btn" onclick="createCustomList()" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">➕ Custom List</button>
                             </div>
+                  <div style="text-align:center;margin-top:12px;">
+                <label style="font-size:13px;color:#64748b;margin-right:8px;">Or select custom list:</label>
+                <select id="customListDropdown" onchange="changeListType()" style="padding:8px 12px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:13px;outline:none;cursor:pointer;">
+                    <option value="shopping">Shopping</option>
+                    <option value="reminder">Reminder</option>
+                    <option value="todo">To-do</option>
+                    <option value="__new__">➕ New list type...</option>
+                </select>
+            </div>
            <button onclick="RemoveCurrentList()" class="Remove-list-btn" style="margin-top:12px;padding:8px 16px;background:#fee2e2;color:#b91c1c;border:none;border-radius:999px;font-size:12px;cursor:pointer;">🗑️ Delete Custom List</button>
       
       <!--<div class="controls-row">
@@ -446,6 +455,15 @@ function loadListTypes() {
                 
           // Also create bubble button for custom list
           const bubbleContainer = document.querySelector('.bubble-container');
+                  
+            // Also add to visible custom list dropdown
+            const customDropdown = document.getElementById('customListDropdown');
+            if (customDropdown) {
+                const customOpt = document.createElement('option');
+                customOpt.value = t.key;
+                customOpt.textContent = t.label;
+                customDropdown.insertBefore(customOpt, customDropdown.lastElementChild);
+            }
           if (bubbleContainer) {
             const newBubbleBtn = document.createElement('button');
             newBubbleBtn.className = 'bubble-btn';
@@ -482,8 +500,7 @@ function loadListTypes() {
 
 
 function changeListType() {
-  const select = document.getElementById('listType');
-  let value = select.value;
+    const select = document.getElementById('customListDropdown');  let value = select.value;
 
   if (value === '__new__') {
     const name = prompt('What do you want to call this list? (e.g. Christmas gifts)');
@@ -789,6 +806,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
