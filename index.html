@@ -424,11 +424,27 @@ function deleteCurrentList() {
 function addItem() {
   if (!listRef) return;
   const input = document.getElementById('itemInput');
+  const qtyInput = document.getElementById('quantityInput');
+  const priorityInput = document.getElementById('priorityInput');
+  
   if (input.value.trim()) {
-    listRef.push({ text: input.value.trim(), done: false });
+    const quantity = qtyInput.value.trim() || '1';
+    const priority = priorityInput.value || '';
+    
+    listRef.push({ 
+      text: input.value.trim(), 
+      quantity: quantity,
+      priority: priority,
+      done: false 
+    });
+    
+    // Clear all inputs after adding
     input.value = '';
+    qtyInput.value = '';
+    priorityInput.value = '';
   }
 }
+
 
 function attachListeners() {
   if (!listRef) return;
@@ -461,9 +477,22 @@ function createListItemElement(key, data) {
   const li = document.createElement('li');
   li.id = 'item-' + key;
 
-  const span = document.createElement('span');
-  span.textContent = data.text;
-  if (data.done) span.classList.add('done');
+const span = document.createElement('span');
+// Show quantity if it exists and is not '1'
+const qtyText = data.quantity && data.quantity !== '1' ? data.quantity + '× ' : '';
+span.textContent = qtyText + data.text;
+if (data.done) span.classList.add('done');
+
+// Add priority indicator
+if (data.priority) {
+  const priorityDot = document.createElement('span');
+  priorityDot.style.cssText = 'display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;';
+  if (data.priority === 'high') priorityDot.style.background = '#ef4444';
+  else if (data.priority === 'medium') priorityDot.style.background = '#f59e0b';
+  else if (data.priority === 'low') priorityDot.style.background = '#10b981';
+  span.insertBefore(priorityDot, span.firstChild);
+}
+
 
   const checkBtn = document.createElement('button');
   checkBtn.className = 'check-btn' + (data.done ? ' checked' : '');
@@ -502,6 +531,19 @@ document.getElementById('itemInput').addEventListener('keyup', function (e) {
     addItem();
   }
 });
+  // Also allow Enter from quantity and priority fields
+document.getElementById('quantityInput').addEventListener('keyup', function (e) {
+  if (e.key === 'Enter') {
+    addItem();
+  }
+});
+
+document.getElementById('priorityInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    addItem();
+  }
+});
+
 </script>
 
 <script>
@@ -519,6 +561,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
