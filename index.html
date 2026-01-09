@@ -381,7 +381,14 @@ function changeListType() {
   document.getElementById('list').innerHTML = '';
   listRef.off();
   attachListeners();
+  
+  // Clear input fields when switching lists
+  document.getElementById('itemInput').value = '';
+  document.getElementById('quantityInput').value = '';
+  document.getElementById('priorityInput').value = '';
+  document.getElementById('searchInput').value = '';
 }
+
 
 function deleteCurrentList() {
   const select = document.getElementById('listType');
@@ -561,6 +568,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
