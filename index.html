@@ -1,643 +1,562 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>NexusList - Shared Lists</title>
-<meta name="viewport" content="width=device-width">
-<link rel="icon" href="nexuslist-icon.png">
-<link rel="apple-touch-icon" href="nexuslist-icon.png">
-<link rel="manifest" href="manifest.json">
+    <title>NexusList - Shared Lists</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="icon" href="nexuslist-icon.png">
+    <link rel="apple-touch-icon" href="nexuslist-icon.png">
+    <link rel="manifest" href="manifest.json">
 
-<style>
-:root {
-  --bg-gradient-start: #e0f2fe;
-  --bg-gradient-end: #f9fafb;
-  --card-bg: white;
-  --card-border: rgba(148, 163, 184, 0.3);
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --input-bg: #f9fafb;
-  --input-border: #cbd5f5;
-  --item-bg: #f9fafb;
-  --shadow-color: rgba(15, 23, 42, 0.12);
-}
+    <style>
+        :root {
+            --bg-gradient-start: #e0f2fe;
+            --bg-gradient-end: #f9fafb;
+            --card-bg: white;
+            --card-border: rgba(148, 163, 184, 0.3);
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --input-bg: #f9fafb;
+            --input-border: #cbd5f5;
+            --item-bg: #f9fafb;
+            --shadow-color: rgba(15, 23, 42, 0.12);
+        }
 
-body.dark-mode {
-  --bg-gradient-start: #1e293b;
-  --bg-gradient-end: #0f172a;
-  --card-bg: #1e293b;
-  --card-border: rgba(100, 116, 139, 0.3);
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --input-bg: #334155;
-  --input-border: #475569;
-  --item-bg: #334155;
-  --shadow-color: rgba(0, 0, 0, 0.3);
-}
+        body.dark-mode {
+            --bg-gradient-start: #1e293b;
+            --bg-gradient-end: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: rgba(100, 116, 139, 0.3);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --input-bg: #334155;
+            --input-border: #475569;
+            --item-bg: #334155;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 24px 16px 40px;
-  background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
-  transition: background 0.3s ease;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-.card {
-  background: var(--card-bg);
-  border-radius: 18px;
-  box-shadow: 0 18px 40px var(--shadow-color);
-  padding: 22px 18px 26px;
-  border: 1px solid var(--card-border);
-  transition: background 0.3s ease, border 0.3s ease;
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: all 0.3s;
+            color: var(--text-primary);
+        }
 
-  .logo-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 8px;
-    margin-bottom: 12px;
-  }
+        #signin-container, #app-container {
+            width: 100%;
+            max-width: 500px;
+        }
 
-  .logo-wrapper img {
-    height: 160px;
-    border-radius: 20px;
-  }
+        .card {
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px var(--shadow-color);
+            border: 1px solid var(--card-border);
+        }
 
-h2 {
-  text-align: center;
-  color: var(--text-primary);
-  font-size: 20px;
-  margin: 0 0 10px;
-}
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
 
-.subtitle {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 13px;
-  margin-bottom: 18px;
-}
+        .logo-wrapper img {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+        }
 
+        h2 {
+            text-align: center;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            font-size: 24px;
+        }
 
-  .controls-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
 
-  #listType {
-    padding: 9px 12px;
-    border-radius: 999px;
-    border: 1px solid #d0d7e2;
-    background: #f8fafc;
-    font-size: 13px;
-    color: #0f172a;
-  }
+        button {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
 
-  .input-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
 
-  input#itemInput {
-    flex: 1;
-    padding: 12px 14px;
-    border: 1px solid #cbd5f5;
-    border-radius: 999px;
-    font-size: 14px;
-    outline: none;
-    background: #f9fafb;
-  }
+        button:active {
+            transform: translateY(0);
+        }
 
-  input#itemInput:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 1px rgba(79,70,229,0.25);
-    background: #ffffff;
-  }
+        select, input {
+            font-family: inherit;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
 
-  button {
-    padding: 10px 18px;
-    background: linear-gradient(135deg, #4f46e5, #22c55e);
-    color: white;
-    border: none;
-    border-radius: 999px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.15s;
-    white-space: nowrap;
-  }
+        select:focus, input:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+            border-color: #3b82f6;
+        }
 
-  button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(15,23,42,0.25);
-  }
+        .controls-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
 
-  button:active {
-    transform: translateY(0);
-    box-shadow: none;
-    opacity: 0.9;
-  }
+        .controls-row select {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            cursor: pointer;
+        }
 
-  .check-btn {
-    background: #e5f6ff;
-    color: #0369a1;
-  }
+        .delete-list-btn {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            padding: 10px 16px;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+        }
 
-  .check-btn.checked {
-    background: #dcfce7;
-    color: #166534;
-  }
+        .delete-list-btn:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
 
-  .delete-btn {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
-  
-  .delete-list-btn {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
+        /* Search container with toggle */
+        .search-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
 
-  ul {
-    list-style: none;
-    padding: 0;
-    margin-top: 8px;
-  }
+        .search-toggle-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: none;
+            font-size: 16px;
+        }
 
-  li {
-    padding: 10px 12px;
-    background: #f9fafb;
-    margin: 8px 0;
-    border-radius: 12px;
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
+        .search-toggle-btn:hover {
+            background: #3b82f6;
+            transform: scale(1.05);
+        }
 
-  li span {
-    flex: 1;
-    font-size: 14px;
-    color: #0f172a;
-  }
+        .search-input-wrapper {
+            flex: 1;
+            overflow: hidden;
+            max-width: 0;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
 
-  .done {
-    text-decoration: line-through;
-    opacity: 0.6;
-  }
+        .search-input-wrapper.expanded {
+            max-width: 500px;
+            opacity: 1;
+        }
 
-  .item-buttons {
-    display: flex;
-    gap: 6px;
-  }
-</style>
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            outline: none;
+        }
 
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+        .input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        #itemInput {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        #quantityInput {
+            width: 65px;
+            padding: 12px 10px;
+            border-radius: 999px;
+            font-size: 14px;
+            text-align: center;
+            outline: none;
+        }
+
+        #priorityInput {
+            padding: 10px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .list-item {
+            background: var(--item-bg);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border: 1px solid var(--card-border);
+            transition: all 0.2s;
+        }
+
+        .list-item:hover {
+            transform: translateX(4px);
+            border-color: #3b82f6;
+        }
+
+        .item-content {
+            flex: 1;
+            word-break: break-word;
+            color: var(--text-primary);
+        }
+
+        .list-item button {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .check-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .check-btn:hover {
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            box-shadow: 0 2px 8px rgba(248, 113, 113, 0.3);
+        }
+
+        .delete-btn:hover {
+            box-shadow: 0 4px 12px rgba(248, 113, 113, 0.4);
+        }
+
+        .done {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .item-buttons {
+            display: flex;
+            gap: 6px;
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 </head>
 
 <body>
-  <!-- Sign-in screen -->
-  <div id="signin-container" style="display:none;">
-    <div class="card" style="text-align:center;">
-      <div class="logo-wrapper">
-        <img src="nexuslist-icon.png" alt="NexusList logo">
-      </div>
-      <h2>Welcome to NexusList</h2>
-      <p class="subtitle">Sign in with Google to sync your lists across devices</p>
-      <button onclick="signInWithGoogle()" style="margin-top:20px;">
-        🔐 Sign in with Google
-      </button>
+    <!-- Sign-in screen -->
+    <div id="signin-container" style="display:none;">
+        <div class="card" style="text-align:center;">
+            <div class="logo-wrapper">
+                <img src="nexuslist-icon.png" alt="NexusList logo">
+            </div>
+            <h2>Welcome to NexusList</h2>
+            <p class="subtitle">Sign in with Google to sync your lists across devices</p>
+            <button onclick="signInWithGoogle()" style="margin-top:20px;">
+                🔐 Sign in with Google
+            </button>
+        </div>
     </div>
-  </div>
 
-  <!-- Main app -->
-  <div id="app-container" style="display:none;">
-    <div class="card">
-      <div class="logo-wrapper">
-        <img src="nexuslist-icon.png" alt="NexusList logo">
-      </div>
+    <!-- Main app -->
+    <div id="app-container" style="display:none;">
+        <div class="card">
+            <div class="logo-wrapper">
+                <img src="nexuslist-icon.png" alt="NexusList logo">
+            </div>
 
-      <h2>What kind of list do you want to make?</h2>
-      <div class="subtitle">Switch between shopping, reminders and to-do lists in one place.</div>
-      
-      <div class="controls-row">
-        <select id="listType" onchange="changeListType()">
-          <option value="shopping">Shopping</option>
-          <option value="reminder">Reminder</option>
-          <option value="todo">To-do list</option>
-          <option value="__new__">+ New list type…</option>
-        </select>
-        <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
-      </div>
+            <h2>What kind of list do you want to make?</h2>
+            <div class="subtitle">Switch between shopping, reminders and to-do lists in one place.</div>
 
-<!-- Search bar (fixed width) -->
-<div style="margin-bottom:12px;">
-  <input type="text" id="searchInput" placeholder="🔍 Search items..." style="width:calc(100% - 28px);padding:10px 14px;border:1px solid #cbd5e1;border-radius:999px;font-size:14px;outline:none;background:#f8fafc;">
-</div>
+            <div class="controls-row">
+                <select id="listType" onchange="changeListType()">
+                    <option value="shopping">Shopping</option>
+                    <option value="reminder">Reminder</option>
+                    <option value="todo">To-do list</option>
+                    <option value="__new__">+ New list type…</option>
+                </select>
+                <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
+            </div>
 
-<!-- Add item form (no notes field) -->
-<div class="input-row" style="flex-wrap:wrap;gap:8px;">
-  <input id="itemInput" placeholder="Add item..." style="flex:1;min-width:150px;padding:12px 14px;border:1px solid #cbd5f5;border-radius:999px;font-size:14px;outline:none;background:#f9fafb;">
-  <input id="quantityInput" placeholder="Qty" style="width:65px;padding:12px 10px;border:1px solid #cbd5f5;border-radius:999px;font-size:14px;text-align:center;outline:none;">
-  <select id="priorityInput" style="padding:10px 12px;border:1px solid #cbd5f5;border-radius:999px;font-size:13px;outline:none;background:#f8fafc;">
-    <option value="">Priority</option>
-    <option value="high">🔴 High</option>
-    <option value="medium">🟡 Medium</option>
-    <option value="low">🟢 Low</option>
-  </select>
-  <button onclick="addItem()">Add</button>
-</div>
+            <!-- Search bar with toggle -->
+            <div class="search-container">
+                <button class="search-toggle-btn" onclick="toggleSearch()" id="searchToggleBtn">🔍</button>
+                <div class="search-input-wrapper" id="searchInputWrapper">
+                    <input type="text" id="searchInput" placeholder="Search items..." oninput="searchItems()">
+                </div>
+            </div>
 
-<ul id="list"></ul>
+            <!-- Add item form -->
+            <div class="input-row">
+                <input id="itemInput" placeholder="Add item...">
+                <input id="quantityInput" placeholder="Qty">
+                <select id="priorityInput">
+                    <option value="">Priority</option>
+                    <option value="high">🔴 High</option>
+                    <option value="medium">🟡 Medium</option>
+                    <option value="low">🟢 Low</option>
+                </select>
+                <button onclick="addItem()">Add</button>
+            </div>
 
-      
-  <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;">
-  <button onclick="toggleDarkMode()" style="background:#64748b;font-size:12px;" id="darkModeBtn">🌙 Dark</button>
-  <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
-</div>
+            <ul id="list"></ul>
 
+            <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;">
+                <button onclick="toggleDarkMode()" style="background:#64748b;font-size:12px;" id="darkModeBtn">🌙 Dark</button>
+                <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY",
-  authDomain: "nexuslist-380ff.firebaseapp.com",
-  databaseURL: "https://nexuslist-380ff-default-rtdb.firebaseio.com",
-  projectId: "nexuslist-380ff",
-  storageBucket: "nexuslist-380ff.firebasestorage.app",
-  messagingSenderId: "950145923798",
-  appId: "1:950145923798:web:050a4a08f99cae13e72777",
-  measurementId: "G-8X3506GVGQ"
-};
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCt8a1_GHD0m8_aHbVuW4_HsKqYEYFXdPo",
+            authDomain: "nexuslist-4d78e.firebaseapp.com",
+            databaseURL: "https://nexuslist-4d78e-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "nexuslist-4d78e",
+            storageBucket: "nexuslist-4d78e.firebasestorage.app",
+            messagingSenderId: "748653903888",
+            appId: "1:748653903888:web:1e9e0ad3f78a4b5d03e8a8"
+        };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const auth = firebase.auth();
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
-// Enable auth persistence
-auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        let currentListKey = 'shopping';
+        let userId = null;
 
-  // Dark mode toggle
-function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-  
-  // Update button text
-  const btn = document.getElementById('darkModeBtn');
-  btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
-}
-
-// Load dark mode preference on startup
-if (localStorage.getItem('darkMode') === 'enabled') {
-  document.body.classList.add('dark-mode');
-  document.getElementById('darkModeBtn').textContent = '☀️ Light';
-}
-
-
-// Monitor connection
-firebase.database().ref('.info/connected').on('value', function(snapshot) {
-  if (snapshot.val() === true) {
-    console.log('Connected to Firebase');
-  } else {
-    console.log('Offline - changes will sync when back online');
-  }
-});
-
-let currentUser = null;
-let currentType = 'shopping';
-let listRef = null;
-let listTypesRef = null;
-
-// AUTH
-auth.onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user;
-    console.log('Signed in as:', user.displayName || user.email);
-    
-    listTypesRef = db.ref('nexuslist/' + currentUser.uid + '/listTypes');
-    listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
-
-    loadListTypes();
-    attachListeners();
-    
-    document.getElementById('signin-container').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
-  } else {
-    document.getElementById('signin-container').style.display = 'block';
-    document.getElementById('app-container').style.display = 'none';
-  }
-});
-
-function signInWithGoogle() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(error) {
-    console.log('Sign-in error:', error);
-    alert('Sign-in failed. Please try again.');
-  });
-}
-
-function signOut() {
-  auth.signOut();
-}
-
-// LIST TYPES
-function loadListTypes() {
-  const select = document.getElementById('listType');
-  if (!select) return;
-
-  const newOption = document.querySelector('#listType option[value="__new__"]');
-  select.innerHTML = `
-    <option value="shopping">Shopping</option>
-    <option value="reminder">Reminder</option>
-    <option value="todo">To-do list</option>
-  `;
-  select.appendChild(newOption);
-
-  if (!listTypesRef) return;
-
-  // Use 'on' instead of 'once' to listen for real-time changes
-  listTypesRef.on('child_added', snap => {
-    const t = snap.val();
-    // Check if this option already exists
-    const existingOpt = document.querySelector(`#listType option[value="${t.key}"]`);
-    if (!existingOpt && t.key !== 'shopping' && t.key !== 'reminder' && t.key !== 'todo') {
-      const opt = document.createElement('option');
-      opt.value = t.key;
-      opt.textContent = t.label;
-      select.insertBefore(opt, select.lastElementChild);
-    }
-  });
-
-  // Listen for deleted list types
-  listTypesRef.on('child_removed', snap => {
-    const t = snap.val();
-    const optToRemove = document.querySelector(`#listType option[value="${t.key}"]`);
-    if (optToRemove) {
-      optToRemove.remove();
-      // If the deleted list was currently selected, switch to Shopping
-      if (currentType === t.key) {
-        currentType = 'shopping';
-        select.value = 'shopping';
-        changeListType();
-      }
-    }
-  });
-}
-
-
-function changeListType() {
-  const select = document.getElementById('listType');
-  let value = select.value;
-
-  if (value === '__new__') {
-    const name = prompt('What do you want to call this list? (e.g. Christmas gifts)');
-    if (!name || !name.trim()) {
-      select.value = currentType;
-      return;
-    }
-
-    const label = name.trim();
-    const key = label.toLowerCase().replace(/\s+/g, '-');
-    value = key;
-
-    if (listTypesRef) {
-      const newTypeRef = listTypesRef.push();
-      newTypeRef.set({ key, label });
-    }
-
-    const opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = label;
-    select.insertBefore(opt, select.lastElementChild);
-    select.value = key;
-  }
-
-  currentType = value;
-  if (!currentUser) return;
-
-  listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
-  document.getElementById('list').innerHTML = '';
-  listRef.off();
-  attachListeners();
-  
-  // Clear input fields when switching lists
-  document.getElementById('itemInput').value = '';
-  document.getElementById('quantityInput').value = '';
-  document.getElementById('priorityInput').value = '';
-  document.getElementById('searchInput').value = '';
-}
-
-
-function deleteCurrentList() {
-  const select = document.getElementById('listType');
-
-  if (currentType === 'shopping' || currentType === 'reminder' || currentType === 'todo') {
-    alert('Default lists (Shopping, Reminder, To-do) cannot be deleted.');
-    return;
-  }
-
-  const label = select.options[select.selectedIndex].textContent;
-  const ok = confirm(`Delete the list "${label}" and all its items?`);
-  if (!ok || !currentUser) return;
-
-  db.ref('nexuslist/' + currentUser.uid + '/' + currentType).remove();
-
-  if (listTypesRef) {
-    listTypesRef.once('value', snap => {
-      const data = snap.val();
-      if (!data) return;
-
-      Object.entries(data).forEach(([id, t]) => {
-        if (t.key === currentType) {
-          listTypesRef.child(id).remove();
+        // Toggle search bar visibility
+        function toggleSearch() {
+            const wrapper = document.getElementById('searchInputWrapper');
+            const input = document.getElementById('searchInput');
+            wrapper.classList.toggle('expanded');
+            
+            if (wrapper.classList.contains('expanded')) {
+                setTimeout(() => input.focus(), 300);
+            } else {
+                input.value = '';
+                searchItems(); // Reset search
+            }
         }
-      });
-    });
-  }
 
-  select.remove(select.selectedIndex);
-  currentType = 'shopping';
-  select.value = 'shopping';
+        // Search items
+        function searchItems() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const items = document.querySelectorAll('.list-item');
+            
+            items.forEach(item => {
+                const text = item.querySelector('.item-content').textContent.toLowerCase();
+                if (text.includes(query)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
 
-  listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
-  document.getElementById('list').innerHTML = '';
-  listRef.off();
-  attachListeners();
-}
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                userId = user.uid;
+                document.getElementById('signin-container').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                loadList();
+                loadDarkModePreference();
+            } else {
+                document.getElementById('signin-container').style.display = 'block';
+                document.getElementById('app-container').style.display = 'none';
+            }
+        });
 
-// ITEMS
-function addItem() {
-  if (!listRef) return;
-  const input = document.getElementById('itemInput');
-  const qtyInput = document.getElementById('quantityInput');
-  const priorityInput = document.getElementById('priorityInput');
-  
-  if (input.value.trim()) {
-    const quantity = qtyInput.value.trim() || '1';
-    const priority = priorityInput.value || '';
-    
-    listRef.push({ 
-      text: input.value.trim(), 
-      quantity: quantity,
-      priority: priority,
-      done: false 
-    });
-    
-    // Clear all inputs after adding
-    input.value = '';
-    qtyInput.value = '';
-    priorityInput.value = '';
-  }
-}
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(err => alert(err.message));
+        }
 
+        function signOut() {
+            auth.signOut();
+        }
 
-function attachListeners() {
-  if (!listRef) return;
+        function changeListType() {
+            const select = document.getElementById('listType');
+            if (select.value === '__new__') {
+                const newType = prompt('Enter new list type name:');
+                if (newType && newType.trim()) {
+                    const opt = document.createElement('option');
+                    opt.value = newType.toLowerCase().replace(/\\s+/g, '-');
+                    opt.textContent = newType;
+                    select.insertBefore(opt, select.options[select.options.length - 1]);
+                    opt.selected = true;
+                    currentListKey = opt.value;
+                } else {
+                    select.value = currentListKey;
+                    return;
+                }
+            } else {
+                currentListKey = select.value;
+            }
+            loadList();
+        }
 
-  listRef.on('child_added', snap => {
-    createListItemElement(snap.key, snap.val());
-  });
+        function deleteCurrentList() {
+            if (confirm(`Delete the entire "${currentListKey}" list?`)) {
+                db.ref(`users/${userId}/lists/${currentListKey}`).remove();
+            }
+        }
 
-  listRef.on('child_changed', snap => {
-    const li = document.getElementById('item-' + snap.key);
-    if (!li) return;
-    const span = li.querySelector('span');
-    const checkBtn = li.querySelector('.check-btn');
+        function addItem() {
+            const input = document.getElementById('itemInput');
+            const quantityInput = document.getElementById('quantityInput');
+            const priorityInput = document.getElementById('priorityInput');
+            
+            const text = input.value.trim();
+            const qty = quantityInput.value.trim();
+            const priority = priorityInput.value;
 
-    span.textContent = snap.val().text;
-    span.classList.toggle('done', snap.val().done);
-    checkBtn.textContent = snap.val().done ? 'Uncheck' : 'Check';
-    checkBtn.classList.toggle('checked', snap.val().done);
-  });
+            if (!text) return;
 
-  listRef.on('child_removed', snap => {
-    const li = document.getElementById('item-' + snap.key);
-    if (li && li.parentNode) {
-      li.parentNode.removeChild(li);
-    }
-  });
-}
+            const item = { text, done: false };
+            if (qty) item.quantity = qty;
+            if (priority) item.priority = priority;
 
-function createListItemElement(key, data) {
-  const li = document.createElement('li');
-  li.id = 'item-' + key;
+            db.ref(`users/${userId}/lists/${currentListKey}`).push(item);
+            
+            input.value = '';
+            quantityInput.value = '';
+            priorityInput.value = '';
+        }
 
-const span = document.createElement('span');
-// Show quantity if it exists and is not '1'
-const qtyText = data.quantity && data.quantity !== '1' ? data.quantity + '× ' : '';
-span.textContent = qtyText + data.text;
-if (data.done) span.classList.add('done');
+        function loadList() {
+            const list = document.getElementById('list');
+            list.innerHTML = '';
 
-// Add priority indicator
-if (data.priority) {
-  const priorityDot = document.createElement('span');
-  priorityDot.style.cssText = 'display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;';
-  if (data.priority === 'high') priorityDot.style.background = '#ef4444';
-  else if (data.priority === 'medium') priorityDot.style.background = '#f59e0b';
-  else if (data.priority === 'low') priorityDot.style.background = '#10b981';
-  span.insertBefore(priorityDot, span.firstChild);
-}
+            db.ref(`users/${userId}/lists/${currentListKey}`).on('value', snapshot => {
+                list.innerHTML = '';
+                const data = snapshot.val() || {};
+                
+                Object.keys(data).forEach(key => {
+                    const item = data[key];
+                    const li = document.createElement('li');
+                    li.className = 'list-item' + (item.done ? ' done' : '');
 
+                    let displayText = '';
+                    if (item.priority === 'high') displayText += '🔴 ';
+                    else if (item.priority === 'medium') displayText += '🟡 ';
+                    else if (item.priority === 'low') displayText += '🟢 ';
+                    
+                    if (item.quantity) displayText += item.quantity + '× ';
+                    displayText += item.text;
 
-  const checkBtn = document.createElement('button');
-  checkBtn.className = 'check-btn' + (data.done ? ' checked' : '');
-  checkBtn.textContent = data.done ? 'Uncheck' : 'Check';
-  checkBtn.onclick = () => toggle(key);
+                    li.innerHTML = `
+                        <div class="item-content">${displayText}</div>
+                        <div class="item-buttons">
+                            <button class="check-btn" onclick="toggleDone('${key}')">${item.done ? 'Uncheck' : 'Check'}</button>
+                            <button class="delete-btn" onclick="deleteItem('${key}')">Delete</button>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+                
+                // Re-apply search filter if active
+                if (document.getElementById('searchInputWrapper').classList.contains('expanded')) {
+                    searchItems();
+                }
+            });
+        }
 
-  const delBtn = document.createElement('button');
-  delBtn.className = 'delete-btn';
-  delBtn.textContent = 'Delete';
-  delBtn.onclick = () => listRef.child(key
-).remove();
+        function toggleDone(key) {
+            const ref = db.ref(`users/${userId}/lists/${currentListKey}/${key}`);
+            ref.once('value', snapshot => {
+                const item = snapshot.val();
+                ref.update({ done: !item.done });
+            });
+        }
 
-  const btnWrapper = document.createElement('div');
-  btnWrapper.className = 'item-buttons';
-  btnWrapper.appendChild(checkBtn);
-  btnWrapper.appendChild(delBtn);
+        function deleteItem(key) {
+            db.ref(`users/${userId}/lists/${currentListKey}/${key}`).remove();
+        }
 
-  li.appendChild(span);
-  li.appendChild(btnWrapper);
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
+            
+            if (userId) {
+                db.ref(`users/${userId}/darkMode`).set(isDark);
+            }
+        }
 
-  document.getElementById('list').appendChild(li);
-}
+        function loadDarkModePreference() {
+            db.ref(`users/${userId}/darkMode`).once('value', snapshot => {
+                if (snapshot.val() === true) {
+                    document.body.classList.add('dark-mode');
+                    document.getElementById('darkModeBtn').textContent = '☀️ Light';
+                }
+            });
+        }
 
-function toggle(key) {
-  if (!listRef) return;
-  const item = listRef.child(key);
-  item.once('value', snap => {
-    const current = snap.val();
-    item.update({ done: !current.done });
-  });
-}
-
-// Enter key adds item
-document.getElementById('itemInput').addEventListener('keyup', function (e) {
-  if (e.key === 'Enter') {
-    addItem();
-  }
-});
-  // Also allow Enter from quantity and priority fields
-document.getElementById('quantityInput').addEventListener('keyup', function (e) {
-  if (e.key === 'Enter') {
-    addItem();
-  }
-});
-
-document.getElementById('priorityInput').addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    addItem();
-  }
-});
-  // Search/filter functionality
-document.getElementById('searchInput').addEventListener('keyup', function(e) {
-  const searchTerm = e.target.value.toLowerCase();
-  const items = document.querySelectorAll('#list li');
-  
-  items.forEach(item => {
-    const text = item.querySelector('span').textContent.toLowerCase();
-    if (text.includes(searchTerm)) {
-      item.style.display = 'flex';
-    } else {
-      item.style.display = 'none';
-    }
-  });
-});
-
-
-</script>
-
-<script>
-// Register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js')
-    .then(function(registration) {
-      console.log('Service Worker registered:', registration);
-    })
-    .catch(function(error) {
-      console.log('Service Worker failed:', error);
-    });
-}
-</script>
-
+        document.getElementById('itemInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') addItem();
+        });
+    </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
