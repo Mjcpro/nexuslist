@@ -484,12 +484,7 @@ function loadListTypes() {
   });
 }
 
-
-function changeListType() {
-  const select = document.getElementById('listType');
-  let value = select.value;
-
-  // Bubble button functions
+// Bubble button functions
   function selectListType(type) {
     currentType = type;
     // Update active state on buttons
@@ -509,6 +504,11 @@ function changeListType() {
     }
   }
 
+function changeListType() {
+  const select = document.getElementById('listType');
+  let value = select.value;
+
+  
   if (value === '__new__') {
     const name = prompt('What do you want to call this list? (e.g. Christmas gifts)');
     if (!name || !name.trim()) {
@@ -666,7 +666,7 @@ if (data.priority) {
 
   const delBtn = document.createElement('button');
   delBtn.className = 'delete-btn';
-  delBtn.textContent = 'Delete';
+  delBtn.textContent = 'Remove';
   delBtn.onclick = () => listRef.child(key
 ).remove();
 
@@ -741,6 +741,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
