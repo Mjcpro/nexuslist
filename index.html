@@ -559,6 +559,16 @@ function changeToBubbleList(type) {
         opt.textContent = label;
         select.insertBefore(opt, select.lastElementChild);
         select.value = key;
+
+       // Add bubble button for the new custom list
+     const bubbleContainer = document.querySelector('.bubble-container');
+     const newBubbleBtn = document.createElement('button');
+     newBubbleBtn.className = 'bubble-btn';
+     newBubbleBtn.setAttribute('data-list', key);
+     newBubbleBtn.setAttribute('onclick', `changeToBubbleList('${key}')`);
+     newBubbleBtn.style.cssText = 'padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;';
+     newBubbleBtn.textContent = label;
+     bubbleContainer.appendChild(newBubbleBtn);
         
         // Switch to the new list
                 changeToBubbleList(key);
@@ -759,6 +769,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
