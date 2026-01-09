@@ -496,7 +496,8 @@ function changeToBubbleList(type) {
         });
 
     // Add active class to clicked bubble
-      const clickedBtn = document.querySelector(`.bubble-btn[data-list="${type}"]`);Btn.classList.add('active');
+      const clickedBtn = document.querySelector(`.bubble-btn[data-list="${type}"]`); 
+      clickedBtn.classList.add('active');
     clickedBtn.style.background = '#3b82f6';
     clickedBtn.style.borderColor = '#3b82f6';
     clickedBtn.style.color = 'white';
@@ -541,7 +542,7 @@ function changeToBubbleList(type) {
         select.value = key;
         
         // Switch to the new list
-        changeToListType(key);          }
+                changeToBubbleList(key); }
     }
 }
 
@@ -739,6 +740,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
