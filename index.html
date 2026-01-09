@@ -500,8 +500,8 @@ function changeListType() {
       }
     });
     renderList();
+    saveUserPreferences();
   }
-
   function showCustomListDialog() {
     const name = prompt('Enter custom list name:');
     if (name && name.trim()) {
@@ -741,6 +741,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
