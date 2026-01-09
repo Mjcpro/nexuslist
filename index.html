@@ -228,8 +228,14 @@ h2 {
 
       <h2>What kind of list do you want to make?</h2>
       <div class="subtitle">Switch between shopping, reminders and to-do lists in one place.</div>
+                <div class="bubble-container" style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
+                              <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">🛒 Shopping</button>
+                              <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">📝 Reminder</button>
+                              <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">✓ To-do</button>
+                              <button class="bubble-btn" onclick="createCustomList()" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">➕ Custom List</button>
+                            </div>
       
-      <div class="controls-row">
+      <!--<div class="controls-row">
         <select id="listType" onchange="changeListType()">
           <option value="shopping">Shopping</option>
           <option value="reminder">Reminder</option>
@@ -237,7 +243,7 @@ h2 {
           <option value="__new__">+ New list type…</option>
         </select>
         <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
-      </div>
+      </div>-->
 
 <!-- Collapsible Search Bar -->
     <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
@@ -477,6 +483,42 @@ function changeListType() {
   document.getElementById('quantityInput').value = '';
   document.getElementById('priorityInput').value = '';
   document.getElementById('searchInput').value = '';
+
+
+function changeToBubbleList(type) {
+    // Remove active class from all bubbles
+    document.querySelectorAll('.bubble-btn').forEach(btn => {
+          btn.classList.remove('active');
+          btn.style.background = '#f8fafc';
+          btn.style.borderColor = '#cbd5e1';
+          btn.style.color = '#1e293b';
+        });
+
+    // Add active class to clicked bubble
+    const clickedBtn = event.target;
+    clickedBtn.classList.add('active');
+    clickedBtn.style.background = '#3b82f6';
+    clickedBtn.style.borderColor = '#3b82f6';
+    clickedBtn.style.color = 'white';
+
+    // Update list reference
+    currentType = type;
+    listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
+    document.getElementById('list').innerHTML = '';
+    listRef.off();
+    attachListeners();
+    document.getElementById('itemInput').value = '';
+    document.getElementById('quantityInput').value = '';
+    document.getElementById('priorityInput').value = '';
+    document.getElementById('searchInput').value = '';
+  }
+
+  function createCustomList() {
+      const name = prompt('Enter custom list name:');
+      if (name && name.trim()) {
+            alert('Custom list feature coming soon!');
+          }
+    }
 }
 
 
@@ -673,6 +715,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
