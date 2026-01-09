@@ -369,8 +369,7 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyCt8a1_GHD0m8_aHbVuW4_HsKqYEYFXdPo",
-            authDomain: "nexuslist-4d78e.firebaseapp.com",
+            apiKey: "AIzaSyCt8a1_GHD0m8_aHbVuW4_HsKqYEYFXdPo",            authDomain: "nexuslist-4d78e.firebaseapp.com",
             databaseURL: "https://nexuslist-4d78e-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "nexuslist-4d78e",
             storageBucket: "nexuslist-4d78e.firebasestorage.app",
@@ -378,7 +377,8 @@
             appId: "1:748653903888:web:1e9e0ad3f78a4b5d03e8a8"
         };
 
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(371
+                              );
         const auth = firebase.auth();
         const db = firebase.database();
 
@@ -442,8 +442,7 @@
                 const newType = prompt('Enter new list type name:');
                 if (newType && newType.trim()) {
                     const opt = document.createElement('option');
-                    opt.value = newType.toLowerCase().replace(/\\s+/g, '-');
-                    opt.textContent = newType;
+                    opt.value = newType.toLowerCase().replace(/\s+/g, '-');                    opt.textContent = newType;
                     select.insertBefore(opt, select.options[select.options.length - 1]);
                     opt.selected = true;
                     currentListKey = opt.value;
@@ -560,3 +559,4 @@
     </script>
 </body>
 </html>
+
