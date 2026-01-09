@@ -65,19 +65,20 @@ body {
     border-radius: 20px;
   }
 
-  h2 {
-    text-align: center;
-    color: #0f172a;
-    font-size: 20px;
-    margin: 0 0 10px;
-  }
+h2 {
+  text-align: center;
+  color: var(--text-primary);
+  font-size: 20px;
+  margin: 0 0 10px;
+}
 
-  .subtitle {
-    text-align: center;
-    color: #64748b;
-    font-size: 13px;
-    margin-bottom: 18px;
-  }
+.subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
 
   .controls-row {
     display: flex;
@@ -259,10 +260,7 @@ body {
 <ul id="list"></ul>
 
       
-      <div style="text-align:center;margin-top:20px;">
-        <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
-      </div>
-      <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;">
+  <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;">
   <button onclick="toggleDarkMode()" style="background:#64748b;font-size:12px;" id="darkModeBtn">🌙 Dark</button>
   <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
 </div>
@@ -634,6 +632,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
