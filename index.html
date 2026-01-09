@@ -88,6 +88,50 @@ h2 {
     justify-content: center;
   }
 
+  .list-type-bubbles {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bubble-btn {
+    background: #f8fafc;
+    border: 2px solid #cbd5e1;
+    border-radius: 999px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #0f172a;
+    font-weight: 500;
+  }
+
+  .bubble-btn:hover {
+    background: #e2e8f0;
+    border-color: #94a3b8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .bubble-btn.active {
+    background: #8cb5d1;
+    border-color: #8cb5d1;
+    color: white;
+  }
+
+  .bubble-btn.custom-btn {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+  }
+
+  .bubble-btn.custom-btn:hover {
+    background: #059669;
+    border-color: #059669;
+  }
+
   #listType {
     padding: 9px 12px;
     border-radius: 999px;
@@ -229,16 +273,20 @@ h2 {
       <h2>What kind of list do you want to make?</h2>
       <div class="subtitle">Switch between shopping, reminders and to-do lists in one place.</div>
       
-      <div class="controls-row">
-        <select id="listType" onchange="changeListType()">
-          <option value="shopping">Shopping</option>
-          <option value="reminder">Reminder</option>
-          <option value="todo">To-do list</option>
-          <option value="__new__">+ New list type…</option>
-        </select>
-        <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
-      </div>
-
+      <div class="list-type-bubbles">
+      <button class="bubble-btn active" onclick="selectListType('shopping')" data-type="shopping">
+        🛒 Shopping
+      </button>
+      <button class="bubble-btn" onclick="selectListType('reminder')" data-type="reminder">
+        🗒 Reminder
+      </button>
+      <button class="bubble-btn" onclick="selectListType('todo')" data-type="todo">
+        ✅ To-do
+      </button>
+      <button class="bubble-btn custom-btn" onclick="showCustomListDialog()">
+        ➕ Custom
+      </button>
+    </div>
 <!-- Collapsible Search Bar -->
     <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
       <button id="searchToggle" onclick="toggleSearch()" style="background:#8cb5d1;border:1px solid #cbd5e1;border-radius:999px;padding:10px 14px;font-size:14px;cursor:pointer;outline:none;flex-shrink:0;" title="Toggle Search">
@@ -440,6 +488,26 @@ function loadListTypes() {
 function changeListType() {
   const select = document.getElementById('listType');
   let value = select.value;
+
+  // Bubble button functions
+  function selectListType(type) {
+    currentType = type;
+    // Update active state on buttons
+    document.querySelectorAll('.bubble-btn').forEach(btn => {
+      btn.classList.remove('active');
+      if (btn.dataset.type === type) {
+        btn.classList.add('active');
+      }
+    });
+    renderList();
+  }
+
+  function showCustomListDialog() {
+    const name = prompt('Enter custom list name:');
+    if (name && name.trim()) {
+      addListType(name.trim());
+    }
+  }
 
   if (value === '__new__') {
     const name = prompt('What do you want to call this list? (e.g. Christmas gifts)');
@@ -673,6 +741,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
