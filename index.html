@@ -252,6 +252,7 @@ h2 {
                               <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">✓ To-do</button>
                               <button class="bubble-btn" onclick="createCustomList()" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">➕ Custom List</button>
                             </div>
+           <button onclick="RemoveCurrentList()" class="Remove-list-btn" style="margin-top:12px;padding:8px 16px;background:#fee2e2;color:#b91c1c;border:none;border-radius:999px;font-size:12px;cursor:pointer;">🗑️ Delete Custom List</button>
       
       <!--<div class="controls-row">
         <select id="listType" onchange="changeListType()">
@@ -560,7 +561,7 @@ function changeToBubbleList(type) {
         select.value = key;
         
         // Switch to the new list
-                changeToBubbleList(key); }
+                changeToBubbleList(key);
 }
 
 
@@ -757,6 +758,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
