@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Version: 1.0.1 - Updated: 2026-01-09 - Changes: Fixed Delete to Remove, Completed custom list functionality -->
 <html>
 <head>
 <title>NexusList - Shared Lists</title>
@@ -154,12 +155,12 @@ h2 {
     color: #166534;
   }
 
-  .delete-btn {
+  .Remove-btn {
     background: #fee2e2;
     color: #b91c1c;
   }
   
-  .delete-list-btn {
+  .Remove-list-btn {
     background: #fee2e2;
     color: #b91c1c;
   }
@@ -242,7 +243,7 @@ h2 {
           <option value="todo">To-do list</option>
           <option value="__new__">+ New list type…</option>
         </select>
-        <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
+        <button onclick="RemoveCurrentList()" class="Remove-list-btn">Remove list</button>
       </div>-->
 
 <!-- Collapsible Search Bar -->
@@ -426,13 +427,13 @@ function loadListTypes() {
     }
   });
 
-  // Listen for deleted list types
+  // Listen for Removed list types
   listTypesRef.on('child_removed', snap => {
     const t = snap.val();
     const optToRemove = document.querySelector(`#listType option[value="${t.key}"]`);
     if (optToRemove) {
       optToRemove.remove();
-      // If the deleted list was currently selected, switch to Shopping
+      // If the Removed list was currently selected, switch to Shopping
       if (currentType === t.key) {
         currentType = 'shopping';
         select.value = 'shopping';
@@ -515,22 +516,46 @@ function changeToBubbleList(type) {
   function createCustomList() {
       const name = prompt('Enter custom list name:');
       if (name && name.trim()) {
-            alert('Custom list feature coming soon!');
-          }
+        // Create key from the name
+        const label = name.trim();
+        const key = label.toLowerCase().replace(/\s+/g, '-');
+        
+        // Check if user is logged in
+        if (!currentUser) {
+            alert('Please sign in to create custom lists');
+            return;
+        }
+        
+        // Add to Firebase list types
+        if (listTypesRef) {
+            const newTypeRef = listTypesRef.push();
+            newTypeRef.set({ key, label });
+        }
+        
+        // Add to dropdown
+        const select = document.getElementById('listType');
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = label;
+        select.insertBefore(opt, select.lastElementChild);
+        select.value = key;
+        
+        // Switch to the new list
+        changeToListType(key);          }
     }
 }
 
 
-function deleteCurrentList() {
+function RemoveCurrentList() {
   const select = document.getElementById('listType');
 
   if (currentType === 'shopping' || currentType === 'reminder' || currentType === 'todo') {
-    alert('Default lists (Shopping, Reminder, To-do) cannot be deleted.');
+    alert('Default lists (Shopping, Reminder, To-do) cannot be Removed.');
     return;
   }
 
   const label = select.options[select.selectedIndex].textContent;
-  const ok = confirm(`Delete the list "${label}" and all its items?`);
+  const ok = confirm(`Remove the list "${label}" and all its items?`);
   if (!ok || !currentUser) return;
 
   db.ref('nexuslist/' + currentUser.uid + '/' + currentType).remove();
@@ -638,8 +663,8 @@ if (data.priority) {
   checkBtn.onclick = () => toggle(key);
 
   const delBtn = document.createElement('button');
-  delBtn.className = 'delete-btn';
-  delBtn.textContent = 'Delete';
+  delBtn.className = 'Remove-btn';
+  delBtn.textContent = 'Remove';
   delBtn.onclick = () => listRef.child(key
 ).remove();
 
@@ -714,6 +739,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
