@@ -239,11 +239,13 @@ h2 {
         <button onclick="deleteCurrentList()" class="delete-list-btn">Delete list</button>
       </div>
 
-<!-- Search bar (fixed width) -->
-<div style="margin-bottom:12px;">
-  <input type="text" id="searchInput" placeholder="🔍 Search items..." style="width:calc(100% - 28px);padding:10px 14px;border:1px solid #cbd5e1;border-radius:999px;font-size:14px;outline:none;background:#f8fafc;">
-</div>
-
+<!-- Collapsible Search Bar -->
+    <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+      <button id="searchToggle" onclick="toggleSearch()" style="background:#8cb5d1;border:1px solid #cbd5e1;border-radius:999px;padding:10px 14px;font-size:14px;cursor:pointer;outline:none;flex-shrink:0;" title="Toggle Search">
+        🔍
+      </button>
+      <input type="text" id="searchInput" placeholder="🔍 Search items..." style="width:0;opacity:0;padding:10px 14px;border:1px solid #cbd5e1;border-radius:999px;font-size:14px;outline:none;background:#f8fafc;transition:all 0.3s ease;">
+    </div>
 <!-- Add item form (no notes field) -->
 <div class="input-row" style="flex-wrap:wrap;gap:8px;">
   <input id="itemInput" placeholder="Add item..." style="flex:1;min-width:150px;padding:12px 14px;border:1px solid #cbd5f5;border-radius:999px;font-size:14px;outline:none;background:#f9fafb;">
@@ -297,6 +299,45 @@ function toggleDarkMode() {
   const btn = document.getElementById('darkModeBtn');
   btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
 }
+
+  // Toggle search bar
+  function toggleSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const isExpanded = searchInput.style.width !== '0px' && searchInput.style.width !== '';
+    
+    if (isExpanded) {
+      // Collapse
+      searchInput.style.width = '0';
+      searchInput.style.opacity = '0';
+      searchInput.value = '';
+      filterItems();
+    } else {
+      // Expand
+      searchInput.style.width = 'calc(100% - 60px)';
+      searchInput.style.opacity = '1';
+      searchInput.focus();
+    }
+  }
+
+  // Search/filter function
+  function filterItems() {
+    const searchInput = document.getElementById('searchInput');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const items = document.querySelectorAll('#list li');
+    
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+  }
+
+  // Add event listener for search input
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', filterItems);
+    }
+  });
 
 // Load dark mode preference on startup
 if (localStorage.getItem('darkMode') === 'enabled') {
@@ -632,6 +673,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
