@@ -519,7 +519,7 @@ function loadListTypes() {
     
     // Add to Firebase
     if (listTypesRef) {
-      const newTypeRef = listTypesRef.push();
+      const newTypeRef = listTypesRef./\s+/g();
       newTypeRef.set({ key, label });
     }
     
@@ -772,6 +772,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
