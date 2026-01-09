@@ -442,6 +442,19 @@ function loadListTypes() {
       opt.value = t.key;
       opt.textContent = t.label;
       select.insertBefore(opt, select.lastElementChild);
+
+                
+          // Also create bubble button for custom list
+          const bubbleContainer = document.querySelector('.bubble-container');
+          if (bubbleContainer) {
+            const newBubbleBtn = document.createElement('button');
+            newBubbleBtn.className = 'bubble-btn';
+            newBubbleBtn.setAttribute('data-list', t.key);
+            newBubbleBtn.setAttribute('onclick', `changeToBubbleList('${t.key}')`);
+            newBubbleBtn.style.cssText = 'padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;';
+            newBubbleBtn.textContent = t.label;
+            bubbleContainer.appendChild(newBubbleBtn);
+          }
     }
   });
 
@@ -451,6 +464,12 @@ function loadListTypes() {
     const optToRemove = document.querySelector(`#listType option[value="${t.key}"]`);
     if (optToRemove) {
       optToRemove.remove();
+            
+      // Also remove bubble button
+      const bubbleBtnToRemove = document.querySelector(`.bubble-btn[data-list="${t.key}"]`);
+      if (bubbleBtnToRemove) {
+        bubbleBtnToRemove.remove();
+      }
       // If the Removed list was currently selected, switch to Shopping
       if (currentType === t.key) {
         currentType = 'shopping';
@@ -770,6 +789,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
