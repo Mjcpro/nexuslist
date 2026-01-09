@@ -495,8 +495,7 @@ function changeToBubbleList(type) {
         });
 
     // Add active class to clicked bubble
-    const clickedBtn = event.target;
-    clickedBtn.classList.add('active');
+      const clickedBtn = document.querySelector(`.bubble-btn[data-list="${type}"]`);Btn.classList.add('active');
     clickedBtn.style.background = '#3b82f6';
     clickedBtn.style.borderColor = '#3b82f6';
     clickedBtn.style.color = 'white';
@@ -715,6 +714,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
