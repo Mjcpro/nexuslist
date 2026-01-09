@@ -8,21 +8,49 @@
 <link rel="manifest" href="manifest.json">
 
 <style>
-  body {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 24px 16px 40px;
-    background: radial-gradient(circle at top left, #e0f2fe, #f9fafb);
-  }
+:root {
+  --bg-gradient-start: #e0f2fe;
+  --bg-gradient-end: #f9fafb;
+  --card-bg: white;
+  --card-border: rgba(148, 163, 184, 0.3);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --input-bg: #f9fafb;
+  --input-border: #cbd5f5;
+  --item-bg: #f9fafb;
+  --shadow-color: rgba(15, 23, 42, 0.12);
+}
 
-  .card {
-    background: white;
-    border-radius: 18px;
-    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
-    padding: 22px 18px 26px;
-    border: 1px solid rgba(148, 163, 184, 0.3);
-  }
+body.dark-mode {
+  --bg-gradient-start: #1e293b;
+  --bg-gradient-end: #0f172a;
+  --card-bg: #1e293b;
+  --card-border: rgba(100, 116, 139, 0.3);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --input-bg: #334155;
+  --input-border: #475569;
+  --item-bg: #334155;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
+  transition: background 0.3s ease;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 18px;
+  box-shadow: 0 18px 40px var(--shadow-color);
+  padding: 22px 18px 26px;
+  border: 1px solid var(--card-border);
+  transition: background 0.3s ease, border 0.3s ease;
+}
 
   .logo-wrapper {
     display: flex;
@@ -234,6 +262,11 @@
       <div style="text-align:center;margin-top:20px;">
         <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
       </div>
+      <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;">
+  <button onclick="toggleDarkMode()" style="background:#64748b;font-size:12px;" id="darkModeBtn">🌙 Dark</button>
+  <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
+</div>
+
     </div>
   </div>
 
@@ -255,6 +288,24 @@ const auth = firebase.auth();
 
 // Enable auth persistence
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+  // Dark mode toggle
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+  
+  // Update button text
+  const btn = document.getElementById('darkModeBtn');
+  btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+}
+
+// Load dark mode preference on startup
+if (localStorage.getItem('darkMode') === 'enabled') {
+  document.body.classList.add('dark-mode');
+  document.getElementById('darkModeBtn').textContent = '☀️ Light';
+}
+
 
 // Monitor connection
 firebase.database().ref('.info/connected').on('value', function(snapshot) {
@@ -583,6 +634,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
