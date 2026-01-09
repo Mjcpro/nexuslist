@@ -487,6 +487,7 @@ function loadListTypes() {
 // Bubble button functions
   function selectListType(type) {
     currentType = type;
+    
     // Update active state on buttons
     document.querySelectorAll('.bubble-btn').forEach(btn => {
       btn.classList.remove('active');
@@ -494,20 +495,50 @@ function loadListTypes() {
         btn.classList.add('active');
       }
     });
-    renderList();
-    saveUserPreferences();
+    
+    // Update Firebase reference and reload list
+    if (!currentUser) return;
+    listRef.off(); // Stop listening to old reference
+    listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
+    document.getElementById('list').innerHTML = ''; // Clear current list
+    attachListeners(); // Attach listeners to new reference
+    
+    // Clear input fields when switching lists
+    document.getElementById('itemInput').value = '';
+    document.getElementById('quantityInput').value = '';
+    document.getElementById('priorityInput').value = '';
+    document.getElementById('searchInput').value = '';
   }
+
   function showCustomListDialog() {
     const name = prompt('Enter custom list name:');
-    if (name && name.trim()) {
-      addListType(name.trim());
+    if (!name || !name.trim()) return;
+    
+    const label = name.trim();
+    const key = label.toLowerCase().replace(/\\s+/g, '-');
+    
+    // Add to Firebase
+    if (listTypesRef) {
+      const newTypeRef = listTypesRef.push();
+      newTypeRef.set({ key, label });
     }
+    
+    // Create bubble button for the new custom list
+    const bubblesContainer = document.querySelector('.list-type-bubbles');
+    const customBtn = bubblesContainer.querySelector('.custom-btn');
+    
+    const newBtn = document.createElement('button');
+    newBtn.className = 'bubble-btn';
+    newBtn.dataset.type = key;
+    newBtn.textContent = label;
+    newBtn.onclick = () => selectListType(key);
+    
+    // Insert before Custom button
+    bubblesContainer.insertBefore(newBtn, customBtn);
+    
+    // Switch to the new list
+    selectListType(key);
   }
-
-function changeListType() {
-  const select = document.getElementById('listType');
-  let value = select.value;
-
   
   if (value === '__new__') {
     const name = prompt('What do you want to call this list? (e.g. Christmas gifts)');
@@ -741,6 +772,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
