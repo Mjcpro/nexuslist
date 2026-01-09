@@ -453,7 +453,7 @@ function loadListTypes() {
             newBubbleBtn.setAttribute('onclick', `changeToBubbleList('${t.key}')`);
             newBubbleBtn.style.cssText = 'padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;';
             newBubbleBtn.textContent = t.label;
-            bubbleContainer.appendChild(newBubbleBtn);
+            bubbleContainer.insertBefore(newBubbleBtn, bubbleContainer.lastElementChild);
           }
     }
   });
@@ -587,7 +587,7 @@ function changeToBubbleList(type) {
      newBubbleBtn.setAttribute('onclick', `changeToBubbleList('${key}')`);
      newBubbleBtn.style.cssText = 'padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;';
      newBubbleBtn.textContent = label;
-     bubbleContainer.appendChild(newBubbleBtn);
+     bubbleContainer.insertBefore(newBubbleBtn, bubbleContainer.lastElementChild);
         
         // Switch to the new list
                 changeToBubbleList(key);
@@ -789,6 +789,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
