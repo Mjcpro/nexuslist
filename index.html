@@ -198,6 +198,23 @@ h2 {
     display: flex;
     gap: 6px;
   }
+  
+ .bubble-btn {
+  padding: 12px 24px;
+  border-radius: 25px;
+  border: 2px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+ }
+
+ .bubble-btn.active {
+  background: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: white !important;
+ }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -740,6 +757,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
