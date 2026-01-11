@@ -205,6 +205,12 @@ li {
 
       <ul id="list"></ul>
 
+      <div style="text-align: center; margin-top: 15px;">
+        <button onclick="clearCompleted()" style="background: none; color: #94a3b8; font-size: 12px; border: 1px solid #cbd5e1; padding: 6px 12px;">
+          🧹 Clear Completed Items
+        </button>
+      </div>
+
       <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;">
         <button onclick="toggleDarkMode()" style="background:#64748b;font-size:12px;" id="darkModeBtn">🌙 Dark</button>
         <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
@@ -268,17 +274,20 @@ function loadListTypes() {
     <option value="__new__">➕ New list type...</option>
   `;
 
+  // Listen for ADDING lists
   listTypesRef.on('child_added', snap => {
     const t = snap.val();
     if (['shopping', 'reminder', 'todo'].includes(t.key)) return;
 
-    // Add to Dropdown
-    const opt = document.createElement('option');
-    opt.value = t.key;
-    opt.textContent = t.label;
-    dropdown.insertBefore(opt, dropdown.lastElementChild);
+    // Add to Dropdown if not already there
+    if (!dropdown.querySelector(`option[value="${t.key}"]`)) {
+      const opt = document.createElement('option');
+      opt.value = t.key;
+      opt.textContent = t.label;
+      dropdown.insertBefore(opt, dropdown.lastElementChild);
+    }
 
-    // Add to Bubble Container
+    // Add to Bubble Container if not already there
     const container = document.querySelector('.bubble-container');
     if (!document.querySelector(`.bubble-btn[data-list="${t.key}"]`)) {
       const btn = document.createElement('button');
@@ -289,13 +298,22 @@ function loadListTypes() {
       container.appendChild(btn);
     }
   });
+
+  // NEW: Listen for REMOVING lists to clean up dropdown
+  listTypesRef.on('child_removed', snap => {
+    const t = snap.val();
+    const optToRemove = dropdown.querySelector(`option[value="${t.key}"]`);
+    if (optToRemove) optToRemove.remove();
+    const btnToRemove = document.querySelector(`.bubble-btn[data-list="${t.key}"]`);
+    if (btnToRemove) btnToRemove.remove();
+  });
 }
 
 function handleDropdownChange() {
   const select = document.getElementById('customListDropdown');
   if (select.value === '__new__') {
     createCustomList();
-    select.value = ""; // reset
+    select.value = ""; 
   } else {
     changeToBubbleList(select.value);
   }
@@ -310,21 +328,17 @@ function createCustomList() {
 
   if (listTypesRef) {
     listTypesRef.push().set({ key, label });
-    // Switch to it after a short delay to allow Firebase to sync
     setTimeout(() => changeToBubbleList(key), 500);
   }
 }
 
 function changeToBubbleList(type) {
   currentType = type;
-  
-  // UI Updates
   document.querySelectorAll('.bubble-btn').forEach(btn => {
     btn.classList.remove('active');
     if(btn.getAttribute('data-list') === type) btn.classList.add('active');
   });
 
-  // Firebase Updates
   if (currentUser) {
     listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
     document.getElementById('list').innerHTML = '';
@@ -347,10 +361,6 @@ function RemoveCurrentList() {
     });
   });
 
-  // Remove the bubble button from UI
-  const btn = document.querySelector(`.bubble-btn[data-list="${currentType}"]`);
-  if (btn) btn.remove();
-
   changeToBubbleList('shopping');
 }
 
@@ -371,6 +381,17 @@ function addItem() {
 
   input.value = '';
   document.getElementById('quantityInput').value = '';
+}
+
+function clearCompleted() {
+  if (!listRef) return;
+  listRef.once('value', (snapshot) => {
+    snapshot.forEach((childSnapshot) => {
+      if (childSnapshot.val().done === true) {
+        listRef.child(childSnapshot.key).remove();
+      }
+    });
+  });
 }
 
 function attachListeners() {
