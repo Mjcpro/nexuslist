@@ -3,9 +3,11 @@
 <head>
 <title>NexusList - Shared Lists</title>
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://yourdomain.com/"> <meta property="og:title" content="NexusList - Shared Shopping & Tasks">
+<meta property="og:url" content="https://yourdomain.com/"> 
+<meta property="og:title" content="NexusList - Shared Shopping & Tasks">
 <meta property="og:description" content="Check out my list on NexusList! We can track our shopping and to-dos together in real-time.">
-<meta property="og:image" content="https://yourdomain.com/nexuslist-icon.png"> <meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://yourdomain.com/nexuslist-icon.png"> 
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="NexusList">
 <meta name="twitter:description" content="Shared real-time lists for family and friends.">
 <meta name="twitter:image" content="https://yourdomain.com/nexuslist-icon.png">
@@ -54,13 +56,23 @@ body {
 h2 { text-align: center; color: var(--text-primary); font-size: 20px; margin: 0 0 10px; }
 .subtitle { text-align: center; color: var(--text-secondary); font-size: 13px; margin-bottom: 18px; }
 
+/* Workspace Tabs */
+.tab-btn {
+  padding: 8px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
+  background: #f8fafc; color: #64748b; font-size: 12px; cursor: pointer;
+  white-space: nowrap; transition: 0.2s;
+}
+.tab-btn.active-tab {
+  background: #3b82f6; color: white; border-color: #3b82f6;
+}
+
 .share-banner {
   background: #dcfce7; color: #166534; padding: 10px; border-radius: 12px;
   margin-bottom: 15px; text-align: center; font-weight: 600; font-size: 13px; display: none;
 }
 
 .input-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
-input#itemInput { flex: 1; min-width: 150px; padding: 12px 14px; border: 1px solid #cbd5f5; border-radius: 999px; font-size: 14px; outline: none; background: #f9fafb; }
+input#itemInput { flex: 1; min-width: 150px; padding: 12px 14px; border: 1px solid #cbd5f5; border-radius: 999px; font-size: 14px; outline: none; background: #f9fafb; color: #0f172a;}
 
 button {
   padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
@@ -76,10 +88,7 @@ button {
   padding: 12px 24px; border-radius: 25px; border: 2px solid #cbd5e1;
   background: #f8fafc; color: #1e293b; font-size: 14px; cursor: pointer;
 }
-
-.bubble-btn.active {
-  background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important;
-}
+.bubble-btn.active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; }
 
 ul { list-style: none; padding: 0; margin-top: 8px; }
 li {
@@ -111,6 +120,9 @@ li {
 
     <div class="card">
       <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
+      
+      <div id="workspaceSwitcher" style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:10px; border-bottom:1px solid rgba(0,0,0,0.05);"></div>
+
       <h2>What kind of list do you want to make?</h2>
       
       <div class="bubble-container" style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
@@ -148,7 +160,6 @@ li {
 
       <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
         <button id="shareBtn" onclick="copyShareLink()" style="background:#3b82f6; color:white; font-size:12px;">🔗 Share List</button>
-        <button id="exitBtn" onclick="exitSharedMode()" style="background:#ef4444; color:white; font-size:12px; display:none;">🏠 Back to Private</button>
         <button id="darkModeBtn" onclick="toggleDarkMode()" style="background:#64748b; color:white; font-size:12px;">🌙 Dark</button>
         <button onclick="signOut()" style="background:#94a3b8; color:white; font-size:12px;">Sign Out</button>
       </div>
@@ -160,7 +171,6 @@ li {
   </div>
 
 <script>
-// --- UPDATED SCRIPT FOR REAL-TIME COUNTERS ---
 const firebaseConfig = {
   apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY",
   authDomain: "nexuslist-380ff.firebaseapp.com",
@@ -181,29 +191,23 @@ let listRef = null;
 let listTypesRef = null;
 let baseDataPath = "";
 let countListeners = {}; 
+let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     const groupParam = new URLSearchParams(window.location.search).get('group');
-    baseDataPath = groupParam ? 'nexuslist/' + groupParam : 'nexuslist/' + user.uid;
 
-    if (groupParam) {
-      document.getElementById('sharedBanner').style.display = 'block';
-      document.getElementById('exitBtn').style.display = 'inline-block';
-      document.getElementById('shareBtn').style.display = 'none';
+    // Store shared group in memory if arriving via link
+    if (groupParam && groupParam !== user.uid && !sharedGroups.includes(groupParam)) {
+      sharedGroups.push(groupParam);
+      localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
     }
 
-    listTypesRef = db.ref(baseDataPath + '/listTypes');
-    listRef = db.ref(baseDataPath + '/' + currentType);
-    
-    loadListTypes();
-    // Initialize counters for the 3 default lists
-    setupCounter('shopping'); 
-    setupCounter('reminder'); 
-    setupCounter('todo');
-    
-    attachListeners();
+    // Default to the link if present, otherwise private
+    const startPath = groupParam || user.uid;
+    switchToWorkspace(startPath);
+
     document.getElementById('signin-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
   } else {
@@ -212,26 +216,53 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-// CRITICAL FIX: Improved setupCounter to be more reactive
-function setupCounter(type) {
-  // If we already have a listener for this type, turn it off first to avoid duplicates
-  if (countListeners[type]) {
-    countListeners[type].off();
-  }
+function switchToWorkspace(id) {
+  baseDataPath = 'nexuslist/' + id;
   
+  // Update Shared Banner
+  document.getElementById('sharedBanner').style.display = (id === currentUser.uid) ? 'none' : 'block';
+
+  // Cleanup old listeners
+  Object.values(countListeners).forEach(ref => ref.off());
+  countListeners = {};
+  if (listTypesRef) listTypesRef.off();
+
+  // Setup refs
+  listTypesRef = db.ref(baseDataPath + '/listTypes');
+  
+  // Reset UI
+  document.getElementById('list').innerHTML = '';
+  document.querySelector('.bubble-container').innerHTML = `
+    <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping" data-label="🛒 Shopping">🛒 Shopping</button>
+    <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder" data-label="📝 Reminder">📝 Reminder</button>
+    <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" data-label="✓ To-do">✓ To-do</button>
+  `;
+
+  // Init
+  loadListTypes();
+  setupCounter('shopping'); setupCounter('reminder'); setupCounter('todo');
+  changeToBubbleList('shopping');
+  renderWorkspaceSwitcher(id);
+}
+
+function renderWorkspaceSwitcher(activeId) {
+  const container = document.getElementById('workspaceSwitcher');
+  container.innerHTML = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">🏠 Me</button>`;
+  
+  sharedGroups.forEach((groupId, index) => {
+    container.innerHTML += `
+      <button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Group ${index + 1}</button>
+    `;
+  });
+}
+
+function setupCounter(type) {
+  if (countListeners[type]) countListeners[type].off();
   const cRef = db.ref(baseDataPath + '/' + type);
   countListeners[type] = cRef;
-
   cRef.on('value', snap => {
     let count = 0;
-    snap.forEach(item => {
-      // Only count if item exists and is NOT done
-      if (item.val() && item.val().done === false) {
-        count++;
-      }
-    });
-    
-    // Find the specific button for this list type
+    snap.forEach(item => { if (item.val() && item.val().done === false) count++; });
     const btn = document.querySelector(`.bubble-btn[data-list="${type}"]`);
     if (btn) {
       const label = btn.getAttribute('data-label');
@@ -244,17 +275,13 @@ function loadListTypes() {
   const dropdown = document.getElementById('customListDropdown');
   dropdown.innerHTML = `<option value="" selected disabled>Select custom list...</option><option value="__new__">➕ New list type...</option>`;
   
-  // Listen for custom lists and set up counters for them immediately
   listTypesRef.on('child_added', snap => {
     const t = snap.val();
     if (['shopping', 'reminder', 'todo'].includes(t.key)) return;
-    
-    // Add to dropdown
     const opt = document.createElement('option');
     opt.value = t.key; opt.textContent = t.label;
     dropdown.insertBefore(opt, dropdown.lastElementChild);
 
-    // Add as bubble button if not exists
     if (!document.querySelector(`.bubble-btn[data-list="${t.key}"]`)) {
         const btn = document.createElement('button');
         btn.className = 'bubble-btn';
@@ -263,8 +290,6 @@ function loadListTypes() {
         btn.onclick = () => changeToBubbleList(t.key);
         btn.textContent = t.label;
         document.querySelector('.bubble-container').appendChild(btn);
-        
-        // Immediately start counting this new custom list
         setupCounter(t.key);
     }
   });
@@ -275,17 +300,8 @@ function addItem() {
   const qty = document.getElementById('quantityInput').value || '1';
   const prio = document.getElementById('priorityInput').value;
   if (!input.value.trim()) return;
-
-  // This pushes to Firebase, which triggers the 'value' listener in setupCounter instantly!
-  listRef.push({ 
-    text: input.value.trim(), 
-    quantity: qty, 
-    priority: prio, 
-    done: false 
-  });
-
-  input.value = ''; 
-  document.getElementById('quantityInput').value = '';
+  listRef.push({ text: input.value.trim(), quantity: qty, priority: prio, done: false });
+  input.value = ''; document.getElementById('quantityInput').value = '';
 }
 
 function attachListeners() {
@@ -310,9 +326,7 @@ function createListItemElement(key, data) {
   li.innerHTML = `
     <span class="${data.done ? 'done' : ''}">${dots[data.priority] || ''}${qty}${data.text}</span>
     <div style="display:flex; gap:5px;">
-      <button class="check-btn ${data.done ? 'checked' : ''}" onclick="toggleDone('${key}')">
-        ${data.done ? 'Uncheck' : 'Check'}
-      </button>
+      <button class="check-btn ${data.done ? 'checked' : ''}" onclick="toggleDone('${key}')">${data.done ? 'Uncheck' : 'Check'}</button>
       <button class="Remove-btn" onclick="deleteItem('${key}')">Remove</button>
     </div>`;
   document.getElementById('list').appendChild(li);
@@ -338,9 +352,9 @@ function changeToBubbleList(type) {
   const activeBtn = document.querySelector(`[data-list="${type}"]`);
   if(activeBtn) activeBtn.classList.add('active');
   
+  if (listRef) listRef.off();
   listRef = db.ref(baseDataPath + '/' + currentType);
   document.getElementById('list').innerHTML = '';
-  listRef.off();
   attachListeners();
 }
 
@@ -356,8 +370,6 @@ function copyShareLink() {
     }, 2000);
   });
 }
-
-function exitSharedMode() { window.location.href = window.location.origin + window.location.pathname; }
 
 function handleDropdownChange() {
   const sel = document.getElementById('customListDropdown');
@@ -394,6 +406,3 @@ document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') ad
 </script>
 </body>
 </html>
-
-
-
