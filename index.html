@@ -254,11 +254,7 @@ h2 {
                             </div>
                   <div style="text-align:center;margin-top:12px;">
                 <label style="font-size:13px;color:#64748b;margin-right:8px;">Or select custom list:</label>
-                <select id="customListDropdown" onchange="changeListType()" style="padding:8px 12px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:13px;outline:none;cursor:pointer;">
-                    <option value="shopping">Shopping</option>
-                    <option value="reminder">Reminder</option>
-                    <option value="todo">To-do</option>
-                    <option value="__new__">➕ New list type...</option>
+                                        <option value="__new__">➕ New list type...</option>
                 </select>
             </div>
            <button onclick="RemoveCurrentList()" class="Remove-list-btn" style="margin-top:12px;padding:8px 16px;background:#fee2e2;color:#b91c1c;border:none;border-radius:999px;font-size:12px;cursor:pointer;">🗑️ Delete Custom List</button>
@@ -806,6 +802,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
