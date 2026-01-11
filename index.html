@@ -2,6 +2,13 @@
 <html>
 <head>
 <title>NexusList - Shared Lists</title>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yourdomain.com/"> <meta property="og:title" content="NexusList - Shared Shopping & Tasks">
+<meta property="og:description" content="Check out my list on NexusList! We can track our shopping and to-dos together in real-time.">
+<meta property="og:image" content="https://yourdomain.com/nexuslist-icon.png"> <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NexusList">
+<meta name="twitter:description" content="Shared real-time lists for family and friends.">
+<meta name="twitter:image" content="https://yourdomain.com/nexuslist-icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="nexuslist-icon.png">
 <link rel="apple-touch-icon" href="nexuslist-icon.png">
@@ -119,10 +126,6 @@ li {
         </select>
       </div>
 
-      <div style="text-align:center; margin-top:10px;">
-        <button onclick="RemoveCurrentList()" style="background: #fee2e2; color: #b91c1c; padding:6px 14px; font-size:11px;">🗑️ Delete Current List</button>
-      </div>
-
       <div class="input-row" style="margin-top:20px;">
         <input id="itemInput" placeholder="Add item...">
         <input id="quantityInput" placeholder="Qty" style="width:50px; border-radius:999px; border:1px solid #cbd5f5; text-align:center;">
@@ -148,6 +151,10 @@ li {
         <button id="exitBtn" onclick="exitSharedMode()" style="background:#ef4444; color:white; font-size:12px; display:none;">🏠 Back to Private</button>
         <button id="darkModeBtn" onclick="toggleDarkMode()" style="background:#64748b; color:white; font-size:12px;">🌙 Dark</button>
         <button onclick="signOut()" style="background:#94a3b8; color:white; font-size:12px;">Sign Out</button>
+      </div>
+
+      <div style="text-align:center; margin-top:25px; border-top: 1px solid rgba(0,0,0,0.05); padding-top:15px;">
+        <button onclick="RemoveCurrentList()" style="background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer;">🗑️ Delete Current List</button>
       </div>
     </div>
   </div>
@@ -178,7 +185,6 @@ auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     const groupParam = new URLSearchParams(window.location.search).get('group');
-
     if (groupParam) {
       baseDataPath = 'nexuslist/' + groupParam;
       document.getElementById('sharedBanner').style.display = 'block';
@@ -187,14 +193,11 @@ auth.onAuthStateChanged(user => {
     } else {
       baseDataPath = 'nexuslist/' + user.uid;
     }
-
     listTypesRef = db.ref(baseDataPath + '/listTypes');
     listRef = db.ref(baseDataPath + '/' + currentType);
-    
     loadListTypes();
     setupCounter('shopping'); setupCounter('reminder'); setupCounter('todo');
     attachListeners();
-
     document.getElementById('signin-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
   } else {
@@ -218,15 +221,12 @@ function setupCounter(type) {
 function loadListTypes() {
   const dropdown = document.getElementById('customListDropdown');
   dropdown.innerHTML = `<option value="" selected disabled>Select custom list...</option><option value="__new__">➕ New list type...</option>`;
-  
   listTypesRef.on('child_added', snap => {
     const t = snap.val();
     if (['shopping', 'reminder', 'todo'].includes(t.key)) return;
-    
     const opt = document.createElement('option');
     opt.value = t.key; opt.textContent = t.label;
     dropdown.insertBefore(opt, dropdown.lastElementChild);
-
     const btn = document.createElement('button');
     btn.className = 'bubble-btn';
     btn.setAttribute('data-list', t.key);
