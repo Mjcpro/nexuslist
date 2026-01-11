@@ -261,6 +261,7 @@ h2 {
                 </select>
             </div>
            <button onclick="RemoveCurrentList()" class="Remove-list-btn" style="margin-top:12px;padding:8px 16px;background:#fee2e2;color:#b91c1c;border:none;border-radius:999px;font-size:12px;cursor:pointer;">🗑️ Delete Custom List</button>
+                          <select id="customListDropdown" onchange="changeListType()" style="padding:8px 12px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:13px;outline:none;cursor:pointer;">
       
       <!--<div class="controls-row">
         <select id="listType" onchange="changeListType()">
@@ -805,6 +806,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
