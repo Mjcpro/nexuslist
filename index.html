@@ -253,15 +253,14 @@ h2 {
                               <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">🛒 Shopping</button>
                               <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">📝 Reminder</button>
                               <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">✓ To-do</button>
-                              <button class="bubble-btn" onclick="createCustomList()" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">➕ Custom List</button>
                             </div>
                   <div style="text-align:center;margin-top:12px;">
                 <label style="font-size:13px;color:#64748b;margin-right:8px;">Or select custom list:</label>
-                                        <option value="__new__">➕ New list type...</option>
-                </select>
             </div>
            <button onclick="RemoveCurrentList()" class="Remove-list-btn" style="margin-top:12px;padding:8px 16px;background:#fee2e2;color:#b91c1c;border:none;border-radius:999px;font-size:12px;cursor:pointer;">🗑️ Delete Custom List</button>
                           <select id="customListDropdown" onchange="changeListType()" style="padding:8px 12px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:13px;outline:none;cursor:pointer;">
+                                                    <option value="__new__">➕ New list type...</option>
+                                                </select>
       
       <!--<div class="controls-row">
         <select id="listType" onchange="changeListType()">
@@ -806,6 +805,7 @@ if ('serviceWorker' in navigator) {
 
 </body>
 </html>
+
 
 
 
