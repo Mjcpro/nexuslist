@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- Version: 1.0.1 - Updated: 2026-01-09 - Changes: Fixed Delete to Remove, Completed custom list functionality --> v3
 <html>
 <head>
 <title>NexusList - Shared Lists</title>
@@ -7,9 +6,9 @@
 <link rel="icon" href="nexuslist-icon.png">
 <link rel="apple-touch-icon" href="nexuslist-icon.png">
 <link rel="manifest" href="manifest.json">
-      <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <style>
 :root {
@@ -56,18 +55,18 @@ body {
   transition: background 0.3s ease, border 0.3s ease;
 }
 
-  .logo-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 8px;
-    margin-bottom: 12px;
-  }
+.logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
 
-  .logo-wrapper img {
-    height: 160px;
-    border-radius: 20px;
-  }
+.logo-wrapper img {
+  height: 160px;
+  border-radius: 20px;
+}
 
 h2 {
   text-align: center;
@@ -83,141 +82,69 @@ h2 {
   margin-bottom: 18px;
 }
 
+.input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
 
-  .controls-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+input#itemInput {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #cbd5f5;
+  border-radius: 999px;
+  font-size: 14px;
+  outline: none;
+  background: #f9fafb;
+}
 
-  #listType {
-    padding: 9px 12px;
-    border-radius: 999px;
-    border: 1px solid #d0d7e2;
-    background: #f8fafc;
-    font-size: 13px;
-    color: #0f172a;
-  }
+button {
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #4f46e5, #22c55e);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
 
-  .input-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
+.check-btn { background: #e5f6ff; color: #0369a1; }
+.check-btn.checked { background: #dcfce7; color: #166534; }
+.Remove-btn { background: #fee2e2; color: #b91c1c; }
+.Remove-list-btn { background: #fee2e2; color: #b91c1c; }
 
-  input#itemInput {
-    flex: 1;
-    padding: 12px 14px;
-    border: 1px solid #cbd5f5;
-    border-radius: 999px;
-    font-size: 14px;
-    outline: none;
-    background: #f9fafb;
-  }
+ul { list-style: none; padding: 0; margin-top: 8px; }
+li {
+  padding: 10px 12px;
+  background: var(--item-bg);
+  margin: 8px 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px var(--shadow-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  input#itemInput:focus {
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 1px rgba(79,70,229,0.25);
-    background: #ffffff;
-  }
+.done { text-decoration: line-through; opacity: 0.6; }
 
-  button {
-    padding: 10px 18px;
-    background: linear-gradient(135deg, #4f46e5, #22c55e);
-    color: white;
-    border: none;
-    border-radius: 999px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.15s;
-    white-space: nowrap;
-  }
-
-  button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(15,23,42,0.25);
-  }
-
-  button:active {
-    transform: translateY(0);
-    box-shadow: none;
-    opacity: 0.9;
-  }
-
-  .check-btn {
-    background: #e5f6ff;
-    color: #0369a1;
-  }
-
-  .check-btn.checked {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  .Remove-btn {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
-  
-  .Remove-list-btn {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    margin-top: 8px;
-  }
-
-  li {
-    padding: 10px 12px;
-    background: #f9fafb;
-    margin: 8px 0;
-    border-radius: 12px;
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
-
-  li span {
-    flex: 1;
-    font-size: 14px;
-    color: #0f172a;
-  }
-
-  .done {
-    text-decoration: line-through;
-    opacity: 0.6;
-  }
-
-  .item-buttons {
-    display: flex;
-    gap: 6px;
-  }
-  
- .bubble-btn {
+.bubble-btn {
   padding: 12px 24px;
   border-radius: 25px;
   border: 2px solid #cbd5e1;
   background: #f8fafc;
   color: #1e293b;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
- }
+}
 
- .bubble-btn.active {
+.bubble-btn.active {
   background: #3b82f6 !important;
   border-color: #3b82f6 !important;
   color: white !important;
- }
+}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -226,85 +153,67 @@ h2 {
 </head>
 
 <body>
-  <!-- Sign-in screen -->
   <div id="signin-container" style="display:none;">
     <div class="card" style="text-align:center;">
-      <div class="logo-wrapper">
-        <img src="nexuslist-icon.png" alt="NexusList logo">
-      </div>
+      <div class="logo-wrapper"><img src="nexuslist-icon.png" alt="NexusList logo"></div>
       <h2>Welcome to NexusList</h2>
-      <p class="subtitle">Sign in with Google to sync your lists across devices</p>
-      <button onclick="signInWithGoogle()" style="margin-top:20px;">
-        🔐 Sign in with Google
-      </button>
+      <p class="subtitle">Sign in with Google to sync your lists</p>
+      <button onclick="signInWithGoogle()" style="margin-top:20px;">🔐 Sign in with Google</button>
     </div>
   </div>
 
-  <!-- Main app -->
   <div id="app-container" style="display:none;">
     <div class="card">
-      <div class="logo-wrapper">
-        <img src="nexuslist-icon.png" alt="NexusList logo">
-      </div>
+      <div class="logo-wrapper"><img src="nexuslist-icon.png" alt="NexusList logo"></div>
 
       <h2>What kind of list do you want to make?</h2>
-      <div class="subtitle">Switch between shopping, reminders and to-do lists in one place.</div>
-                <div class="bubble-container" style="display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;">
-                              <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">🛒 Shopping</button>
-                              <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">📝 Reminder</button>
-                              <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" style="padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;">✓ To-do</button>
-                            </div>
-                  <div style="text-align:center;margin-top:12px;">
-                <label style="font-size:13px;color:#64748b;margin-right:8px;">Or select custom list:</label>
-            </div>
-           <button onclick="RemoveCurrentList()" class="Remove-list-btn" style="margin-top:12px;padding:8px 16px;background:#fee2e2;color:#b91c1c;border:none;border-radius:999px;font-size:12px;cursor:pointer;">🗑️ Delete Custom List</button>
-                          <select id="customListDropdown" onchange
-                                                    <option value="" selected disabled>Select custom list...</option>="changeListType()" style="padding:8px 12px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:13px;outline:none;cursor:pointer;">
-                                                    <option value="__new__">➕ New list type...</option>
-                                                </select>
       
-      <!--<div class="controls-row">
-        <select id="listType" onchange="changeListType()">
-          <option value="shopping">Shopping</option>
-          <option value="reminder">Reminder</option>
-          <option value="todo">To-do list</option>
-          <option value="__new__">+ New list type…</option>
+      <div class="bubble-container" style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+        <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping">🛒 Shopping</button>
+        <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder">📝 Reminder</button>
+        <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo">✓ To-do</button>
+      </div>
+
+      <div style="text-align:center;margin-top:16px;">
+        <label style="font-size:13px;color:var(--text-secondary);display:block;margin-bottom:8px;">Or select custom list:</label>
+        <select id="customListDropdown" onchange="handleDropdownChange()" style="padding:8px 12px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:13px;outline:none;cursor:pointer;width:200px;">
+          <option value="" selected disabled>Select custom list...</option>
+          <option value="__new__">➕ New list type...</option>
         </select>
-        <button onclick="RemoveCurrentList()" class="Remove-list-btn">Remove list</button>
-      </div>-->
+      </div>
 
-<!-- Collapsible Search Bar -->
-    <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-      <button id="searchToggle" onclick="toggleSearch()" style="background:#8cb5d1;border:1px solid #cbd5e1;border-radius:999px;padding:10px 14px;font-size:14px;cursor:pointer;outline:none;flex-shrink:0;" title="Toggle Search">
-        🔍
-      </button>
-      <input type="text" id="searchInput" placeholder="🔍 Search items..." style="width:0;opacity:0;padding:10px 14px;border:1px solid #cbd5e1;border-radius:999px;font-size:14px;outline:none;background:#f8fafc;transition:all 0.3s ease;">
-    </div>
-<!-- Add item form (no notes field) -->
-<div class="input-row" style="flex-wrap:wrap;gap:8px;">
-  <input id="itemInput" placeholder="Add item..." style="flex:1;min-width:150px;padding:12px 14px;border:1px solid #cbd5f5;border-radius:999px;font-size:14px;outline:none;background:#f9fafb;">
-  <input id="quantityInput" placeholder="Qty" style="width:65px;padding:12px 10px;border:1px solid #cbd5f5;border-radius:999px;font-size:14px;text-align:center;outline:none;">
-  <select id="priorityInput" style="padding:10px 12px;border:1px solid #cbd5f5;border-radius:999px;font-size:13px;outline:none;background:#f8fafc;">
-    <option value="">Priority</option>
-    <option value="high">🔴 High</option>
-    <option value="medium">🟡 Medium</option>
-    <option value="low">🟢 Low</option>
-  </select>
-  <button onclick="addItem()">Add</button>
-</div>
+      <div style="text-align:center; margin-top:10px;">
+        <button onclick="RemoveCurrentList()" class="Remove-list-btn" style="padding:6px 14px; font-size:11px;">🗑️ Delete Current List</button>
+      </div>
 
-<ul id="list"></ul>
+      <div style="margin:20px 0 12px; display:flex; align-items:center; gap:8px;">
+        <button id="searchToggle" onclick="toggleSearch()" style="background:#8cb5d1;border-radius:999px;padding:10px;cursor:pointer;border:none;">🔍</button>
+        <input type="text" id="searchInput" placeholder="Search items..." style="width:0;opacity:0;padding:10px;border:1px solid #cbd5e1;border-radius:999px;transition:all 0.3s ease;">
+      </div>
 
-      
-  <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;">
-  <button onclick="toggleDarkMode()" style="background:#64748b;font-size:12px;" id="darkModeBtn">🌙 Dark</button>
-  <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
-</div>
+      <div class="input-row" style="flex-wrap:wrap;gap:8px;">
+        <input id="itemInput" placeholder="Add item..." style="flex:1;min-width:150px;">
+        <input id="quantityInput" placeholder="Qty" style="width:50px; border-radius:999px; border:1px solid #cbd5f5; text-align:center;">
+        <select id="priorityInput" style="padding:10px; border-radius:999px; border:1px solid #cbd5f5;">
+          <option value="">Priority</option>
+          <option value="high">🔴 High</option>
+          <option value="medium">🟡 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+        <button onclick="addItem()">Add</button>
+      </div>
 
+      <ul id="list"></ul>
+
+      <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;">
+        <button onclick="toggleDarkMode()" style="background:#64748b;font-size:12px;" id="darkModeBtn">🌙 Dark</button>
+        <button onclick="signOut()" style="background:#94a3b8;font-size:12px;">Sign Out</button>
+      </div>
     </div>
   </div>
 
 <script>
+// --- FIREBASE CONFIG ---
 const firebaseConfig = {
   apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY",
   authDomain: "nexuslist-380ff.firebaseapp.com",
@@ -312,100 +221,27 @@ const firebaseConfig = {
   projectId: "nexuslist-380ff",
   storageBucket: "nexuslist-380ff.firebasestorage.app",
   messagingSenderId: "950145923798",
-  appId: "1:950145923798:web:050a4a08f99cae13e72777",
-  measurementId: "G-8X3506GVGQ"
+  appId: "1:950145923798:web:050a4a08f99cae13e72777"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
-
-// Enable auth persistence
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-  // Dark mode toggle
-function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-  
-  // Update button text
-  const btn = document.getElementById('darkModeBtn');
-  btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
-}
-
-  // Toggle search bar
-  function toggleSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const isExpanded = searchInput.style.width !== '0px' && searchInput.style.width !== '';
-    
-    if (isExpanded) {
-      // Collapse
-      searchInput.style.width = '0';
-      searchInput.style.opacity = '0';
-      searchInput.value = '';
-      filterItems();
-    } else {
-      // Expand
-      searchInput.style.width = 'calc(100% - 60px)';
-      searchInput.style.opacity = '1';
-      searchInput.focus();
-    }
-  }
-
-  // Search/filter function
-  function filterItems() {
-    const searchInput = document.getElementById('searchInput');
-    const searchTerm = searchInput.value.toLowerCase().trim();
-    const items = document.querySelectorAll('#list li');
-    
-    items.forEach(item => {
-      const text = item.textContent.toLowerCase();
-      item.style.display = text.includes(searchTerm) ? '' : 'none';
-    });
-  }
-
-  // Add event listener for search input
-  document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', filterItems);
-    }
-  });
-
-// Load dark mode preference on startup
-if (localStorage.getItem('darkMode') === 'enabled') {
-  document.body.classList.add('dark-mode');
-  document.getElementById('darkModeBtn').textContent = '☀️ Light';
-}
-
-
-// Monitor connection
-firebase.database().ref('.info/connected').on('value', function(snapshot) {
-  if (snapshot.val() === true) {
-    console.log('Connected to Firebase');
-  } else {
-    console.log('Offline - changes will sync when back online');
-  }
-});
 
 let currentUser = null;
 let currentType = 'shopping';
 let listRef = null;
 let listTypesRef = null;
 
-// AUTH
+// --- AUTH LOGIC ---
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
-    console.log('Signed in as:', user.displayName || user.email);
-    
-    listTypesRef = db.ref('nexuslist/' + currentUser.uid + '/listTypes');
-    listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
-
+    listTypesRef = db.ref('nexuslist/' + user.uid + '/listTypes');
+    listRef = db.ref('nexuslist/' + user.uid + '/' + currentType);
     loadListTypes();
     attachListeners();
-    
     document.getElementById('signin-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
   } else {
@@ -416,290 +252,140 @@ auth.onAuthStateChanged(user => {
 
 function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(error) {
-    console.log('Sign-in error:', error);
-    alert('Sign-in failed. Please try again.');
-  });
+  auth.signInWithPopup(provider).catch(e => alert('Sign-in failed.'));
 }
 
-function signOut() {
-  auth.signOut();
-}
+function signOut() { auth.signOut(); }
 
-// LIST TYPES
+// --- CUSTOM LISTS LOGIC ---
 function loadListTypes() {
-  const select = document.getElementById('listType');
-  if (!select) return;
+  const dropdown = document.getElementById('customListDropdown');
+  if (!dropdown || !listTypesRef) return;
 
-  const newOption = document.querySelector('#listType option[value="__new__"]');
-  select.innerHTML = `
-    <option value="shopping">Shopping</option>
-    <option value="reminder">Reminder</option>
-    <option value="todo">To-do list</option>
+  // Clear dropdown but keep placeholder and "New"
+  dropdown.innerHTML = `
+    <option value="" selected disabled>Select custom list...</option>
+    <option value="__new__">➕ New list type...</option>
   `;
-  select.appendChild(newOption);
 
-  if (!listTypesRef) return;
-
-  // Use 'on' instead of 'once' to listen for real-time changes
   listTypesRef.on('child_added', snap => {
     const t = snap.val();
-    // Check if this option already exists
-    const existingOpt = document.querySelector(`#listType option[value="${t.key}"]`);
-    if (!existingOpt && t.key !== 'shopping' && t.key !== 'reminder' && t.key !== 'todo') {
-      const opt = document.createElement('option');
-      opt.value = t.key;
-      opt.textContent = t.label;
-      select.insertBefore(opt, select.lastElementChild);
+    if (['shopping', 'reminder', 'todo'].includes(t.key)) return;
 
-                
-          // Also create bubble button for custom list
-          const bubbleContainer = document.querySelector('.bubble-container');
-                  
-            // Also add to visible custom list dropdown
-            const customDropdown = document.getElementById('customListDropdown');
-            if (customDropdown) {
-                const customOpt = document.createElement('option');
-                customOpt.value = t.key;
-                customOpt.textContent = t.label;
-                customDropdown.insertBefore(customOpt, customDropdown.lastElementChild);
-            }
-          if (bubbleContainer) {
-            const newBubbleBtn = document.createElement('button');
-            newBubbleBtn.className = 'bubble-btn';
-            newBubbleBtn.setAttribute('data-list', t.key);
-            newBubbleBtn.setAttribute('onclick', `changeToBubbleList('${t.key}')`);
-            newBubbleBtn.style.cssText = 'padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;';
-            newBubbleBtn.textContent = t.label;
-            bubbleContainer.insertBefore(newBubbleBtn, bubbleContainer.lastElementChild);
-          }
-    }
-  });
+    // Add to Dropdown
+    const opt = document.createElement('option');
+    opt.value = t.key;
+    opt.textContent = t.label;
+    dropdown.insertBefore(opt, dropdown.lastElementChild);
 
-  // Listen for Removed list types
-  listTypesRef.on('child_removed', snap => {
-    const t = snap.val();
-    const optToRemove = document.querySelector(`#listType option[value="${t.key}"]`);
-    if (optToRemove) {
-      optToRemove.remove();
-            
-      // Also remove bubble button
-      const bubbleBtnToRemove = document.querySelector(`.bubble-btn[data-list="${t.key}"]`);
-      if (bubbleBtnToRemove) {
-        bubbleBtnToRemove.remove();
-      }
-      // If the Removed list was currently selected, switch to Shopping
-      if (currentType === t.key) {
-        currentType = 'shopping';
-        select.value = 'shopping';
-        changeListType();
-      }
+    // Add to Bubble Container
+    const container = document.querySelector('.bubble-container');
+    if (!document.querySelector(`.bubble-btn[data-list="${t.key}"]`)) {
+      const btn = document.createElement('button');
+      btn.className = 'bubble-btn';
+      btn.setAttribute('data-list', t.key);
+      btn.onclick = () => changeToBubbleList(t.key);
+      btn.textContent = t.label;
+      container.appendChild(btn);
     }
   });
 }
 
-
-function changeListType() {
-    const select = document.getElementById('customListDropdown');  let value = select.value;
-
-  if (value === '__new__') {
-    const name = prompt('What do you want to call this list? (e.g. Christmas gifts)');
-    if (!name || !name.trim()) {
-      select.value = currentType;
-      return;
-    }
-
-    const label = name.trim();
-    const key = label.toLowerCase().replace(/\s+/g, '-');
-    value = key;
-
-    if (listTypesRef) {
-      const newTypeRef = listTypesRef.push();
-      newTypeRef.set({ key, label });
-    }
-
-    const opt = document.createElement('option');
-    opt.value = key;
-    opt.textContent = label;
-    select.insertBefore(opt, select.lastElementChild);
-    select.value = key;
+function handleDropdownChange() {
+  const select = document.getElementById('customListDropdown');
+  if (select.value === '__new__') {
+    createCustomList();
+    select.value = ""; // reset
+  } else {
+    changeToBubbleList(select.value);
   }
+}
 
-  currentType = value;
-  if (!currentUser) return;
+function createCustomList() {
+  const name = prompt('Enter name for the new list:');
+  if (!name || !name.trim()) return;
 
-  listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
-  document.getElementById('list').innerHTML = '';
-  listRef.off();
-  attachListeners();
-  
-  // Clear input fields when switching lists
-  document.getElementById('itemInput').value = '';
-  document.getElementById('quantityInput').value = '';
-  document.getElementById('priorityInput').value = '';
-  document.getElementById('searchInput').value = '';
+  const label = name.trim();
+  const key = label.toLowerCase().replace(/\s+/g, '-');
 
+  if (listTypesRef) {
+    listTypesRef.push().set({ key, label });
+    // Switch to it after a short delay to allow Firebase to sync
+    setTimeout(() => changeToBubbleList(key), 500);
   }
+}
 
 function changeToBubbleList(type) {
-    // Remove active class from all bubbles
-    document.querySelectorAll('.bubble-btn').forEach(btn => {
-          btn.classList.remove('active');
-          btn.style.background = '#f8fafc';
-          btn.style.borderColor = '#cbd5e1';
-          btn.style.color = '#1e293b';
-        });
+  currentType = type;
+  
+  // UI Updates
+  document.querySelectorAll('.bubble-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if(btn.getAttribute('data-list') === type) btn.classList.add('active');
+  });
 
-    // Add active class to clicked bubble
-      const clickedBtn = document.querySelector(`.bubble-btn[data-list="${type}"]`); 
-      clickedBtn.classList.add('active');
-    clickedBtn.style.background = '#3b82f6';
-    clickedBtn.style.borderColor = '#3b82f6';
-    clickedBtn.style.color = 'white';
-
-    // Update list reference
-    currentType = type;
+  // Firebase Updates
+  if (currentUser) {
     listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
     document.getElementById('list').innerHTML = '';
     listRef.off();
     attachListeners();
-    document.getElementById('itemInput').value = '';
-    document.getElementById('quantityInput').value = '';
-    document.getElementById('priorityInput').value = '';
-    document.getElementById('searchInput').value = '';
   }
-
-  function createCustomList() {
-      const name = prompt('Enter custom list name:');
-      if (name && name.trim()) {
-        // Create key from the name
-        const label = name.trim();
-        const key = label.toLowerCase().replace(/\s+/g, '-');
-        
-        // Check if user is logged in
-        if (!currentUser) {
-            alert('Please sign in to create custom lists');
-            return;
-        }
-        
-        // Add to Firebase list types
-        if (listTypesRef) {
-            const newTypeRef = listTypesRef.push();
-            newTypeRef.set({ key, label });
-        }
-        
-        // Add to dropdown
-        const select = document.getElementById('listType');
-        const opt = document.createElement('option');
-        opt.value = key;
-        opt.textContent = label;
-        select.insertBefore(opt, select.lastElementChild);
-        select.value = key;
-
-       // Add bubble button for the new custom list
-     const bubbleContainer = document.querySelector('.bubble-container');
-     const newBubbleBtn = document.createElement('button');
-     newBubbleBtn.className = 'bubble-btn';
-     newBubbleBtn.setAttribute('data-list', key);
-     newBubbleBtn.setAttribute('onclick', `changeToBubbleList('${key}')`);
-     newBubbleBtn.style.cssText = 'padding:12px 24px;border-radius:25px;border:2px solid #cbd5e1;background:#f8fafc;color:#1e293b;font-size:15px;cursor:pointer;transition:all 0.3s ease;';
-     newBubbleBtn.textContent = label;
-     bubbleContainer.insertBefore(newBubbleBtn, bubbleContainer.lastElementChild);
-        
-        // Switch to the new list
-                changeToBubbleList(key);
 }
-    }
-
 
 function RemoveCurrentList() {
-  
-  const select = document.getElementById('listType');
-
-  if (currentType === 'shopping' || currentType === 'reminder' || currentType === 'todo') {
-    alert('Default lists (Shopping, Reminder, To-do) cannot be Removed.');
-    return;
+  if (['shopping', 'reminder', 'todo'].includes(currentType)) {
+    return alert('Default lists cannot be deleted.');
   }
-
-  const label = select.options[select.selectedIndex].textContent;
-  const ok = confirm(`Remove the list "${label}" and all its items?`);
-  if (!ok || !currentUser) return;
+  if (!confirm(`Delete entire "${currentType}" list?`)) return;
 
   db.ref('nexuslist/' + currentUser.uid + '/' + currentType).remove();
-
-  if (listTypesRef) {
-    listTypesRef.once('value', snap => {
-      const data = snap.val();
-      if (!data) return;
-
-      Object.entries(data).forEach(([id, t]) => {
-        if (t.key === currentType) {
-          listTypesRef.child(id).remove();
-        }
-      });
-    });
-  }
-
-  select.remove(select.selectedIndex);
-  currentType = 'shopping';
-  select.value = 'shopping';
-
-  listRef = db.ref('nexuslist/' + currentUser.uid + '/' + currentType);
-  document.getElementById('list').innerHTML = '';
-  listRef.off();
-  attachListeners();
-}
-
-// ITEMS
-function addItem() {
-  if (!listRef) return;
-  const input = document.getElementById('itemInput');
-  const qtyInput = document.getElementById('quantityInput');
-  const priorityInput = document.getElementById('priorityInput');
   
-  if (input.value.trim()) {
-    const quantity = qtyInput.value.trim() || '1';
-    const priority = priorityInput.value || '';
-    
-    listRef.push({ 
-      text: input.value.trim(), 
-      quantity: quantity,
-      priority: priority,
-      done: false 
+  listTypesRef.once('value', snap => {
+    snap.forEach(child => {
+      if (child.val().key === currentType) child.ref.remove();
     });
-    
-    // Clear all inputs after adding
-    input.value = '';
-    qtyInput.value = '';
-    priorityInput.value = '';
-  }
+  });
+
+  // Remove the bubble button from UI
+  const btn = document.querySelector(`.bubble-btn[data-list="${currentType}"]`);
+  if (btn) btn.remove();
+
+  changeToBubbleList('shopping');
 }
 
+// --- ITEM LOGIC ---
+function addItem() {
+  const input = document.getElementById('itemInput');
+  const qty = document.getElementById('quantityInput').value || '1';
+  const prio = document.getElementById('priorityInput').value;
+  
+  if (!input.value.trim() || !listRef) return;
+
+  listRef.push({
+    text: input.value.trim(),
+    quantity: qty,
+    priority: prio,
+    done: false
+  });
+
+  input.value = '';
+  document.getElementById('quantityInput').value = '';
+}
 
 function attachListeners() {
   if (!listRef) return;
-
-  listRef.on('child_added', snap => {
-    createListItemElement(snap.key, snap.val());
-  });
-
+  listRef.on('child_added', snap => createListItemElement(snap.key, snap.val()));
   listRef.on('child_changed', snap => {
     const li = document.getElementById('item-' + snap.key);
     if (!li) return;
-    const span = li.querySelector('span');
-    const checkBtn = li.querySelector('.check-btn');
-
-    span.textContent = snap.val().text;
-    span.classList.toggle('done', snap.val().done);
-    checkBtn.textContent = snap.val().done ? 'Uncheck' : 'Check';
-    checkBtn.classList.toggle('checked', snap.val().done);
+    li.querySelector('span').classList.toggle('done', snap.val().done);
+    const btn = li.querySelector('.check-btn');
+    btn.textContent = snap.val().done ? 'Uncheck' : 'Check';
+    btn.classList.toggle('checked', snap.val().done);
   });
-
   listRef.on('child_removed', snap => {
-    const li = document.getElementById('item-' + snap.key);
-    if (li && li.parentNode) {
-      li.parentNode.removeChild(li);
-    }
+    document.getElementById('item-' + snap.key)?.remove();
   });
 }
 
@@ -707,131 +393,55 @@ function createListItemElement(key, data) {
   const li = document.createElement('li');
   li.id = 'item-' + key;
 
-const span = document.createElement('span');
-// Show quantity if it exists and is not '1'
-const qtyText = data.quantity && data.quantity !== '1' ? data.quantity + '× ' : '';
-span.textContent = qtyText + data.text;
-if (data.done) span.classList.add('done');
+  const qty = data.quantity && data.quantity !== '1' ? `${data.quantity}× ` : '';
+  let prioDot = '';
+  if (data.priority === 'high') prioDot = '🔴 ';
+  else if (data.priority === 'medium') prioDot = '🟡 ';
+  else if (data.priority === 'low') prioDot = '🟢 ';
 
-// Add priority indicator
-if (data.priority) {
-  const priorityDot = document.createElement('span');
-  priorityDot.style.cssText = 'display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;';
-  if (data.priority === 'high') priorityDot.style.background = '#ef4444';
-  else if (data.priority === 'medium') priorityDot.style.background = '#f59e0b';
-  else if (data.priority === 'low') priorityDot.style.background = '#10b981';
-  span.insertBefore(priorityDot, span.firstChild);
-}
-
-
-  const checkBtn = document.createElement('button');
-  checkBtn.className = 'check-btn' + (data.done ? ' checked' : '');
-  checkBtn.textContent = data.done ? 'Uncheck' : 'Check';
-  checkBtn.onclick = () => toggle(key);
-
-  const delBtn = document.createElement('button');
-  delBtn.className = 'Remove-btn';
-  delBtn.textContent = 'Remove';
-  delBtn.onclick = () => listRef.child(key
-).remove();
-
-  const btnWrapper = document.createElement('div');
-  btnWrapper.className = 'item-buttons';
-  btnWrapper.appendChild(checkBtn);
-  btnWrapper.appendChild(delBtn);
-
-  li.appendChild(span);
-  li.appendChild(btnWrapper);
-
+  li.innerHTML = `
+    <span class="${data.done ? 'done' : ''}">${prioDot}${qty}${data.text}</span>
+    <div style="display:flex; gap:5px;">
+      <button class="check-btn ${data.done ? 'checked' : ''}" onclick="toggleDone('${key}')">${data.done ? 'Uncheck' : 'Check'}</button>
+      <button class="Remove-btn" onclick="deleteItem('${key}')">Remove</button>
+    </div>
+  `;
   document.getElementById('list').appendChild(li);
 }
 
-function toggle(key) {
-  if (!listRef) return;
-  const item = listRef.child(key);
-  item.once('value', snap => {
-    const current = snap.val();
-    item.update({ done: !current.done });
-  });
+function toggleDone(key) {
+  const ref = listRef.child(key);
+  ref.once('value', snap => ref.update({ done: !snap.val().done }));
 }
 
-// Enter key adds item
-document.getElementById('itemInput').addEventListener('keyup', function (e) {
-  if (e.key === 'Enter') {
-    addItem();
-  }
-});
-  // Also allow Enter from quantity and priority fields
-document.getElementById('quantityInput').addEventListener('keyup', function (e) {
-  if (e.key === 'Enter') {
-    addItem();
-  }
-});
+function deleteItem(key) { listRef.child(key).remove(); }
 
-document.getElementById('priorityInput').addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') {
-    addItem();
-  }
-});
-  // Search/filter functionality
-document.getElementById('searchInput').addEventListener('keyup', function(e) {
-  const searchTerm = e.target.value.toLowerCase();
-  const items = document.querySelectorAll('#list li');
-  
-  items.forEach(item => {
-    const text = item.querySelector('span').textContent.toLowerCase();
-    if (text.includes(searchTerm)) {
-      item.style.display = 'flex';
-    } else {
-      item.style.display = 'none';
-    }
-  });
-});
-
-
-</script>
-
-<script>
-// Register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js')
-    .then(function(registration) {
-      console.log('Service Worker registered:', registration);
-    })
-    .catch(function(error) {
-      console.log('Service Worker failed:', error);
-    });
+// --- UI HELPERS ---
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
+  document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
 }
-</script>
 
+function toggleSearch() {
+  const input = document.getElementById('searchInput');
+  const active = input.style.width !== '0px' && input.style.width !== '';
+  input.style.width = active ? '0' : '150px';
+  input.style.opacity = active ? '0' : '1';
+  if (!active) input.focus();
+}
+
+document.getElementById('searchInput').oninput = (e) => {
+  const val = e.target.value.toLowerCase();
+  document.querySelectorAll('#list li').forEach(li => {
+    li.style.display = li.textContent.toLowerCase().includes(val) ? 'flex' : 'none';
+  });
+};
+
+document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
+
+if (localStorage.getItem('darkMode') === 'enabled') toggleDarkMode();
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
