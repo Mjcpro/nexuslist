@@ -112,10 +112,7 @@ li {
   color: white !important;
 }
 
-.count-badge {
-  font-weight: bold;
-  margin-left: 4px;
-}
+.count-badge { font-weight: bold; margin-left: 4px; color: inherit; }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -205,7 +202,7 @@ let currentUser = null;
 let currentType = 'shopping';
 let listRef = null;
 let listTypesRef = null;
-let countListeners = {}; // To keep track of item counters
+let countListeners = {}; 
 
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -213,7 +210,6 @@ auth.onAuthStateChanged(user => {
     listTypesRef = db.ref('nexuslist/' + user.uid + '/listTypes');
     listRef = db.ref('nexuslist/' + user.uid + '/' + currentType);
     
-    // Initial start
     loadListTypes();
     setupCounter('shopping');
     setupCounter('reminder');
@@ -235,9 +231,9 @@ function signInWithGoogle() {
 
 function signOut() { auth.signOut(); }
 
-// --- THE COUNTER LOGIC ---
+// --- FIXED COUNTER LOGIC ---
 function setupCounter(type) {
-  if (countListeners[type]) return; // Avoid duplicate listeners
+  if (!currentUser || countListeners[type]) return; 
   
   const countRef = db.ref('nexuslist/' + currentUser.uid + '/' + type);
   countListeners[type] = countRef;
@@ -283,11 +279,13 @@ function loadListTypes() {
       const btn = document.createElement('button');
       btn.className = 'bubble-btn';
       btn.setAttribute('data-list', t.key);
-      btn.setAttribute('data-label', t.label);
+      btn.setAttribute('data-label', t.label); // Essential for the counter
       btn.onclick = () => changeToBubbleList(t.key);
       btn.textContent = t.label;
       container.appendChild(btn);
-      setupCounter(t.key); // Start counting this new list!
+      
+      // CRITICAL FIX: Ensure the button exists in DOM before setting up counter
+      setTimeout(() => setupCounter(t.key), 100);
     }
   });
 
@@ -296,7 +294,7 @@ function loadListTypes() {
     dropdown.querySelector(`option[value="${t.key}"]`)?.remove();
     document.querySelector(`.bubble-btn[data-list="${t.key}"]`)?.remove();
     if (countListeners[t.key]) {
-       countListeners[t.key].off(); // Stop listening
+       countListeners[t.key].off(); 
        delete countListeners[t.key];
     }
   });
