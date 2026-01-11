@@ -300,9 +300,21 @@ function changeToBubbleList(type) {
 }
 
 function copyShareLink() {
+  const shareBtn = document.getElementById('shareBtn');
+  // This creates the link using your unique ID
   const shareUrl = window.location.origin + window.location.pathname + "?group=" + currentUser.uid;
-  navigator.clipboard.writeText(shareUrl);
-  alert("Share link copied! Send this to your wife.");
+  
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    // 1. Change button text and color instantly
+    shareBtn.textContent = "✅ Copied!";
+    shareBtn.style.background = "#22c55e"; // Success Green
+    
+    // 2. Wait 2 seconds, then change it back to original
+    setTimeout(() => {
+      shareBtn.textContent = "🔗 Share List";
+      shareBtn.style.background = "#3b82f6"; // Back to Blue
+    }, 2000);
+  });
 }
 
 function exitSharedMode() { window.location.href = window.location.origin + window.location.pathname; }
@@ -342,3 +354,4 @@ document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') ad
 </script>
 </body>
 </html>
+
