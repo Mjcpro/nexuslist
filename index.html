@@ -160,6 +160,7 @@ li {
   </div>
 
 <script>
+// --- UPDATED SCRIPT FOR REAL-TIME COUNTERS ---
 const firebaseConfig = {
   apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY",
   authDomain: "nexuslist-380ff.firebaseapp.com",
@@ -179,24 +180,29 @@ let currentType = 'shopping';
 let listRef = null;
 let listTypesRef = null;
 let baseDataPath = "";
-let countListeners = {};
+let countListeners = {}; 
 
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     const groupParam = new URLSearchParams(window.location.search).get('group');
+    baseDataPath = groupParam ? 'nexuslist/' + groupParam : 'nexuslist/' + user.uid;
+
     if (groupParam) {
-      baseDataPath = 'nexuslist/' + groupParam;
       document.getElementById('sharedBanner').style.display = 'block';
       document.getElementById('exitBtn').style.display = 'inline-block';
       document.getElementById('shareBtn').style.display = 'none';
-    } else {
-      baseDataPath = 'nexuslist/' + user.uid;
     }
+
     listTypesRef = db.ref(baseDataPath + '/listTypes');
     listRef = db.ref(baseDataPath + '/' + currentType);
+    
     loadListTypes();
-    setupCounter('shopping'); setupCounter('reminder'); setupCounter('todo');
+    // Initialize counters for the 3 default lists
+    setupCounter('shopping'); 
+    setupCounter('reminder'); 
+    setupCounter('todo');
+    
     attachListeners();
     document.getElementById('signin-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
@@ -206,35 +212,61 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+// CRITICAL FIX: Improved setupCounter to be more reactive
 function setupCounter(type) {
-  if (countListeners[type]) return;
+  // If we already have a listener for this type, turn it off first to avoid duplicates
+  if (countListeners[type]) {
+    countListeners[type].off();
+  }
+  
   const cRef = db.ref(baseDataPath + '/' + type);
   countListeners[type] = cRef;
+
   cRef.on('value', snap => {
     let count = 0;
-    snap.forEach(item => { if(!item.val().done) count++; });
+    snap.forEach(item => {
+      // Only count if item exists and is NOT done
+      if (item.val() && item.val().done === false) {
+        count++;
+      }
+    });
+    
+    // Find the specific button for this list type
     const btn = document.querySelector(`.bubble-btn[data-list="${type}"]`);
-    if(btn) btn.innerHTML = `${btn.getAttribute('data-label')} <span class="count-badge">(${count})</span>`;
+    if (btn) {
+      const label = btn.getAttribute('data-label');
+      btn.innerHTML = `${label} <span class="count-badge">(${count})</span>`;
+    }
   });
 }
 
 function loadListTypes() {
   const dropdown = document.getElementById('customListDropdown');
   dropdown.innerHTML = `<option value="" selected disabled>Select custom list...</option><option value="__new__">➕ New list type...</option>`;
+  
+  // Listen for custom lists and set up counters for them immediately
   listTypesRef.on('child_added', snap => {
     const t = snap.val();
     if (['shopping', 'reminder', 'todo'].includes(t.key)) return;
+    
+    // Add to dropdown
     const opt = document.createElement('option');
     opt.value = t.key; opt.textContent = t.label;
     dropdown.insertBefore(opt, dropdown.lastElementChild);
-    const btn = document.createElement('button');
-    btn.className = 'bubble-btn';
-    btn.setAttribute('data-list', t.key);
-    btn.setAttribute('data-label', t.label);
-    btn.onclick = () => changeToBubbleList(t.key);
-    btn.textContent = t.label;
-    document.querySelector('.bubble-container').appendChild(btn);
-    setTimeout(() => setupCounter(t.key), 100);
+
+    // Add as bubble button if not exists
+    if (!document.querySelector(`.bubble-btn[data-list="${t.key}"]`)) {
+        const btn = document.createElement('button');
+        btn.className = 'bubble-btn';
+        btn.setAttribute('data-list', t.key);
+        btn.setAttribute('data-label', t.label);
+        btn.onclick = () => changeToBubbleList(t.key);
+        btn.textContent = t.label;
+        document.querySelector('.bubble-container').appendChild(btn);
+        
+        // Immediately start counting this new custom list
+        setupCounter(t.key);
+    }
   });
 }
 
@@ -243,8 +275,17 @@ function addItem() {
   const qty = document.getElementById('quantityInput').value || '1';
   const prio = document.getElementById('priorityInput').value;
   if (!input.value.trim()) return;
-  listRef.push({ text: input.value.trim(), quantity: qty, priority: prio, done: false });
-  input.value = ''; document.getElementById('quantityInput').value = '';
+
+  // This pushes to Firebase, which triggers the 'value' listener in setupCounter instantly!
+  listRef.push({ 
+    text: input.value.trim(), 
+    quantity: qty, 
+    priority: prio, 
+    done: false 
+  });
+
+  input.value = ''; 
+  document.getElementById('quantityInput').value = '';
 }
 
 function attachListeners() {
@@ -269,15 +310,18 @@ function createListItemElement(key, data) {
   li.innerHTML = `
     <span class="${data.done ? 'done' : ''}">${dots[data.priority] || ''}${qty}${data.text}</span>
     <div style="display:flex; gap:5px;">
-      <button class="check-btn ${data.done ? 'checked' : ''}" onclick="toggleDone('${key}')">${data.done ? 'Uncheck' : 'Check'}</button>
+      <button class="check-btn ${data.done ? 'checked' : ''}" onclick="toggleDone('${key}')">
+        ${data.done ? 'Uncheck' : 'Check'}
+      </button>
       <button class="Remove-btn" onclick="deleteItem('${key}')">Remove</button>
     </div>`;
   document.getElementById('list').appendChild(li);
 }
 
 function toggleDone(key) {
-  const ref = listRef.child(key);
-  ref.once('value', snap => ref.update({ done: !snap.val().done }));
+  listRef.child(key).once('value', snap => {
+    listRef.child(key).update({ done: !snap.val().done });
+  });
 }
 
 function deleteItem(key) { listRef.child(key).remove(); }
@@ -293,6 +337,7 @@ function changeToBubbleList(type) {
   document.querySelectorAll('.bubble-btn').forEach(b => b.classList.remove('active'));
   const activeBtn = document.querySelector(`[data-list="${type}"]`);
   if(activeBtn) activeBtn.classList.add('active');
+  
   listRef = db.ref(baseDataPath + '/' + currentType);
   document.getElementById('list').innerHTML = '';
   listRef.off();
@@ -301,18 +346,13 @@ function changeToBubbleList(type) {
 
 function copyShareLink() {
   const shareBtn = document.getElementById('shareBtn');
-  // This creates the link using your unique ID
   const shareUrl = window.location.origin + window.location.pathname + "?group=" + currentUser.uid;
-  
   navigator.clipboard.writeText(shareUrl).then(() => {
-    // 1. Change button text and color instantly
     shareBtn.textContent = "✅ Copied!";
-    shareBtn.style.background = "#22c55e"; // Success Green
-    
-    // 2. Wait 2 seconds, then change it back to original
+    shareBtn.style.background = "#22c55e"; 
     setTimeout(() => {
       shareBtn.textContent = "🔗 Share List";
-      shareBtn.style.background = "#3b82f6"; // Back to Blue
+      shareBtn.style.background = "#3b82f6"; 
     }, 2000);
   });
 }
@@ -354,5 +394,6 @@ document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') ad
 </script>
 </body>
 </html>
+
 
 
