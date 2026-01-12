@@ -3,14 +3,14 @@
 <head>
 <title>NexusList - Shared Lists</title>
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://yourdomain.com/"> 
+<meta property="og:url" content="https://mjcpro.github.io/nexuslist/"> 
 <meta property="og:title" content="NexusList - Shared Shopping & Tasks">
 <meta property="og:description" content="Check out my list on NexusList! We can track our shopping and to-dos together in real-time.">
-<meta property="og:image" content="https://yourdomain.com/nexuslist-icon.png"> 
+<meta property="og:image" content="nexuslist-icon.png"> 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="NexusList">
 <meta name="twitter:description" content="Shared real-time lists for family and friends.">
-<meta name="twitter:image" content="https://yourdomain.com/nexuslist-icon.png">
+<meta name="twitter:image" content="nexuslist-icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="nexuslist-icon.png">
 <link rel="apple-touch-icon" href="nexuslist-icon.png">
@@ -30,23 +30,12 @@ body.dark-mode {
   --bg-gradient-end: #020617;
   --card-bg: #1e293b; 
   --card-border: rgba(255, 255, 255, 0.1);
-  --text-primary: #f8fafc;   /* Bright white for text */
+  --text-primary: #f8fafc;   
   --text-secondary: #94a3b8; 
   --input-bg: #334155; 
   --input-border: #475569;
   --item-bg: #334155; 
   --shadow-color: rgba(0, 0, 0, 0.4);
-}
-
-/* Add this to ensure the list text turns white in dark mode */
-body.dark-mode li span {
-  color: var(--text-primary) !important;
-}
-
-/* This makes the "Clear checked Items" button visible too */
-body.dark-mode button[onclick="clearCompleted()"] {
-  color: #cbd5e1 !important;
-  border-color: #475569 !important;
 }
 
 body {
@@ -56,7 +45,12 @@ body {
   padding: 24px 16px 40px;
   background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
   transition: background 0.3s ease;
+  min-height: 100vh;
 }
+
+/* Ensure list text is visible in Dark Mode */
+body.dark-mode li span { color: var(--text-primary) !important; }
+body.dark-mode button[onclick="clearCompleted()"] { color: #cbd5e1 !important; border-color: #475569 !important; }
 
 .card {
   background: var(--card-bg);
@@ -70,17 +64,13 @@ body {
 .logo-wrapper img { height: 160px; border-radius: 20px; }
 
 h2 { text-align: center; color: var(--text-primary); font-size: 20px; margin: 0 0 10px; }
-.subtitle { text-align: center; color: var(--text-secondary); font-size: 13px; margin-bottom: 18px; }
 
-/* Workspace Tabs */
 .tab-btn {
   padding: 8px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
   background: #f8fafc; color: #64748b; font-size: 12px; cursor: pointer;
   white-space: nowrap; transition: 0.2s;
 }
-.tab-btn.active-tab {
-  background: #3b82f6; color: white; border-color: #3b82f6;
-}
+.tab-btn.active-tab { background: #3b82f6; color: white; border-color: #3b82f6; }
 
 .share-banner {
   background: #dcfce7; color: #166534; padding: 10px; border-radius: 12px;
@@ -90,29 +80,17 @@ h2 { text-align: center; color: var(--text-primary); font-size: 20px; margin: 0 
 .input-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
 input#itemInput { flex: 1; min-width: 150px; padding: 12px 14px; border: 1px solid #cbd5f5; border-radius: 999px; font-size: 14px; outline: none; background: #f9fafb; color: #0f172a;}
 
-button {
-  padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer;
-  font-size: 13px; font-weight: 600; transition: transform 0.08s ease;
-}
-
+button { padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: transform 0.08s ease; }
 .primary-btn { background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; }
 .check-btn { background: #e5f6ff; color: #0369a1; }
 .check-btn.checked { background: #dcfce7; color: #166534; }
 .Remove-btn { background: #fee2e2; color: #b91c1c; }
 
-.bubble-btn {
-  padding: 12px 24px; border-radius: 25px; border: 2px solid #cbd5e1;
-  background: #f8fafc; color: #1e293b; font-size: 14px; cursor: pointer;
-}
+.bubble-btn { padding: 12px 24px; border-radius: 25px; border: 2px solid #cbd5e1; background: #f8fafc; color: #1e293b; font-size: 14px; cursor: pointer; }
 .bubble-btn.active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; }
 
 ul { list-style: none; padding: 0; margin-top: 8px; }
-li {
-  padding: 10px 12px; background: var(--item-bg); margin: 8px 0;
-  border-radius: 12px; box-shadow: 0 4px 6px var(--shadow-color);
-  display: flex; justify-content: space-between; align-items: center;
-}
-
+li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radius: 12px; box-shadow: 0 4px 6px var(--shadow-color); display: flex; justify-content: space-between; align-items: center; }
 .done { text-decoration: line-through; opacity: 0.6; }
 .count-badge { font-weight: bold; margin-left: 4px; }
 </style>
@@ -123,6 +101,7 @@ li {
 </head>
 
 <body>
+
   <div id="signin-container" style="display:none;">
     <div class="card" style="text-align:center;">
       <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
@@ -133,27 +112,21 @@ li {
 
   <div id="app-container" style="display:none;">
     <div id="sharedBanner" class="share-banner">🌍 Viewing SHARED List</div>
-
     <div class="card">
       <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
-      
       <div id="workspaceSwitcher" style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:10px; border-bottom:1px solid rgba(0,0,0,0.05);"></div>
-
       <h2>What kind of list do you want to make?</h2>
-      
       <div class="bubble-container" style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
         <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping" data-label="🛒 Shopping">🛒 Shopping</button>
         <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder" data-label="📝 Reminder">📝 Reminder</button>
         <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" data-label="✓ To-do">✓ To-do</button>
       </div>
-
       <div style="text-align:center;margin-top:16px;">
         <select id="customListDropdown" onchange="handleDropdownChange()" style="padding:8px 12px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:13px;outline:none;cursor:pointer;width:200px;">
           <option value="" selected disabled>Select custom list...</option>
           <option value="__new__">➕ New list type...</option>
         </select>
       </div>
-
       <div class="input-row" style="margin-top:20px;">
         <input id="itemInput" placeholder="Add item...">
         <input id="quantityInput" placeholder="Qty" style="width:50px; border-radius:999px; border:1px solid #cbd5f5; text-align:center;">
@@ -165,29 +138,21 @@ li {
         </select>
         <button class="primary-btn" onclick="addItem()">Add</button>
       </div>
-
       <ul id="list"></ul>
-
       <div style="text-align: center; margin-top: 15px;">
-        <button onclick="clearCompleted()" style="background: none; color: #94a3b8; font-size: 12px; border: 1px solid #cbd5e1; padding: 6px 12px;">
-          🧹 Clear checked Items
-        </button>
+        <button onclick="clearCompleted()" style="background: none; color: #94a3b8; font-size: 12px; border: 1px solid #cbd5e1; padding: 6px 12px;">🧹 Clear checked Items</button>
       </div>
-
       <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
         <button id="shareBtn" onclick="copyShareLink()" style="background:#3b82f6; color:white; font-size:12px;">🔗 Share List</button>
         <button id="darkModeBtn" onclick="toggleDarkMode()" style="background:#64748b; color:white; font-size:12px;">🌙 Dark</button>
         <button onclick="signOut()" style="background:#94a3b8; color:white; font-size:12px;">Sign Out</button>
       </div>
-
       <div style="text-align:center; margin-top:25px; border-top: 1px solid rgba(0,0,0,0.05); padding-top:15px;">
-        <button onclick="RemoveCurrentList()" style="background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer;">🗑️ Delete Current List</button>
+        <button onclick="RemoveCurrentList()" style="background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer; display: block; margin: 0 auto;">🗑️ Delete Current List</button>
+        <a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; margin-top: 10px; display: inline-block;">Privacy Policy</a>
       </div>
     </div>
   </div>
-  <div style="text-align:center; margin-top:25px; border-top: 1px solid rgba(0,0,0,0.05); padding-top:15px;">
-  <a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; margin-top: 10px; display: inline-block;">Privacy Policy</a>
-</div>
 
 <script>
 const firebaseConfig = {
@@ -212,21 +177,23 @@ let baseDataPath = "";
 let countListeners = {}; 
 let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
+// Apply Dark Mode from memory immediately
+if (localStorage.getItem('darkMode') === 'true') {
+  document.body.classList.add('dark-mode');
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('darkModeBtn').textContent = '☀️ Light';
+  });
+}
+
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     const groupParam = new URLSearchParams(window.location.search).get('group');
-
-    // Store shared group in memory if arriving via link
     if (groupParam && groupParam !== user.uid && !sharedGroups.includes(groupParam)) {
       sharedGroups.push(groupParam);
       localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
     }
-
-    // Default to the link if present, otherwise private
-    const startPath = groupParam || user.uid;
-    switchToWorkspace(startPath);
-
+    switchToWorkspace(groupParam || user.uid);
     document.getElementById('signin-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
   } else {
@@ -237,27 +204,12 @@ auth.onAuthStateChanged(user => {
 
 function switchToWorkspace(id) {
   baseDataPath = 'nexuslist/' + id;
-  
-  // Update Shared Banner
   document.getElementById('sharedBanner').style.display = (id === currentUser.uid) ? 'none' : 'block';
-
-  // Cleanup old listeners
   Object.values(countListeners).forEach(ref => ref.off());
   countListeners = {};
   if (listTypesRef) listTypesRef.off();
-
-  // Setup refs
   listTypesRef = db.ref(baseDataPath + '/listTypes');
-  
-  // Reset UI
   document.getElementById('list').innerHTML = '';
-  document.querySelector('.bubble-container').innerHTML = `
-    <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping" data-label="🛒 Shopping">🛒 Shopping</button>
-    <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder" data-label="📝 Reminder">📝 Reminder</button>
-    <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" data-label="✓ To-do">✓ To-do</button>
-  `;
-
-  // Init
   loadListTypes();
   setupCounter('shopping'); setupCounter('reminder'); setupCounter('todo');
   changeToBubbleList('shopping');
@@ -267,16 +219,12 @@ function switchToWorkspace(id) {
 function renderWorkspaceSwitcher(activeId) {
   const container = document.getElementById('workspaceSwitcher');
   container.innerHTML = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">🏠 Me</button>`;
-  
   sharedGroups.forEach((groupId, index) => {
-    container.innerHTML += `
-      <button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Group ${index + 1}</button>
-    `;
+    container.innerHTML += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Group ${index + 1}</button>`;
   });
 }
 
 function setupCounter(type) {
-  if (countListeners[type]) countListeners[type].off();
   const cRef = db.ref(baseDataPath + '/' + type);
   countListeners[type] = cRef;
   cRef.on('value', snap => {
@@ -293,19 +241,16 @@ function setupCounter(type) {
 function loadListTypes() {
   const dropdown = document.getElementById('customListDropdown');
   dropdown.innerHTML = `<option value="" selected disabled>Select custom list...</option><option value="__new__">➕ New list type...</option>`;
-  
   listTypesRef.on('child_added', snap => {
     const t = snap.val();
     if (['shopping', 'reminder', 'todo'].includes(t.key)) return;
     const opt = document.createElement('option');
     opt.value = t.key; opt.textContent = t.label;
     dropdown.insertBefore(opt, dropdown.lastElementChild);
-
     if (!document.querySelector(`.bubble-btn[data-list="${t.key}"]`)) {
         const btn = document.createElement('button');
         btn.className = 'bubble-btn';
-        btn.setAttribute('data-list', t.key);
-        btn.setAttribute('data-label', t.label);
+        btn.setAttribute('data-list', t.key); btn.setAttribute('data-label', t.label);
         btn.onclick = () => changeToBubbleList(t.key);
         btn.textContent = t.label;
         document.querySelector('.bubble-container').appendChild(btn);
@@ -351,26 +296,15 @@ function createListItemElement(key, data) {
   document.getElementById('list').appendChild(li);
 }
 
-function toggleDone(key) {
-  listRef.child(key).once('value', snap => {
-    listRef.child(key).update({ done: !snap.val().done });
-  });
-}
-
+function toggleDone(key) { listRef.child(key).once('value', snap => { listRef.child(key).update({ done: !snap.val().done }); }); }
 function deleteItem(key) { listRef.child(key).remove(); }
-
-function clearCompleted() {
-  listRef.once('value', snap => {
-    snap.forEach(c => { if(c.val().done) listRef.child(c.key).remove(); });
-  });
-}
+function clearCompleted() { listRef.once('value', snap => { snap.forEach(c => { if(c.val().done) listRef.child(c.key).remove(); }); }); }
 
 function changeToBubbleList(type) {
   currentType = type;
   document.querySelectorAll('.bubble-btn').forEach(b => b.classList.remove('active'));
   const activeBtn = document.querySelector(`[data-list="${type}"]`);
   if(activeBtn) activeBtn.classList.add('active');
-  
   if (listRef) listRef.off();
   listRef = db.ref(baseDataPath + '/' + currentType);
   document.getElementById('list').innerHTML = '';
@@ -381,12 +315,8 @@ function copyShareLink() {
   const shareBtn = document.getElementById('shareBtn');
   const shareUrl = window.location.origin + window.location.pathname + "?group=" + currentUser.uid;
   navigator.clipboard.writeText(shareUrl).then(() => {
-    shareBtn.textContent = "✅ Copied!";
-    shareBtn.style.background = "#22c55e"; 
-    setTimeout(() => {
-      shareBtn.textContent = "🔗 Share List";
-      shareBtn.style.background = "#3b82f6"; 
-    }, 2000);
+    shareBtn.textContent = "✅ Copied!"; shareBtn.style.background = "#22c55e"; 
+    setTimeout(() => { shareBtn.textContent = "🔗 Share List"; shareBtn.style.background = "#3b82f6"; }, 2000);
   });
 }
 
@@ -405,6 +335,7 @@ function handleDropdownChange() {
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
   const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('darkMode', isDark);
   document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
 }
 
@@ -412,9 +343,7 @@ function RemoveCurrentList() {
   if (['shopping','reminder','todo'].includes(currentType)) return alert("Default lists cannot be deleted.");
   if (confirm("Delete this entire list?")) {
     db.ref(baseDataPath + '/' + currentType).remove();
-    listTypesRef.once('value', snap => {
-      snap.forEach(c => { if(c.val().key === currentType) c.ref.remove(); });
-    });
+    listTypesRef.once('value', snap => { snap.forEach(c => { if(c.val().key === currentType) c.ref.remove(); }); });
     location.reload();
   }
 }
@@ -423,18 +352,9 @@ function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthP
 function signOut() { auth.signOut(); }
 document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
 
-  // Register the Service Worker for PWABuilder
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js', { 
-    scope: '/nexuslist/' 
-  });
+  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js', { scope: '/nexuslist/' });
 }
-  
 </script>
 </body>
 </html>
-
-
-
-
-
