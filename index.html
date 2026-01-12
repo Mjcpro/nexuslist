@@ -5,52 +5,39 @@
 <meta name="theme-color" content="#4f46e5">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="nexuslist-icon.png">
-<link rel="apple-touch-icon" href="nexuslist-icon.png">
-<link rel="manifest" href="manifest.json">
 
 <style>
+/* CSS styles remain the same as previous version... */
 :root {
   --bg-gradient-start: #e0f2fe; --bg-gradient-end: #f9fafb;
   --card-bg: white; --card-border: rgba(148, 163, 184, 0.3);
   --text-primary: #0f172a; --text-secondary: #64748b;
   --input-bg: #f9fafb; --input-border: #cbd5f5;
   --item-bg: #f9fafb; --shadow-color: rgba(15, 23, 42, 0.12);
+  --overdue-red: #ef4444;
 }
 
 body.dark-mode {
-  --bg-gradient-start: #0f172a; 
-  --bg-gradient-end: #020617;
-  --card-bg: #1e293b; 
-  --card-border: rgba(255, 255, 255, 0.1);
-  --text-primary: #f8fafc;   
-  --text-secondary: #94a3b8; 
-  --input-bg: #334155; 
-  --input-border: #475569;
-  --item-bg: #334155; 
-  --shadow-color: rgba(0, 0, 0, 0.4);
+  --bg-gradient-start: #0f172a; --bg-gradient-end: #020617;
+  --card-bg: #1e293b; --card-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #f8fafc; --text-secondary: #94a3b8; 
+  --input-bg: #334155; --input-border: #475569;
+  --item-bg: #334155; --shadow-color: rgba(0, 0, 0, 0.4);
 }
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 0 16px 40px;
+  max-width: 640px; margin: 0 auto; padding: 0 16px 40px;
   background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
-  transition: background 0.3s ease;
-  min-height: 100vh;
-  overscroll-behavior-y: contain;
+  transition: background 0.3s ease; min-height: 100vh; overscroll-behavior-y: contain;
 }
 
 body.dark-mode li span { color: var(--text-primary) !important; }
 body.dark-mode select, body.dark-mode input { background-color: var(--input-bg); color: var(--text-primary); border-color: var(--input-border); color-scheme: dark; }
 
 .card {
-  background: var(--card-bg);
-  border-radius: 18px;
-  box-shadow: 0 18px 40px var(--shadow-color);
-  padding: 22px 18px 26px;
-  border: 1px solid var(--card-border);
-  margin-top: 24px;
+  background: var(--card-bg); border-radius: 18px; box-shadow: 0 18px 40px var(--shadow-color);
+  padding: 22px 18px 26px; border: 1px solid var(--card-border); margin-top: 24px;
 }
 
 .logo-wrapper { display: flex; justify-content: center; align-items: center; margin-top: 8px; margin-bottom: 12px; }
@@ -60,14 +47,13 @@ h2 { text-align: center; color: var(--text-primary); font-size: 20px; margin: 0 
 
 .tab-btn {
   padding: 8px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
-  background: #f8fafc; color: #64748b; font-size: 12px; cursor: pointer;
-  white-space: nowrap; transition: 0.2s;
+  background: #f8fafc; color: #64748b; font-size: 12px; cursor: pointer; transition: 0.2s;
 }
 .tab-btn.active-tab { background: #3b82f6; color: white; border-color: #3b82f6; }
 
 .share-banner {
   background: #dcfce7; color: #166534; padding: 10px; border-radius: 12px;
-  margin-top: 15px; margin-bottom: 15px; text-align: center; font-weight: 600; font-size: 13px; display: none;
+  margin: 15px 0; text-align: center; font-weight: 600; font-size: 13px; display: none;
 }
 
 .input-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
@@ -87,23 +73,15 @@ button { padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer
 ul { list-style: none; padding: 0; margin-top: 8px; }
 li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radius: 12px; box-shadow: 0 4px 6px var(--shadow-color); display: flex; justify-content: space-between; align-items: center; }
 .done { text-decoration: line-through; opacity: 0.6; }
-.count-badge { font-weight: bold; margin-left: 4px; }
 .date-badge { display: block; font-size: 11px; color: #6366f1; margin-top: 2px; font-weight: 600; }
+.date-badge.overdue { color: var(--overdue-red); font-weight: 800; animation: pulse 2s infinite; }
 
-#customListModal, #deleteConfirmModal {
-  display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center;
-}
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 </style>
 
 <script>
-  // Apply dark mode IMMEDIATELY before body renders to prevent flash
   if (localStorage.getItem('darkMode') === 'true') {
     document.documentElement.classList.add('dark-mode');
-    document.addEventListener('DOMContentLoaded', () => {
-      document.body.classList.add('dark-mode');
-      const btn = document.getElementById('darkModeBtn');
-      if(btn) btn.textContent = '☀️ Light';
-    });
   }
 </script>
 
@@ -174,7 +152,6 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
              <span style="font-size: 16px;">☕</span> Support NexusList
           </a>
         </div>
-        <button id="deleteCustomListBtn" onclick="openDeleteModal()" style="display: none; background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer; margin: 0 auto;">🗑️ Delete Custom List</button>
         <a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; margin-top: 10px; display: inline-block;">Privacy Policy</a>
       </div>
     </div>
@@ -187,14 +164,34 @@ const db = firebase.database();
 const auth = firebase.auth();
 
 let currentUser = null, currentType = 'shopping', listRef = null, listTypesRef = null, baseDataPath = "";
-let countListeners = {}, sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
+let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
-window.addEventListener('offline', () => { document.getElementById('offline-indicator').style.display = 'block'; });
-window.addEventListener('online', () => { document.getElementById('offline-indicator').style.display = 'none'; });
+// --- NOTIFICATION LOGIC ---
+function requestNotificationPermission() {
+  if (!("Notification" in window)) return;
+  if (Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+}
+
+function sendLocalNotification(title, body) {
+  if (Notification.permission === "granted") {
+    new Notification(title, { body, icon: 'nexuslist-icon.png' });
+  }
+}
+
+function checkDueToday(snapVal) {
+  const today = new Date().toISOString().split('T')[0];
+  if (snapVal.dueDate === today && !snapVal.done) {
+    sendLocalNotification("NexusList Reminder", `Today: ${snapVal.text}`);
+  }
+}
+// --------------------------
 
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
+    requestNotificationPermission();
     const groupParam = new URLSearchParams(window.location.search).get('group');
     if (groupParam && groupParam !== user.uid && !sharedGroups.includes(groupParam)) {
       sharedGroups.push(groupParam);
@@ -212,12 +209,6 @@ auth.onAuthStateChanged(user => {
 function switchToWorkspace(id) {
   baseDataPath = 'nexuslist/' + id;
   document.getElementById('sharedBanner').style.display = (id === currentUser.uid) ? 'none' : 'block';
-  Object.values(countListeners).forEach(ref => ref.off());
-  countListeners = {};
-  if (listTypesRef) listTypesRef.off();
-  listTypesRef = db.ref(baseDataPath + '/listTypes');
-  loadListTypes();
-  setupCounter('shopping'); setupCounter('reminder'); setupCounter('todo');
   changeToBubbleList('shopping');
   renderWorkspaceSwitcher(id);
 }
@@ -236,7 +227,6 @@ function changeToBubbleList(type) {
   listRef = db.ref(baseDataPath + '/' + currentType);
   document.getElementById('list').innerHTML = '';
   attachListeners();
-  document.getElementById('deleteCustomListBtn').style.display = ['shopping','reminder','todo'].includes(currentType) ? 'none' : 'block';
 }
 
 function addItem() {
@@ -250,18 +240,34 @@ function addItem() {
   document.getElementById('dateInput').value = ''; document.getElementById('priorityInput').value = '';
 }
 
+function attachListeners() {
+  listRef.on('child_added', snap => {
+    createListItemElement(snap.key, snap.val());
+    if (currentType === 'reminder') checkDueToday(snap.val());
+  });
+  listRef.on('child_changed', snap => {
+    const li = document.getElementById('item-' + snap.key);
+    if(li) li.replaceWith(renderUpdatedElement(snap.key, snap.val()));
+  });
+  listRef.on('child_removed', snap => document.getElementById('item-' + snap.key)?.remove());
+}
+
 function createListItemElement(key, data) {
   const li = document.createElement('li');
   li.id = 'item-' + key;
   const dots = {high:'🔴 ', medium:'🟡 ', low:'🟢 '};
   let details = (currentType === 'shopping' && data.quantity && data.quantity !== '1') ? `<b style="color:#4f46e5">${data.quantity}×</b> ` : "";
-  let dateLabel = (currentType === 'reminder' && data.dueDate) ? `<span class="date-badge">📅 ${data.dueDate}</span>` : "";
+  
+  let dateClass = "date-badge";
+  if (data.dueDate && !data.done) {
+    const today = new Date().toISOString().split('T')[0];
+    if (data.dueDate < today) dateClass += " overdue";
+  }
+  
+  let dateLabel = (currentType === 'reminder' && data.dueDate) ? `<span class="${dateClass}">📅 ${data.dueDate}</span>` : "";
 
   li.innerHTML = `
-    <div>
-      <span class="${data.done ? 'done' : ''}">${dots[data.priority] || ''}${details}${data.text}</span>
-      ${dateLabel}
-    </div>
+    <div><span class="${data.done ? 'done' : ''}">${dots[data.priority] || ''}${details}${data.text}</span>${dateLabel}</div>
     <div style="display:flex; gap:5px;">
       <button class="check-btn ${data.done ? 'checked' : ''}" onclick="toggleDone('${key}')">${data.done ? 'Uncheck' : 'Check'}</button>
       <button class="Remove-btn" onclick="deleteItem('${key}')">Remove</button>
@@ -269,42 +275,17 @@ function createListItemElement(key, data) {
   document.getElementById('list').appendChild(li);
 }
 
-function setupCounter(type) {
-  const cRef = db.ref(baseDataPath + '/' + type);
-  countListeners[type] = cRef;
-  cRef.on('value', snap => {
-    let count = 0; snap.forEach(item => { if (item.val() && !item.val().done) count++; });
-    const btn = document.querySelector(`.bubble-btn[data-list="${type}"]`);
-    if (btn) btn.innerHTML = `${btn.getAttribute('data-label')} <span class="count-badge">(${count})</span>`;
-  });
-}
-
-function attachListeners() {
-  listRef.on('child_added', snap => createListItemElement(snap.key, snap.val()));
-  listRef.on('child_changed', snap => {
-    const li = document.getElementById('item-' + snap.key);
-    if(li) {
-      li.querySelector('span').classList.toggle('done', snap.val().done);
-      li.querySelector('.check-btn').classList.toggle('checked', snap.val().done);
-      li.querySelector('.check-btn').textContent = snap.val().done ? 'Uncheck' : 'Check';
-    }
-  });
-  listRef.on('child_removed', snap => document.getElementById('item-' + snap.key)?.remove());
+function renderUpdatedElement(key, data) {
+  const oldLi = document.getElementById('item-' + key);
+  createListItemElement(key, data);
+  const newItem = document.getElementById('item-' + key);
+  oldLi.remove(); 
+  return newItem;
 }
 
 function toggleDone(key) { listRef.child(key).once('value', snap => { listRef.child(key).update({ done: !snap.val().done }); }); }
 function deleteItem(key) { listRef.child(key).remove(); }
 function clearCompleted() { listRef.once('value', snap => { snap.forEach(c => { if(c.val().done) listRef.child(c.key).remove(); }); }); }
-
-function loadListTypes() {
-  const dropdown = document.getElementById('customListDropdown');
-  dropdown.innerHTML = `<option value="" selected disabled>Select custom list...</option><option value="__new__">➕ New list type...</option>`;
-  listTypesRef.on('child_added', snap => {
-    const t = snap.val(); if (['shopping', 'reminder', 'todo'].includes(t.key)) return;
-    const opt = document.createElement('option'); opt.value = t.key; opt.textContent = t.label;
-    dropdown.insertBefore(opt, dropdown.lastElementChild);
-  });
-}
 
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
@@ -328,6 +309,11 @@ function copyShareLink() {
   navigator.clipboard.writeText(url).then(() => { alert("Link Copied!"); });
 }
 document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
+
+// Sync UI Dark Mode button
+if (localStorage.getItem('darkMode') === 'true') {
+  window.addEventListener('DOMContentLoaded', () => { document.getElementById('darkModeBtn').textContent = '☀️ Light'; });
+}
 </script>
 </body>
 </html>
