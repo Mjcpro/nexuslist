@@ -3,15 +3,6 @@
 <head>
 <title>NexusList - Shared Lists</title>
 <meta name="theme-color" content="#4f46e5">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://mjcpro.github.io/nexuslist/"> 
-<meta property="og:title" content="NexusList - Shared Shopping & Tasks">
-<meta property="og:description" content="Check out my list on NexusList! We can track our shopping and to-dos together in real-time.">
-<meta property="og:image" content="nexuslist-icon.png"> 
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="NexusList">
-<meta name="twitter:description" content="Shared real-time lists for family and friends.">
-<meta name="twitter:image" content="nexuslist-icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="nexuslist-icon.png">
 <link rel="apple-touch-icon" href="nexuslist-icon.png">
@@ -97,12 +88,24 @@ ul { list-style: none; padding: 0; margin-top: 8px; }
 li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radius: 12px; box-shadow: 0 4px 6px var(--shadow-color); display: flex; justify-content: space-between; align-items: center; }
 .done { text-decoration: line-through; opacity: 0.6; }
 .count-badge { font-weight: bold; margin-left: 4px; }
-.date-badge { display: block; font-size: 11px; color: #6366f1; margin-top: 2px; font-weight: 500; }
+.date-badge { display: block; font-size: 11px; color: #6366f1; margin-top: 2px; font-weight: 600; }
 
 #customListModal, #deleteConfirmModal {
   display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center;
 }
 </style>
+
+<script>
+  // Apply dark mode IMMEDIATELY before body renders to prevent flash
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.documentElement.classList.add('dark-mode');
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.add('dark-mode');
+      const btn = document.getElementById('darkModeBtn');
+      if(btn) btn.textContent = '☀️ Light';
+    });
+  }
+</script>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
@@ -110,29 +113,7 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
 </head>
 
 <body>
-  <div id="offline-indicator" style="display:none; background:#ef4444; color:white; text-align:center; padding:8px;">⚠️ Working Offline</div>
-
-  <div id="customListModal">
-    <div class="card" style="width:90%; max-width:400px; text-align:center;">
-      <h2>New List Type</h2>
-      <input id="newListInput" placeholder="List name..." class="field-pill" style="width:85%; margin:15px 0; text-align:center;">
-      <div style="display:flex; gap:10px; justify-content:center;">
-        <button onclick="closeModal('customListModal')" style="background:#64748b; color:white;">Cancel</button>
-        <button onclick="submitNewList()" class="primary-btn">Create</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="deleteConfirmModal">
-    <div class="card" style="width:90%; max-width:400px; text-align:center;">
-      <h2 style="color: #ef4444;">Delete Custom List?</h2>
-      <p style="color: var(--text-secondary); font-size: 13px;">This permanently removes this list and all its items.</p>
-      <div style="display:flex; gap:10px; justify-content:center; margin-top: 20px;">
-        <button onclick="closeModal('deleteConfirmModal')" style="background:#64748b; color:white;">Cancel</button>
-        <button onclick="confirmDeleteList()" style="background:#ef4444; color:white;">Yes, Delete</button>
-      </div>
-    </div>
-  </div>
+  <div id="offline-indicator" style="display:none; background:#ef4444; color:white; text-align:center; padding:8px; position: sticky; top: 0; z-index: 1000;">⚠️ Working Offline</div>
 
   <div id="signin-container" style="display:none;">
     <div class="card" style="text-align:center;">
@@ -163,7 +144,6 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
 
       <div class="input-row" style="margin-top:20px;">
         <input id="itemInput" placeholder="Add item...">
-        
         <input id="quantityInput" placeholder="Qty" class="field-pill" style="width:45px; text-align:center;">
         <input id="dateInput" type="date" class="field-pill" style="display:none;">
         <select id="priorityInput" class="field-pill" style="display:none;">
@@ -172,7 +152,6 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
           <option value="medium">🟡 Med</option>
           <option value="low">🟢 Low</option>
         </select>
-
         <button class="primary-btn" onclick="addItem()">Add</button>
       </div>
 
@@ -189,6 +168,12 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
       </div>
 
       <div style="text-align:center; margin-top:25px; border-top: 1px solid rgba(0,0,0,0.05); padding-top:15px;">
+        <div style="margin-bottom: 20px;">
+          <a href="https://buymeacoffee.com/mjcpro" target="_blank" 
+             style="display: inline-flex; align-items: center; gap: 8px; background: #FFDD00; color: #000000; padding: 10px 20px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+             <span style="font-size: 16px;">☕</span> Support NexusList
+          </a>
+        </div>
         <button id="deleteCustomListBtn" onclick="openDeleteModal()" style="display: none; background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer; margin: 0 auto;">🗑️ Delete Custom List</button>
         <a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; margin-top: 10px; display: inline-block;">Privacy Policy</a>
       </div>
@@ -203,6 +188,9 @@ const auth = firebase.auth();
 
 let currentUser = null, currentType = 'shopping', listRef = null, listTypesRef = null, baseDataPath = "";
 let countListeners = {}, sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
+
+window.addEventListener('offline', () => { document.getElementById('offline-indicator').style.display = 'block'; });
+window.addEventListener('online', () => { document.getElementById('offline-indicator').style.display = 'none'; });
 
 auth.onAuthStateChanged(user => {
   if (user) {
@@ -240,7 +228,6 @@ function changeToBubbleList(type) {
   const activeBtn = document.querySelector(`[data-list="${type}"]`);
   if(activeBtn) activeBtn.classList.add('active');
 
-  // CONTEXTUAL UX: Show/Hide fields
   document.getElementById('quantityInput').style.display = (type === 'shopping') ? 'block' : 'none';
   document.getElementById('dateInput').style.display = (type === 'reminder') ? 'block' : 'none';
   document.getElementById('priorityInput').style.display = (type === 'reminder' || type === 'todo') ? 'block' : 'none';
@@ -249,9 +236,7 @@ function changeToBubbleList(type) {
   listRef = db.ref(baseDataPath + '/' + currentType);
   document.getElementById('list').innerHTML = '';
   attachListeners();
-
-  const isDefault = ['shopping','reminder','todo'].includes(currentType);
-  document.getElementById('deleteCustomListBtn').style.display = isDefault ? 'none' : 'block';
+  document.getElementById('deleteCustomListBtn').style.display = ['shopping','reminder','todo'].includes(currentType) ? 'none' : 'block';
 }
 
 function addItem() {
@@ -259,27 +244,17 @@ function addItem() {
   const qty = document.getElementById('quantityInput').value || '1';
   const prio = document.getElementById('priorityInput').value || '';
   const date = document.getElementById('dateInput').value || '';
-  
   if (!input.value.trim()) return;
   listRef.push({ text: input.value.trim(), quantity: qty, priority: prio, dueDate: date, done: false });
-  
-  input.value = ''; 
-  document.getElementById('quantityInput').value = '';
-  document.getElementById('dateInput').value = '';
-  document.getElementById('priorityInput').value = '';
+  input.value = ''; document.getElementById('quantityInput').value = '';
+  document.getElementById('dateInput').value = ''; document.getElementById('priorityInput').value = '';
 }
 
 function createListItemElement(key, data) {
   const li = document.createElement('li');
   li.id = 'item-' + key;
   const dots = {high:'🔴 ', medium:'🟡 ', low:'🟢 '};
-  
-  // Custom display based on type
-  let details = "";
-  if (currentType === 'shopping' && data.quantity && data.quantity !== '1') {
-    details = `<b style="color:#4f46e5">${data.quantity}×</b> `;
-  }
-
+  let details = (currentType === 'shopping' && data.quantity && data.quantity !== '1') ? `<b style="color:#4f46e5">${data.quantity}×</b> ` : "";
   let dateLabel = (currentType === 'reminder' && data.dueDate) ? `<span class="date-badge">📅 ${data.dueDate}</span>` : "";
 
   li.innerHTML = `
@@ -294,7 +269,6 @@ function createListItemElement(key, data) {
   document.getElementById('list').appendChild(li);
 }
 
-// Logic helpers
 function setupCounter(type) {
   const cRef = db.ref(baseDataPath + '/' + type);
   countListeners[type] = cRef;
@@ -304,6 +278,7 @@ function setupCounter(type) {
     if (btn) btn.innerHTML = `${btn.getAttribute('data-label')} <span class="count-badge">(${count})</span>`;
   });
 }
+
 function attachListeners() {
   listRef.on('child_added', snap => createListItemElement(snap.key, snap.val()));
   listRef.on('child_changed', snap => {
@@ -316,9 +291,11 @@ function attachListeners() {
   });
   listRef.on('child_removed', snap => document.getElementById('item-' + snap.key)?.remove());
 }
+
 function toggleDone(key) { listRef.child(key).once('value', snap => { listRef.child(key).update({ done: !snap.val().done }); }); }
 function deleteItem(key) { listRef.child(key).remove(); }
 function clearCompleted() { listRef.once('value', snap => { snap.forEach(c => { if(c.val().done) listRef.child(c.key).remove(); }); }); }
+
 function loadListTypes() {
   const dropdown = document.getElementById('customListDropdown');
   dropdown.innerHTML = `<option value="" selected disabled>Select custom list...</option><option value="__new__">➕ New list type...</option>`;
@@ -328,26 +305,14 @@ function loadListTypes() {
     dropdown.insertBefore(opt, dropdown.lastElementChild);
   });
 }
-function handleDropdownChange() {
-  const sel = document.getElementById('customListDropdown');
-  if(sel.value === '__new__') { document.getElementById('customListModal').style.display = 'flex'; sel.value = ""; }
-  else changeToBubbleList(sel.value);
-}
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-function submitNewList() {
-  const name = document.getElementById('newListInput').value.trim();
-  if(name) { listTypesRef.push().set({ key: name.toLowerCase().replace(/\s+/g, '-'), label: name }); closeModal('customListModal'); }
-}
-function openDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
-function confirmDeleteList() {
-  db.ref(baseDataPath + '/' + currentType).remove();
-  listTypesRef.once('value', snap => { snap.forEach(c => { if(c.val().key === currentType) c.ref.remove(); }); });
-  location.reload();
-}
+
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('darkMode', isDark);
+  document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
 }
+
 function renderWorkspaceSwitcher(activeId) {
   const container = document.getElementById('workspaceSwitcher');
   container.innerHTML = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">🏠 Me</button>`;
@@ -355,6 +320,7 @@ function renderWorkspaceSwitcher(activeId) {
     container.innerHTML += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Group ${index + 1}</button>`;
   });
 }
+
 function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 function signOut() { auth.signOut(); }
 function copyShareLink() {
