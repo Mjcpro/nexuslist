@@ -113,7 +113,7 @@ li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
 }
 
 /* Modal Overlay Styles */
-#customListModal {
+#customListModal, #deleteConfirmModal {
   display:none; 
   position:fixed; 
   top:0; left:0; 
@@ -139,8 +139,19 @@ li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
       <p style="color: var(--text-secondary); font-size: 13px;">Give your list a name (e.g., Camping, Office)</p>
       <input id="newListInput" placeholder="List name..." style="width:85%; padding:12px; border-radius:999px; border:1px solid var(--input-border); margin:15px 0; outline:none; text-align:center;">
       <div style="display:flex; gap:10px; justify-content:center;">
-        <button onclick="closeModal()" style="background:#64748b; color:white;">Cancel</button>
+        <button onclick="closeModal('customListModal')" style="background:#64748b; color:white;">Cancel</button>
         <button onclick="submitNewList()" class="primary-btn">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteConfirmModal">
+    <div class="card" style="width:90%; max-width:400px; text-align:center;">
+      <h2 style="color: #ef4444;">Delete List?</h2>
+      <p style="color: var(--text-secondary); font-size: 13px;">This will permanently remove this list and all its items.</p>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top: 20px;">
+        <button onclick="closeModal('deleteConfirmModal')" style="background:#64748b; color:white;">Cancel</button>
+        <button onclick="confirmDeleteList()" style="background:#ef4444; color:white;">Yes, Delete</button>
       </div>
     </div>
   </div>
@@ -197,7 +208,7 @@ li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
              <span style="font-size: 16px;">☕</span> Support NexusList
           </a>
         </div>
-        <button onclick="RemoveCurrentList()" style="background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer; display: block; margin: 0 auto;">🗑️ Delete Current List</button>
+        <button id="deleteCustomListBtn" onclick="openDeleteModal()" style="display: none; background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer; display: block; margin: 0 auto;">🗑️ Delete Custom List</button>
         <a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; margin-top: 10px; display: inline-block;">Privacy Policy</a>
       </div>
     </div>
@@ -360,6 +371,10 @@ function changeToBubbleList(type) {
   listRef = db.ref(baseDataPath + '/' + currentType);
   document.getElementById('list').innerHTML = '';
   attachListeners();
+
+  // Show/Hide delete button based on list type
+  const isDefault = ['shopping','reminder','todo'].includes(currentType);
+  document.getElementById('deleteCustomListBtn').style.display = isDefault ? 'none' : 'block';
 }
 
 function copyShareLink() {
@@ -383,9 +398,9 @@ function handleDropdownChange() {
   }
 }
 
-function closeModal() {
-  document.getElementById('customListModal').style.display = 'none';
-  document.getElementById('newListInput').value = "";
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+  if(modalId === 'customListModal') document.getElementById('newListInput').value = "";
 }
 
 function submitNewList() {
@@ -393,8 +408,22 @@ function submitNewList() {
   if(name) {
     const key = name.toLowerCase().replace(/\s+/g, '-');
     listTypesRef.push().set({ key, label: name });
-    closeModal();
+    closeModal('customListModal');
   }
+}
+
+/* DELETE MODAL LOGIC */
+function openDeleteModal() {
+  document.getElementById('deleteConfirmModal').style.display = 'flex';
+}
+
+function confirmDeleteList() {
+  db.ref(baseDataPath + '/' + currentType).remove();
+  listTypesRef.once('value', snap => { 
+    snap.forEach(c => { if(c.val().key === currentType) c.ref.remove(); }); 
+  });
+  closeModal('deleteConfirmModal');
+  location.reload(); // Refresh to default view
 }
 
 function toggleDarkMode() {
@@ -402,15 +431,6 @@ function toggleDarkMode() {
   const isDark = document.body.classList.contains('dark-mode');
   localStorage.setItem('darkMode', isDark);
   document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
-}
-
-function RemoveCurrentList() {
-  if (['shopping','reminder','todo'].includes(currentType)) return alert("Default lists cannot be deleted.");
-  if (confirm("Delete this entire list?")) {
-    db.ref(baseDataPath + '/' + currentType).remove();
-    listTypesRef.once('value', snap => { snap.forEach(c => { if(c.val().key === currentType) c.ref.remove(); }); });
-    location.reload();
-  }
 }
 
 function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
