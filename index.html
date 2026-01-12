@@ -7,7 +7,7 @@
 <link rel="icon" href="nexuslist-icon.png">
 
 <script>
-  // IMMEDIATE DARK MODE: Prevents white flash
+  // IMMEDIATE DARK MODE: Prevents white flash even on sign-in page
   (function() {
     if (localStorage.getItem('darkMode') === 'true') {
       document.documentElement.classList.add('dark-mode');
@@ -95,7 +95,12 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
     <div class="card" style="text-align:center;">
       <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
       <h2>Welcome to NexusList</h2>
-      <button class="primary-btn" onclick="signInWithGoogle()" style="margin-top:20px;">🔐 Sign in with Google</button>
+      <p style="color: var(--text-secondary); font-size: 14px;">Organize your life together.</p>
+      <button class="primary-btn" onclick="signInWithGoogle()" style="margin-top:20px; width: 100%;">🔐 Sign in with Google</button>
+      
+      <div style="margin-top: 30px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;">
+        <a href="privacy.html" style="color: #94a3b8; font-size: 11px; text-decoration: none;">Privacy Policy & Terms</a>
+      </div>
     </div>
   </div>
 
@@ -162,7 +167,6 @@ const db = firebase.database(), auth = firebase.auth();
 let currentUser = null, currentType = 'shopping', listRef = null, listTypesRef = null, baseDataPath = "";
 let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
-// --- DARK MODE ---
 function applyDarkMode() {
   const isDark = localStorage.getItem('darkMode') === 'true';
   document.documentElement.classList.toggle('dark-mode', isDark);
@@ -177,7 +181,6 @@ function toggleDarkMode() {
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user; applyDarkMode();
-    if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
     const groupParam = new URLSearchParams(window.location.search).get('group');
     if (groupParam && groupParam !== user.uid && !sharedGroups.includes(groupParam)) {
       sharedGroups.push(groupParam);
@@ -189,6 +192,7 @@ auth.onAuthStateChanged(user => {
   } else {
     document.getElementById('signin-container').style.display = 'block';
     document.getElementById('app-container').style.display = 'none';
+    applyDarkMode(); // Keep dark mode active on login page
   }
 });
 
@@ -220,26 +224,18 @@ function attachListeners() {
     listUI.innerHTML = '';
     const items = [];
     snap.forEach(child => { items.push({ key: child.key, ...child.val() }); });
-    
     items.sort((a, b) => {
       if (a.done !== b.done) return a.done ? 1 : -1;
       const prioMap = { high: 1, medium: 2, low: 3, '': 4 };
       return (prioMap[a.priority] || 4) - (prioMap[b.priority] || 4);
     });
-
     items.forEach(item => {
       const li = document.createElement('li');
       const dots = {high:'🔴 ', medium:'🟡 ', low:'🟢 '};
       let details = (currentType === 'shopping' && item.quantity && item.quantity !== '1') ? `<b style="color:#4f46e5">${item.quantity}×</b> ` : "";
       let isOverdue = item.dueDate && !item.done && item.dueDate < new Date().toISOString().split('T')[0];
       let dateLabel = (item.dueDate) ? `<span class="date-badge ${isOverdue ? 'overdue' : ''}">📅 ${item.dueDate}</span>` : "";
-
-      li.innerHTML = `
-        <div><span class="${item.done ? 'done' : ''}">${dots[item.priority] || ''}${details}${item.text}</span>${dateLabel}</div>
-        <div style="display:flex; gap:5px;">
-          <button class="check-btn ${item.done ? 'checked' : ''}" onclick="toggleDone('${item.key}')">${item.done ? 'Uncheck' : 'Check'}</button>
-          <button class="Remove-btn" onclick="deleteItem('${item.key}')">Remove</button>
-        </div>`;
+      li.innerHTML = `<div><span class="${item.done ? 'done' : ''}">${dots[item.priority] || ''}${details}${item.text}</span>${dateLabel}</div><div style="display:flex; gap:5px;"><button class="check-btn ${item.done ? 'checked' : ''}" onclick="toggleDone('${item.key}')">${item.done ? 'Uncheck' : 'Check'}</button><button class="Remove-btn" onclick="deleteItem('${item.key}')">Remove</button></div>`;
       listUI.appendChild(li);
     });
   });
@@ -248,28 +244,17 @@ function attachListeners() {
 function addItem() {
   const input = document.getElementById('itemInput');
   if (!input.value.trim()) return;
-  listRef.push({ 
-    text: input.value.trim(), 
-    quantity: document.getElementById('quantityInput').value || '1',
-    priority: document.getElementById('priorityInput').value || '',
-    dueDate: document.getElementById('dateInput').value || '',
-    done: false 
-  });
-  input.value = ''; document.getElementById('quantityInput').value = '';
-  document.getElementById('dateInput').value = ''; document.getElementById('priorityInput').value = '';
+  listRef.push({ text: input.value.trim(), quantity: document.getElementById('quantityInput').value || '1', priority: document.getElementById('priorityInput').value || '', dueDate: document.getElementById('dateInput').value || '', done: false });
+  input.value = ''; document.getElementById('quantityInput').value = ''; document.getElementById('dateInput').value = ''; document.getElementById('priorityInput').value = '';
 }
-
 function toggleDone(key) { listRef.child(key).once('value', snap => listRef.child(key).update({ done: !snap.val().done })); }
 function deleteItem(key) { listRef.child(key).remove(); }
 function clearCompleted() { listRef.once('value', snap => { snap.forEach(c => { if(c.val().done) listRef.child(c.key).remove(); }); }); }
-
 function loadListTypes() {
   const dropdown = document.getElementById('customListDropdown');
   dropdown.innerHTML = `<option value="" selected disabled>Select other lists...</option><option value="__new__">➕ New list type...</option>`;
   listTypesRef.on('child_added', snap => {
-    const t = snap.val();
-    const opt = document.createElement('option');
-    opt.value = t.key; opt.textContent = t.label;
+    const t = snap.val(); const opt = document.createElement('option'); opt.value = t.key; opt.textContent = t.label;
     dropdown.insertBefore(opt, dropdown.lastElementChild);
   });
 }
@@ -280,27 +265,19 @@ function handleDropdownChange() {
 }
 function submitNewList() {
   const name = document.getElementById('newListInput').value.trim();
-  if(name) {
-    const key = name.toLowerCase().replace(/\s+/g, '-');
-    listTypesRef.push({ key, label: name });
-    closeModal('customListModal');
-    changeToBubbleList(key);
-  }
+  if(name) { const key = name.toLowerCase().replace(/\s+/g, '-'); listTypesRef.push({ key, label: name }); closeModal('customListModal'); changeToBubbleList(key); }
 }
 function openDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 function confirmDeleteList() {
   db.ref(baseDataPath + '/' + currentType).remove();
   listTypesRef.once('value', snap => snap.forEach(c => { if(c.val().key === currentType) c.ref.remove(); }));
-  closeModal('deleteConfirmModal');
-  changeToBubbleList('shopping');
+  closeModal('deleteConfirmModal'); changeToBubbleList('shopping');
 }
 function renderWorkspaceSwitcher(activeId) {
   const container = document.getElementById('workspaceSwitcher');
   container.innerHTML = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">🏠 Me</button>`;
-  sharedGroups.forEach((groupId, index) => {
-    container.innerHTML += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Group ${index + 1}</button>`;
-  });
+  sharedGroups.forEach((groupId, index) => { container.innerHTML += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Group ${index + 1}</button>`; });
 }
 function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 function signOut() { auth.signOut(); }
