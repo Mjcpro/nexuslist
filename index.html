@@ -43,16 +43,15 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
   max-width: 640px;
   margin: 0 auto;
-  padding: 0 16px 40px; /* Adjusted for offline banner */
+  padding: 0 16px 40px;
   background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
   transition: background 0.3s ease;
   min-height: 100vh;
-  /* 2. Prevent accidental browser refresh pull-down */
   overscroll-behavior-y: contain;
 }
 
-/* Ensure list text is visible in Dark Mode */
 body.dark-mode li span { color: var(--text-primary) !important; }
+body.dark-mode select, body.dark-mode input { background-color: var(--input-bg); color: var(--text-primary); border-color: var(--input-border); }
 body.dark-mode button[onclick="clearCompleted()"] { color: #cbd5e1 !important; border-color: #475569 !important; }
 
 .card {
@@ -82,7 +81,7 @@ h2 { text-align: center; color: var(--text-primary); font-size: 20px; margin: 0 
 }
 
 .input-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
-input#itemInput { flex: 1; min-width: 150px; padding: 12px 14px; border: 1px solid #cbd5f5; border-radius: 999px; font-size: 14px; outline: none; background: #f9fafb; color: #0f172a;}
+input#itemInput { flex: 1; min-width: 150px; padding: 12px 14px; border: 1px solid var(--input-border); border-radius: 999px; font-size: 14px; outline: none; background: var(--input-bg); color: var(--text-primary);}
 
 button { padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: transform 0.08s ease; }
 .primary-btn { background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; }
@@ -98,7 +97,6 @@ li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
 .done { text-decoration: line-through; opacity: 0.6; }
 .count-badge { font-weight: bold; margin-left: 4px; }
 
-/* 3. Offline Indicator Styling */
 #offline-indicator {
   display: none;
   background: #ef4444;
@@ -113,6 +111,18 @@ li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
 }
+
+/* Modal Overlay Styles */
+#customListModal {
+  display:none; 
+  position:fixed; 
+  top:0; left:0; 
+  width:100%; height:100%; 
+  background:rgba(0,0,0,0.7); 
+  z-index:2000; 
+  align-items:center; 
+  justify-content:center;
+}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -122,6 +132,18 @@ li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
 
 <body>
   <div id="offline-indicator">⚠️ Working Offline - Changes will sync later</div>
+
+  <div id="customListModal">
+    <div class="card" style="width:90%; max-width:400px; text-align:center;">
+      <h2>New List Type</h2>
+      <p style="color: var(--text-secondary); font-size: 13px;">Give your list a name (e.g., Camping, Office)</p>
+      <input id="newListInput" placeholder="List name..." style="width:85%; padding:12px; border-radius:999px; border:1px solid var(--input-border); margin:15px 0; outline:none; text-align:center;">
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button onclick="closeModal()" style="background:#64748b; color:white;">Cancel</button>
+        <button onclick="submitNewList()" class="primary-btn">Create</button>
+      </div>
+    </div>
+  </div>
 
   <div id="signin-container" style="display:none;">
     <div class="card" style="text-align:center;">
@@ -143,15 +165,15 @@ li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
         <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" data-label="✓ To-do">✓ To-do</button>
       </div>
       <div style="text-align:center;margin-top:16px;">
-        <select id="customListDropdown" onchange="handleDropdownChange()" style="padding:8px 12px;border-radius:999px;border:1px solid #cbd5e1;background:#f8fafc;font-size:13px;outline:none;cursor:pointer;width:200px;">
+        <select id="customListDropdown" onchange="handleDropdownChange()" style="padding:8px 12px;border-radius:999px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--text-primary);font-size:13px;outline:none;cursor:pointer;width:200px;">
           <option value="" selected disabled>Select custom list...</option>
           <option value="__new__">➕ New list type...</option>
         </select>
       </div>
       <div class="input-row" style="margin-top:20px;">
         <input id="itemInput" placeholder="Add item...">
-        <input id="quantityInput" placeholder="Qty" style="width:50px; border-radius:999px; border:1px solid #cbd5f5; text-align:center;">
-        <select id="priorityInput" style="padding:10px; border-radius:999px; border:1px solid #cbd5f5;">
+        <input id="quantityInput" placeholder="Qty" style="width:50px; border-radius:999px; border:1px solid var(--input-border); text-align:center;">
+        <select id="priorityInput" style="padding:10px; border-radius:999px; border:1px solid var(--input-border); background:var(--input-bg); color:var(--text-primary);">
           <option value="">Priority</option>
           <option value="high">🔴 High</option>
           <option value="medium">🟡 Medium</option>
@@ -169,14 +191,12 @@ li { padding: 10px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
         <button onclick="signOut()" style="background:#94a3b8; color:white; font-size:12px;">Sign Out</button>
       </div>
       <div style="text-align:center; margin-top:25px; border-top: 1px solid rgba(0,0,0,0.05); padding-top:15px;">
-        
         <div style="margin-bottom: 20px;">
           <a href="https://buymeacoffee.com/mjcpro" target="_blank" 
              style="display: inline-flex; align-items: center; gap: 8px; background: #FFDD00; color: #000000; padding: 10px 20px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: transform 0.1s ease;">
              <span style="font-size: 16px;">☕</span> Support NexusList
           </a>
         </div>
-
         <button onclick="RemoveCurrentList()" style="background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer; display: block; margin: 0 auto;">🗑️ Delete Current List</button>
         <a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; margin-top: 10px; display: inline-block;">Privacy Policy</a>
       </div>
@@ -206,7 +226,6 @@ let baseDataPath = "";
 let countListeners = {}; 
 let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
-// Apply Dark Mode from memory immediately
 if (localStorage.getItem('darkMode') === 'true') {
   document.body.classList.add('dark-mode');
   window.addEventListener('DOMContentLoaded', () => {
@@ -214,7 +233,6 @@ if (localStorage.getItem('darkMode') === 'true') {
   });
 }
 
-// 4. Offline/Online Event Listeners
 window.addEventListener('offline', () => { document.getElementById('offline-indicator').style.display = 'block'; });
 window.addEventListener('online', () => { document.getElementById('offline-indicator').style.display = 'none'; });
 
@@ -353,16 +371,30 @@ function copyShareLink() {
   });
 }
 
+/* CUSTOM MODAL LOGIC */
 function handleDropdownChange() {
   const sel = document.getElementById('customListDropdown');
   if(sel.value === '__new__') {
-    const name = prompt("Enter name for the new list:");
-    if(name) {
-      const key = name.toLowerCase().replace(/\s+/g, '-');
-      listTypesRef.push().set({ key, label: name });
-    }
+    document.getElementById('customListModal').style.display = 'flex';
+    document.getElementById('newListInput').focus();
     sel.value = "";
-  } else { changeToBubbleList(sel.value); }
+  } else { 
+    changeToBubbleList(sel.value); 
+  }
+}
+
+function closeModal() {
+  document.getElementById('customListModal').style.display = 'none';
+  document.getElementById('newListInput').value = "";
+}
+
+function submitNewList() {
+  const name = document.getElementById('newListInput').value.trim();
+  if(name) {
+    const key = name.toLowerCase().replace(/\s+/g, '-');
+    listTypesRef.push().set({ key, label: name });
+    closeModal();
+  }
 }
 
 function toggleDarkMode() {
