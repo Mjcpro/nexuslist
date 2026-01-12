@@ -26,23 +26,27 @@
 }
 
 body.dark-mode {
-  /* Softer dark background (Material Design standard) */
-  --bg-gradient-start: #121212; 
-  --bg-gradient-end: #1a1a1a;
-  
-  /* Lighter card for "elevation" effect */
-  --card-bg: #1e1e1e; 
+  --bg-gradient-start: #0f172a; 
+  --bg-gradient-end: #020617;
+  --card-bg: #1e293b; 
   --card-border: rgba(255, 255, 255, 0.1);
-  
-  /* High-contrast text */
-  --text-primary: #f8fafc;   /* Crisp off-white */
-  --text-secondary: #cbd5e1; /* Soft grey for less important text */
-  
-  /* Inputs and list items */
-  --input-bg: #2d2d2d;
-  --input-border: #404040;
-  --item-bg: #2d2d2d; 
-  --shadow-color: rgba(0, 0, 0, 0.6);
+  --text-primary: #f8fafc;   /* Bright white for text */
+  --text-secondary: #94a3b8; 
+  --input-bg: #334155; 
+  --input-border: #475569;
+  --item-bg: #334155; 
+  --shadow-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Add this to ensure the list text turns white in dark mode */
+body.dark-mode li span {
+  color: var(--text-primary) !important;
+}
+
+/* This makes the "Clear checked Items" button visible too */
+body.dark-mode button[onclick="clearCompleted()"] {
+  color: #cbd5e1 !important;
+  border-color: #475569 !important;
 }
 
 body {
@@ -426,5 +430,6 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
