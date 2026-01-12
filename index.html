@@ -26,11 +26,23 @@
 }
 
 body.dark-mode {
-  --bg-gradient-start: #1e293b; --bg-gradient-end: #0f172a;
-  --card-bg: #1e293b; --card-border: rgba(100, 116, 139, 0.3);
-  --text-primary: #f1f5f9; --text-secondary: #94a3b8;
-  --input-bg: #334155; --input-border: #475569;
-  --item-bg: #334155; --shadow-color: rgba(0, 0, 0, 0.3);
+  /* Softer dark background (Material Design standard) */
+  --bg-gradient-start: #121212; 
+  --bg-gradient-end: #1a1a1a;
+  
+  /* Lighter card for "elevation" effect */
+  --card-bg: #1e1e1e; 
+  --card-border: rgba(255, 255, 255, 0.1);
+  
+  /* High-contrast text */
+  --text-primary: #f8fafc;   /* Crisp off-white */
+  --text-secondary: #cbd5e1; /* Soft grey for less important text */
+  
+  /* Inputs and list items */
+  --input-bg: #2d2d2d;
+  --input-border: #404040;
+  --item-bg: #2d2d2d; 
+  --shadow-color: rgba(0, 0, 0, 0.6);
 }
 
 body {
@@ -414,4 +426,5 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
