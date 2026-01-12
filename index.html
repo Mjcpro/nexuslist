@@ -5,9 +5,10 @@
 <meta name="theme-color" content="#4f46e5">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="nexuslist-icon.png">
+<link rel="apple-touch-icon" href="nexuslist-icon.png">
+<link rel="manifest" href="manifest.json">
 
 <style>
-/* CSS styles remain the same as previous version... */
 :root {
   --bg-gradient-start: #e0f2fe; --bg-gradient-end: #f9fafb;
   --card-bg: white; --card-border: rgba(148, 163, 184, 0.3);
@@ -80,9 +81,13 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
 </style>
 
 <script>
-  if (localStorage.getItem('darkMode') === 'true') {
-    document.documentElement.classList.add('dark-mode');
-  }
+  // IMMEDIATE DARK MODE INITIALIZATION
+  (function() {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) {
+      document.documentElement.classList.add('dark-mode');
+    }
+  })();
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -111,13 +116,6 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
         <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping" data-label="🛒 Shopping">🛒 Shopping</button>
         <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder" data-label="📝 Reminder">📝 Reminder</button>
         <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo" data-label="✓ To-do">✓ To-do</button>
-      </div>
-
-      <div style="text-align:center;margin-top:16px;">
-        <select id="customListDropdown" onchange="handleDropdownChange()" class="field-pill" style="width:200px; cursor:pointer;">
-          <option value="" selected disabled>Select custom list...</option>
-          <option value="__new__">➕ New list type...</option>
-        </select>
       </div>
 
       <div class="input-row" style="margin-top:20px;">
@@ -163,31 +161,43 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-let currentUser = null, currentType = 'shopping', listRef = null, listTypesRef = null, baseDataPath = "";
+let currentUser = null, currentType = 'shopping', listRef = null, baseDataPath = "";
 let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
-// --- NOTIFICATION LOGIC ---
-function requestNotificationPermission() {
-  if (!("Notification" in window)) return;
-  if (Notification.permission === "default") {
-    Notification.requestPermission();
-  }
+// --- UTILS & DARK MODE ---
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', isDark);
+  updateDarkModeButton(isDark);
 }
 
-function sendLocalNotification(title, body) {
-  if (Notification.permission === "granted") {
-    new Notification(title, { body, icon: 'nexuslist-icon.png' });
+function updateDarkModeButton(isDark) {
+  const btn = document.getElementById('darkModeBtn');
+  if (btn) btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+}
+
+// Ensure UI matches memory on load
+window.addEventListener('DOMContentLoaded', () => {
+  const isDark = localStorage.getItem('darkMode') === 'true';
+  if (isDark) document.body.classList.add('dark-mode');
+  updateDarkModeButton(isDark);
+});
+
+// --- NOTIFICATIONS ---
+function requestNotificationPermission() {
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission();
   }
 }
 
 function checkDueToday(snapVal) {
   const today = new Date().toISOString().split('T')[0];
-  if (snapVal.dueDate === today && !snapVal.done) {
-    sendLocalNotification("NexusList Reminder", `Today: ${snapVal.text}`);
+  if (snapVal.dueDate === today && !snapVal.done && Notification.permission === "granted") {
+    new Notification("NexusList Reminder", { body: `Today: ${snapVal.text}`, icon: 'nexuslist-icon.png' });
   }
 }
-// --------------------------
 
+// --- CORE APP ---
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
@@ -216,8 +226,7 @@ function switchToWorkspace(id) {
 function changeToBubbleList(type) {
   currentType = type;
   document.querySelectorAll('.bubble-btn').forEach(b => b.classList.remove('active'));
-  const activeBtn = document.querySelector(`[data-list="${type}"]`);
-  if(activeBtn) activeBtn.classList.add('active');
+  document.querySelector(`[data-list="${type}"]`)?.classList.add('active');
 
   document.getElementById('quantityInput').style.display = (type === 'shopping') ? 'block' : 'none';
   document.getElementById('dateInput').style.display = (type === 'reminder') ? 'block' : 'none';
@@ -227,17 +236,6 @@ function changeToBubbleList(type) {
   listRef = db.ref(baseDataPath + '/' + currentType);
   document.getElementById('list').innerHTML = '';
   attachListeners();
-}
-
-function addItem() {
-  const input = document.getElementById('itemInput');
-  const qty = document.getElementById('quantityInput').value || '1';
-  const prio = document.getElementById('priorityInput').value || '';
-  const date = document.getElementById('dateInput').value || '';
-  if (!input.value.trim()) return;
-  listRef.push({ text: input.value.trim(), quantity: qty, priority: prio, dueDate: date, done: false });
-  input.value = ''; document.getElementById('quantityInput').value = '';
-  document.getElementById('dateInput').value = ''; document.getElementById('priorityInput').value = '';
 }
 
 function attachListeners() {
@@ -283,16 +281,20 @@ function renderUpdatedElement(key, data) {
   return newItem;
 }
 
+function addItem() {
+  const input = document.getElementById('itemInput');
+  const qty = document.getElementById('quantityInput').value || '1';
+  const prio = document.getElementById('priorityInput').value || '';
+  const date = document.getElementById('dateInput').value || '';
+  if (!input.value.trim()) return;
+  listRef.push({ text: input.value.trim(), quantity: qty, priority: prio, dueDate: date, done: false });
+  input.value = ''; document.getElementById('quantityInput').value = '';
+  document.getElementById('dateInput').value = ''; document.getElementById('priorityInput').value = '';
+}
+
 function toggleDone(key) { listRef.child(key).once('value', snap => { listRef.child(key).update({ done: !snap.val().done }); }); }
 function deleteItem(key) { listRef.child(key).remove(); }
 function clearCompleted() { listRef.once('value', snap => { snap.forEach(c => { if(c.val().done) listRef.child(c.key).remove(); }); }); }
-
-function toggleDarkMode() {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  localStorage.setItem('darkMode', isDark);
-  document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
-}
 
 function renderWorkspaceSwitcher(activeId) {
   const container = document.getElementById('workspaceSwitcher');
@@ -309,11 +311,6 @@ function copyShareLink() {
   navigator.clipboard.writeText(url).then(() => { alert("Link Copied!"); });
 }
 document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
-
-// Sync UI Dark Mode button
-if (localStorage.getItem('darkMode') === 'true') {
-  window.addEventListener('DOMContentLoaded', () => { document.getElementById('darkModeBtn').textContent = '☀️ Light'; });
-}
 </script>
 </body>
 </html>
