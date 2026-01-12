@@ -403,6 +403,15 @@ function RemoveCurrentList() {
 function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 function signOut() { auth.signOut(); }
 document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
+
+  // Register the Service Worker for PWABuilder
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/nexuslist/pwabuilder-sw.js', { 
+    scope: '/nexuslist/' 
+  });
+}
+  
 </script>
 </body>
 </html>
+
