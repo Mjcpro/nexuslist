@@ -13,7 +13,7 @@
   --bg-gradient-start: #e0f2fe; --bg-gradient-end: #f9fafb;
   --card-bg: white; --card-border: rgba(148, 163, 184, 0.3);
   --text-primary: #0f172a; --text-secondary: #64748b;
-  --input-bg: #f9fafb; --input-border: #cbd5f5;
+  --input-bg: #f9fafb; --input-border: #cbd5e1;
   --item-bg: #f9fafb; --shadow-color: rgba(15, 23, 42, 0.12);
   --overdue-red: #ef4444;
 }
@@ -78,13 +78,15 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
 .date-badge.overdue { color: var(--overdue-red); font-weight: 800; animation: pulse 2s infinite; }
 
 @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+#customListModal, #deleteConfirmModal {
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center;
+}
 </style>
 
 <script>
-  // IMMEDIATE DARK MODE INITIALIZATION
   (function() {
-    const isDark = localStorage.getItem('darkMode') === 'true';
-    if (isDark) {
+    if (localStorage.getItem('darkMode') === 'true') {
       document.documentElement.classList.add('dark-mode');
     }
   })();
@@ -97,6 +99,28 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
 
 <body>
   <div id="offline-indicator" style="display:none; background:#ef4444; color:white; text-align:center; padding:8px; position: sticky; top: 0; z-index: 1000;">⚠️ Working Offline</div>
+
+  <div id="customListModal">
+    <div class="card" style="width:90%; max-width:400px; text-align:center;">
+      <h2>New List Name</h2>
+      <input id="newListInput" placeholder="e.g. Camping Gear" class="field-pill" style="width:85%; margin:15px 0; text-align:center;">
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button onclick="closeModal('customListModal')" style="background:#64748b; color:white;">Cancel</button>
+        <button onclick="submitNewList()" class="primary-btn">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteConfirmModal">
+    <div class="card" style="width:90%; max-width:400px; text-align:center;">
+      <h2 style="color: #ef4444;">Delete this category?</h2>
+      <p style="color: var(--text-secondary); font-size: 13px;">This will permanently remove all items in this list.</p>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top: 20px;">
+        <button onclick="closeModal('deleteConfirmModal')" style="background:#64748b; color:white;">Cancel</button>
+        <button onclick="confirmDeleteList()" style="background:#ef4444; color:white;">Delete</button>
+      </div>
+    </div>
+  </div>
 
   <div id="signin-container" style="display:none;">
     <div class="card" style="text-align:center;">
@@ -137,6 +161,13 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
         <button onclick="clearCompleted()" style="background: none; color: #94a3b8; font-size: 12px; border: 1px solid #cbd5e1; padding: 6px 12px; cursor:pointer;">🧹 Clear checked Items</button>
       </div>
 
+      <div style="text-align:center;margin-top:16px;">
+        <select id="customListDropdown" onchange="handleDropdownChange()" class="field-pill" style="width:200px; cursor:pointer; font-size: 12px;">
+          <option value="" selected disabled>Select other lists...</option>
+          <option value="__new__">➕ New list type...</option>
+        </select>
+      </div>
+
       <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
         <button id="shareBtn" onclick="copyShareLink()" style="background:#3b82f6; color:white; font-size:12px;">🔗 Share List</button>
         <button id="darkModeBtn" onclick="toggleDarkMode()" style="background:#64748b; color:white; font-size:12px;">🌙 Dark</button>
@@ -150,7 +181,9 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
              <span style="font-size: 16px;">☕</span> Support NexusList
           </a>
         </div>
-        <a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; margin-top: 10px; display: inline-block;">Privacy Policy</a>
+        <button id="deleteCustomListBtn" onclick="openDeleteModal()" style="display: none; background: none; color: #f87171; border: none; font-size: 11px; cursor: pointer; margin-bottom: 10px;">🗑️ Delete Custom Category</button>
+        <br>
+        <a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; display: inline-block;">Privacy Policy</a>
       </div>
     </div>
   </div>
@@ -161,47 +194,23 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-let currentUser = null, currentType = 'shopping', listRef = null, baseDataPath = "";
+let currentUser = null, currentType = 'shopping', listRef = null, listTypesRef = null, baseDataPath = "";
 let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
-// --- UTILS & DARK MODE ---
+// --- DARK MODE LOGIC ---
 function toggleDarkMode() {
   const isDark = document.body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', isDark);
-  updateDarkModeButton(isDark);
+  updateDarkModeUI(isDark);
 }
-
-function updateDarkModeButton(isDark) {
+function updateDarkModeUI(isDark) {
   const btn = document.getElementById('darkModeBtn');
-  if (btn) btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
+  if(btn) btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
 }
 
-// Ensure UI matches memory on load
-window.addEventListener('DOMContentLoaded', () => {
-  const isDark = localStorage.getItem('darkMode') === 'true';
-  if (isDark) document.body.classList.add('dark-mode');
-  updateDarkModeButton(isDark);
-});
-
-// --- NOTIFICATIONS ---
-function requestNotificationPermission() {
-  if ("Notification" in window && Notification.permission === "default") {
-    Notification.requestPermission();
-  }
-}
-
-function checkDueToday(snapVal) {
-  const today = new Date().toISOString().split('T')[0];
-  if (snapVal.dueDate === today && !snapVal.done && Notification.permission === "granted") {
-    new Notification("NexusList Reminder", { body: `Today: ${snapVal.text}`, icon: 'nexuslist-icon.png' });
-  }
-}
-
-// --- CORE APP ---
 auth.onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
-    requestNotificationPermission();
     const groupParam = new URLSearchParams(window.location.search).get('group');
     if (groupParam && groupParam !== user.uid && !sharedGroups.includes(groupParam)) {
       sharedGroups.push(groupParam);
@@ -210,6 +219,7 @@ auth.onAuthStateChanged(user => {
     switchToWorkspace(groupParam || user.uid);
     document.getElementById('signin-container').style.display = 'none';
     document.getElementById('app-container').style.display = 'block';
+    updateDarkModeUI(localStorage.getItem('darkMode') === 'true');
   } else {
     document.getElementById('signin-container').style.display = 'block';
     document.getElementById('app-container').style.display = 'none';
@@ -219,6 +229,9 @@ auth.onAuthStateChanged(user => {
 function switchToWorkspace(id) {
   baseDataPath = 'nexuslist/' + id;
   document.getElementById('sharedBanner').style.display = (id === currentUser.uid) ? 'none' : 'block';
+  if (listTypesRef) listTypesRef.off();
+  listTypesRef = db.ref(baseDataPath + '/listTypes');
+  loadListTypes();
   changeToBubbleList('shopping');
   renderWorkspaceSwitcher(id);
 }
@@ -228,9 +241,13 @@ function changeToBubbleList(type) {
   document.querySelectorAll('.bubble-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`[data-list="${type}"]`)?.classList.add('active');
 
+  // Input Visibility Logic
   document.getElementById('quantityInput').style.display = (type === 'shopping') ? 'block' : 'none';
   document.getElementById('dateInput').style.display = (type === 'reminder') ? 'block' : 'none';
   document.getElementById('priorityInput').style.display = (type === 'reminder' || type === 'todo') ? 'block' : 'none';
+
+  // Delete button logic
+  document.getElementById('deleteCustomListBtn').style.display = (['shopping', 'reminder', 'todo'].includes(type)) ? 'none' : 'inline-block';
 
   if (listRef) listRef.off();
   listRef = db.ref(baseDataPath + '/' + currentType);
@@ -238,11 +255,48 @@ function changeToBubbleList(type) {
   attachListeners();
 }
 
-function attachListeners() {
-  listRef.on('child_added', snap => {
-    createListItemElement(snap.key, snap.val());
-    if (currentType === 'reminder') checkDueToday(snap.val());
+function loadListTypes() {
+  const dropdown = document.getElementById('customListDropdown');
+  dropdown.innerHTML = `<option value="" selected disabled>Select other lists...</option><option value="__new__">➕ New list type...</option>`;
+  listTypesRef.on('child_added', snap => {
+    const t = snap.val();
+    const opt = document.createElement('option');
+    opt.value = t.key; opt.textContent = t.label;
+    dropdown.insertBefore(opt, dropdown.lastElementChild);
   });
+}
+
+function handleDropdownChange() {
+  const sel = document.getElementById('customListDropdown');
+  if(sel.value === '__new__') { document.getElementById('customListModal').style.display = 'flex'; sel.value = ""; }
+  else changeToBubbleList(sel.value);
+}
+
+function submitNewList() {
+  const name = document.getElementById('newListInput').value.trim();
+  if(name) {
+    const key = name.toLowerCase().replace(/\s+/g, '-');
+    listTypesRef.push({ key, label: name });
+    closeModal('customListModal');
+    changeToBubbleList(key);
+  }
+}
+
+function openDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function confirmDeleteList() {
+  db.ref(baseDataPath + '/' + currentType).remove();
+  listTypesRef.once('value', snap => {
+    snap.forEach(child => {
+      if(child.val().key === currentType) child.ref.remove();
+    });
+  });
+  closeModal('deleteConfirmModal');
+  changeToBubbleList('shopping');
+}
+
+function attachListeners() {
+  listRef.on('child_added', snap => createListItemElement(snap.key, snap.val()));
   listRef.on('child_changed', snap => {
     const li = document.getElementById('item-' + snap.key);
     if(li) li.replaceWith(renderUpdatedElement(snap.key, snap.val()));
@@ -261,8 +315,7 @@ function createListItemElement(key, data) {
     const today = new Date().toISOString().split('T')[0];
     if (data.dueDate < today) dateClass += " overdue";
   }
-  
-  let dateLabel = (currentType === 'reminder' && data.dueDate) ? `<span class="${dateClass}">📅 ${data.dueDate}</span>` : "";
+  let dateLabel = (data.dueDate) ? `<span class="${dateClass}">📅 ${data.dueDate}</span>` : "";
 
   li.innerHTML = `
     <div><span class="${data.done ? 'done' : ''}">${dots[data.priority] || ''}${details}${data.text}</span>${dateLabel}</div>
@@ -274,10 +327,9 @@ function createListItemElement(key, data) {
 }
 
 function renderUpdatedElement(key, data) {
-  const oldLi = document.getElementById('item-' + key);
+  const temp = document.createElement('div');
   createListItemElement(key, data);
   const newItem = document.getElementById('item-' + key);
-  oldLi.remove(); 
   return newItem;
 }
 
