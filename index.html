@@ -5,6 +5,26 @@
 <meta name="theme-color" content="#4f46e5">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="nexuslist-icon.png">
+    <link rel="apple-touch-icon" href="nexuslist-icon.png">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Create and share shopping lists, reminders, and to-do lists with your family in real-time. Sync across all your devices with Google sign-in.">
+    <meta name="keywords" content="shared lists, shopping list, todo list, reminder app, collaborative lists, family organizer, grocery list, task manager">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://mjcpro.github.io/nexuslist/">
+    <meta property="og:title" content="NexusList - Shared Lists for Family">
+    <meta property="og:description" content="Create and share shopping lists, reminders, and to-do lists with your family in real-time.">
+    <meta property="og:image" content="https://mjcpro.github.io/nexuslist/nexuslist-icon.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://mjcpro.github.io/nexuslist/">
+    <meta property="twitter:title" content="NexusList - Shared Lists for Family">
+    <meta property="twitter:description" content="Create and share shopping lists, reminders, and to-do lists with your family in real-time.">
+    <meta property="twitter:image" content="https://mjcpro.github.io/nexuslist/nexuslist-icon.png">
 
 <script>
   // IMMEDIATE DARK MODE: Prevents white flash even on sign-in page
@@ -288,4 +308,14 @@ function copyShareLink() {
 document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
 </script>
 </body>
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-XXXXXXXXXX');
+        </script>
 </html>
+
