@@ -22,7 +22,7 @@
       --text-primary: #0f172a; --text-secondary: #64748b;
       --input-bg: #f9fafb; --input-border: #cbd5e1;
       --item-bg: #f9fafb; --shadow-color: rgba(15, 23, 42, 0.12);
-      --qty-text: #0369a1; /* Deep blue for light mode */
+      --qty-text: #0369a1; 
     }
     .dark-mode {
       --bg-gradient-start: #0f172a; --bg-gradient-end: #020617;
@@ -30,7 +30,7 @@
       --text-primary: #f8fafc; --text-secondary: #94a3b8; 
       --input-bg: #334155; --input-border: #475569;
       --item-bg: #334155; --shadow-color: rgba(0, 0, 0, 0.4);
-      --qty-text: #fbbf24; /* Warm gold for visibility in dark mode */
+      --qty-text: #fbbf24; 
     }
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -58,7 +58,6 @@
     }
     .bubble-btn.active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; }
 
-    /* New Circular Plus Button Design */
     .add-category-btn {
       width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--input-border);
       background: var(--input-bg); color: var(--text-secondary); font-size: 20px;
@@ -99,7 +98,6 @@
     .dot-Med { background-color: #f59e0b; box-shadow: 0 0 5px #f59e0b; }  
     .dot-Low { background-color: #22c55e; box-shadow: 0 0 5px #22c55e; }  
     
-    /* Dynamic Quantity Tag Color */
     .qty-tag { color: var(--qty-text); font-weight: bold; font-size: 12px; margin-left: 5px; }
 
     .check-btn { background: #e5f6ff; color: #0369a1; padding: 6px 12px; border-radius: 999px; border: none; font-size: 12px; cursor: pointer; }
@@ -117,6 +115,11 @@
       display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
       background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center;
     }
+    
+    /* Support and Privacy Styling */
+    .footer-links { margin-top: 25px; border-top: 1px solid var(--card-border); padding-top: 15px; text-align: center; }
+    .footer-links a { color: #3b82f6; text-decoration: none; font-size: 12px; }
+    .privacy-text { font-size: 10px; color: var(--text-secondary); margin-top: 10px; line-height: 1.4; padding: 0 10px; }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -174,6 +177,14 @@
 
       <div id="deleteCategoryWrapper" style="display:none; text-align:center; margin-top:20px;">
         <button onclick="deleteCurrentCategory()" style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; text-decoration:underline;">🗑️ Delete Custom Category</button>
+      </div>
+
+      <div class="footer-links">
+        <a href="mailto:support@nexuslist.com">🆘 Need Support? Contact us</a>
+        <p class="privacy-text">
+          Privacy: We only use your Google ID to sync your lists. We do not sell your data or use it for advertising. 
+          Your lists are private to you and whoever you share your link with.
+        </p>
       </div>
     </div>
   </div>
