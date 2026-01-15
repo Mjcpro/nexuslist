@@ -22,6 +22,7 @@
       --text-primary: #0f172a; --text-secondary: #64748b;
       --input-bg: #f9fafb; --input-border: #cbd5e1;
       --item-bg: #f9fafb; --shadow-color: rgba(15, 23, 42, 0.12);
+      --qty-text: #0369a1; /* Deep blue for light mode */
     }
     .dark-mode {
       --bg-gradient-start: #0f172a; --bg-gradient-end: #020617;
@@ -29,6 +30,7 @@
       --text-primary: #f8fafc; --text-secondary: #94a3b8; 
       --input-bg: #334155; --input-border: #475569;
       --item-bg: #334155; --shadow-color: rgba(0, 0, 0, 0.4);
+      --qty-text: #fcd34d; /* Warm gold for better dark mode visibility */
     }
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -56,6 +58,15 @@
     }
     .bubble-btn.active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; }
 
+    /* New Circular Add Button Style */
+    .add-category-btn {
+      width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--input-border);
+      background: var(--input-bg); color: var(--text-secondary); font-size: 20px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: all 0.2s; padding: 0; line-height: 1;
+    }
+    .add-category-btn:hover { border-color: #3b82f6; color: #3b82f6; transform: scale(1.05); }
+
     .tab-btn {
       padding: 8px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
       background: #f8fafc; color: #64748b; font-size: 12px; cursor: pointer; white-space: nowrap;
@@ -69,7 +80,6 @@
     }
     #itemInput { flex: 2; }
     
-    /* Stretched Input Widths */
     #qtyInput { width: 65px; min-width: 65px; text-align: center; }
     #priorityInput { width: 120px; min-width: 120px; text-align: left; padding-left: 10px; }
 
@@ -85,13 +95,13 @@
     }
     .done { text-decoration: line-through; opacity: 0.5; }
     
-    /* Dot System - Traffic Light Colors */
     .priority-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-    .dot-High { background-color: #ef4444; box-shadow: 0 0 5px #ef4444; } /* Red */
-    .dot-Med { background-color: #f59e0b; box-shadow: 0 0 5px #f59e0b; }  /* Yellow */
-    .dot-Low { background-color: #22c55e; box-shadow: 0 0 5px #22c55e; }  /* Green */
+    .dot-High { background-color: #ef4444; box-shadow: 0 0 5px #ef4444; } 
+    .dot-Med { background-color: #f59e0b; box-shadow: 0 0 5px #f59e0b; }  
+    .dot-Low { background-color: #22c55e; box-shadow: 0 0 5px #22c55e; }  
     
-    .qty-tag { color: #0369a1; font-weight: bold; font-size: 12px; margin-left: 5px; }
+    /* Variable Color for Quantity */
+    .qty-tag { color: var(--qty-text); font-weight: bold; font-size: 12px; margin-left: 5px; }
 
     .check-btn { background: #e5f6ff; color: #0369a1; padding: 6px 12px; border-radius: 999px; border: none; font-size: 12px; cursor: pointer; }
     .check-btn.checked { background: #dcfce7; color: #166534; }
@@ -130,12 +140,12 @@
       
       <div id="workspaceSwitcher" style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:5px;"></div>
       
-      <div id="bubbleContainer" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <div id="bubbleContainer" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center;">
         <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping">🛒 Shopping</button>
         <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder">📝 Reminder</button>
         <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo">✓ To-do</button>
         <span id="dynamicBubbles" style="display:contents;"></span>
-        <button class="bubble-btn" onclick="showCustomModal()" style="background:#f1f5f9; border-style:dashed;">+</button>
+        <button class="add-category-btn" onclick="showCustomModal()">+</button>
       </div>
 
       <div class="input-row" style="margin-top:25px;">
@@ -192,7 +202,6 @@
   </div>
 
 <script>
-  // Service Worker Registration
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/nexuslist/sw.js')
@@ -376,14 +385,6 @@
     navigator.clipboard.writeText(url).then(() => alert("Link Copied!"));
   }
   document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
-  
-  // Modal Escape handler
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      hideCustomModal();
-      hideDeleteModal();
-    }
-  });
 </script>
 </body>
 </html>
