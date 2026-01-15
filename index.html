@@ -134,6 +134,7 @@ li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radiu
         <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping">🛒 Shopping</button>
         <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder">📝 Reminder</button>
         <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo">✓ To-do</button>
+                          <span id="customListButtons"></span>
       </div>
 
       <div class="input-row" style="margin-top:20px;">
@@ -276,6 +277,14 @@ function loadListTypes() {
   listTypesRef.on('child_added', snap => {
     const t = snap.val(); const opt = document.createElement('option'); opt.value = t.key; opt.textContent = t.label;
     dropdown.insertBefore(opt, dropdown.lastElementChild);
+              
+        // Create bubble button for custom list
+        const btn = document.createElement('button');
+        btn.className = 'bubble-btn';
+        btn.dataset.list = t.key;
+        btn.textContent = t.label;
+        btn.onclick = () => changeToBubbleList(t.key);
+        document.getElementById('customListButtons').appendChild(btn);
   });
 }
 function handleDropdownChange() {
@@ -318,4 +327,5 @@ document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') ad
           gtag('config', 'G-XXXXXXXXXX');
         </script>
 </html>
+
 
