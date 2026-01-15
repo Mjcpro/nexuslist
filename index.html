@@ -122,7 +122,10 @@
       font-size: 14px; margin: 20px 0; border: 1px solid #e2e8f0;
     }
     .footer-links { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--card-border); text-align: center; }
-    .footer-links a { color: var(--text-secondary); font-size: 11px; text-decoration: underline; }
+    .footer-links a, .footer-links button { 
+      color: var(--text-secondary); font-size: 11px; text-decoration: underline; 
+      background: none; border: none; cursor: pointer; margin: 0 5px;
+    }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -139,7 +142,7 @@
   </div>
 
   <div id="app-container" style="display:none;">
-    <div id="sharedBanner" style="display:none; background:#dcfce7; color:#166534; padding:10px; border-radius:12px; margin-bottom:15px; text-align:center; font-weight:600; font-size:13px;">🌍 Viewing SHARED List</div>
+    <div id="sharedBanner" style="display:none; background:#dcfce7; color:#166534; padding:10px; border-radius:12px; margin-bottom:15px; text-align:center; font-weight:600; font-size:13px;">🌍 Using SHARED Workspace</div>
     <div class="card">
       <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
       
@@ -173,7 +176,8 @@
       <div id="sync-status"></div>
 
       <div style="text-align:center; margin-top:20px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-        <button onclick="copyShareLink()" class="tab-btn" style="background:#3b82f6; color:white;">🔗 Share List</button>
+        <button onclick="createSharedWorkspace()" class="tab-btn" style="background:#22c55e; color:white;">✨ Create Shared List</button>
+        <button onclick="copyShareLink()" id="shareBtn" class="tab-btn" style="background:#3b82f6; color:white; display:none;">🔗 Copy Invite Link</button>
         <button onclick="toggleDarkMode()" id="darkModeBtn" class="tab-btn">🌙 Dark</button>
         <button onclick="signOut()" class="tab-btn">Sign Out</button>
       </div>
@@ -190,6 +194,7 @@
 
       <div class="footer-links">
         <a href="privacy.html" target="_blank">Privacy Policy</a>
+        <button onclick="clearWorkspaceHistory()">Clear Shared History</button>
       </div>
     </div>
   </div>
@@ -217,14 +222,6 @@
   </div>
 
 <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/nexuslist/sw.js')
-        .then(reg => console.log('Service Worker registered!'))
-        .catch(err => console.log('Service Worker failed: ', err));
-    });
-  }
-
   const firebaseConfig = { 
     apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY", 
     authDomain: "nexuslist-380ff.firebaseapp.com", 
@@ -237,7 +234,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database(), auth = firebase.auth();
 
-  let currentUser = null, currentType = 'shopping', listRef = null, baseDataPath = "";
+  let currentUser = null, currentType = 'shopping', listRef = null, baseDataPath = "", currentWorkspaceId = "";
   let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
   function applyDarkMode() {
@@ -270,8 +267,13 @@
   });
 
   function switchToWorkspace(id) {
+    currentWorkspaceId = id;
     baseDataPath = 'nexuslist/' + id;
-    document.getElementById('sharedBanner').style.display = (id === currentUser.uid) ? 'none' : 'block';
+    
+    const isPrivate = (id === currentUser.uid);
+    document.getElementById('sharedBanner').style.display = isPrivate ? 'none' : 'block';
+    document.getElementById('shareBtn').style.display = isPrivate ? 'none' : 'inline-block';
+    
     renderWorkspaceSwitcher(id);
     loadCustomBubbles();
     changeToBubbleList('shopping');
@@ -279,22 +281,40 @@
 
   function renderWorkspaceSwitcher(activeId) {
     const container = document.getElementById('workspaceSwitcher');
-    // Only show the switcher if you have shared lists
     if (sharedGroups.length === 0) {
       container.style.display = 'none';
       return;
     }
-    
     container.style.display = 'flex';
     let html = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">📂 My Lists</button>`;
-    
-    sharedGroups.forEach((groupId) => {
-      html += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Shared Lists</button>`;
+    sharedGroups.forEach((groupId, index) => {
+      html += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Shared List ${index + 1}</button>`;
     });
-    
     container.innerHTML = html;
   }
 
+  function createSharedWorkspace() {
+    const newId = "group_" + Math.random().toString(36).substr(2, 9);
+    sharedGroups.push(newId);
+    localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
+    switchToWorkspace(newId);
+    alert("Shared Workspace Created! Use the 'Copy Invite Link' button to invite others.");
+  }
+
+  function copyShareLink() {
+    const url = window.location.origin + window.location.pathname + "?group=" + currentWorkspaceId;
+    navigator.clipboard.writeText(url).then(() => alert("Invite Link Copied! Send this to the person you want to share with."));
+  }
+
+  function clearWorkspaceHistory() {
+    if(confirm("This will remove all shared lists from your view. You can rejoin using their invite links. Continue?")) {
+      localStorage.setItem('sharedGroups', "[]");
+      sharedGroups = [];
+      switchToWorkspace(currentUser.uid);
+    }
+  }
+
+  // --- REST OF THE LOGIC REMAINS UNCHANGED ---
   function loadCustomBubbles() {
     db.ref(baseDataPath + '/custom_categories').on('value', snap => {
       const dynamicContainer = document.getElementById('dynamicBubbles');
@@ -315,15 +335,12 @@
   function changeToBubbleList(type) {
     currentType = type;
     document.querySelectorAll('.bubble-btn').forEach(b => b.classList.toggle('active', b.dataset.list === type));
-    
     const isShopping = type === 'shopping';
     const isPriorityNeeded = ['reminder', 'todo'].includes(type);
     document.getElementById('qtyInput').style.display = isShopping ? 'block' : 'none';
     document.getElementById('priorityInput').style.display = isPriorityNeeded ? 'block' : 'none';
-    
     const isDefault = ['shopping', 'reminder', 'todo'].includes(type);
     document.getElementById('deleteCategoryWrapper').style.display = isDefault ? 'none' : 'block';
-
     if (listRef) listRef.off();
     listRef = db.ref(baseDataPath + '/' + currentType);
     attachListeners();
@@ -342,7 +359,6 @@
         const li = document.createElement('li');
         let priorityDot = item.priority ? `<span class="priority-dot dot-${item.priority}"></span>` : '';
         let qtyText = item.qty ? `<span class="qty-tag">(${item.qty})</span>` : '';
-
         li.innerHTML = `
           <div style="display:flex; align-items:center;">
             ${priorityDot}
@@ -385,11 +401,9 @@
     const qty = document.getElementById('qtyInput').value.trim();
     const priority = document.getElementById('priorityInput').value;
     if (!input.value.trim()) return;
-    
     let itemData = { text: input.value.trim(), done: false };
     if (currentType === 'shopping' && qty) itemData.qty = qty;
     if (['reminder', 'todo'].includes(currentType)) itemData.priority = priority;
-
     listRef.push(itemData);
     input.value = '';
     document.getElementById('qtyInput').value = '';
@@ -404,10 +418,6 @@
   }
   function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
   function signOut() { auth.signOut(); }
-  function copyShareLink() {
-    const url = window.location.origin + window.location.pathname + "?group=" + currentUser.uid;
-    navigator.clipboard.writeText(url).then(() => alert("Link Copied!"));
-  }
   document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
 </script>
 </body>
