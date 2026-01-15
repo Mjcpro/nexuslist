@@ -1,13 +1,14 @@
 {
   "name": "NexusList - Shared Lists",
   "short_name": "NexusList",
-  "id": "/nexuslist/",
+  "id": "nexuslist-pwa",
   "orientation": "portrait",
   "description": "Create and share shopping lists, reminders, and to-do lists with your family in real-time",
   "start_url": "/nexuslist/",
   "display": "standalone",
   "background_color": "#f0f8ff",
   "theme_color": "#4f46e5",
+  "categories": ["productivity", "lifestyle", "utilities"],
   "icons": [
     {
       "src": "/nexuslist/nexuslist-icon-192.png",
@@ -19,28 +20,21 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    ,
-        "categories": ["productivity", "lifestyle", "utilities"],
-        "screenshots": [
-              {
-                      "src": "/nexuslist/nexuslist-icon.png",
-                      "sizes": "512x512",
-                      "type": "image/png",
-                      "form_factor": "wide",
-                      "label": "NexusList main interface"
-                    }
-            ],
-        "prefer_related_applications": false,
-        "shortcuts": [
-              {
-                      "name": "Shopping List",
-                      "short_name": "Shopping",
-                      "description": "Open shopping list",
-                      "url": "/nexuslist/?list=shopping",
-                      "icons": [{ "src": "/nexuslist/nexuslist-icon-192.png", "sizes": "192x192" }]
-                    }
-            ]
-      }
-  ]
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Shopping List",
+      "short_name": "Shopping",
+      "description": "Open shopping list",
+      "url": "/nexuslist/?list=shopping",
+      "icons": [
+        {
+          "src": "/nexuslist/nexuslist-icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
 }
-
