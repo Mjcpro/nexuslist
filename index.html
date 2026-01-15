@@ -196,6 +196,14 @@
   </div>
 
 <script>
+  if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Note the path matches your manifest "id" and "start_url"
+    navigator.serviceWorker.register('/nexuslist/sw.js')
+      .then(reg => console.log('Service Worker registered!'))
+      .catch(err => console.log('Service Worker failed: ', err));
+  });
+}
   if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
 
   const firebaseConfig = { 
@@ -381,3 +389,4 @@
 </script>
 </body>
 </html>
+
