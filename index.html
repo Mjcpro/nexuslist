@@ -70,8 +70,8 @@
     #itemInput { flex: 2; }
     
     /* Stretched Input Widths */
-    #qtyInput { width: 60px; text-align: center; }
-    #priorityInput { width: 110px; text-align: left; padding-left: 15px; }
+    #qtyInput { width: 65px; min-width: 65px; text-align: center; }
+    #priorityInput { width: 120px; min-width: 120px; text-align: left; padding-left: 10px; }
 
     .primary-btn { 
       background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; 
@@ -166,10 +166,6 @@
       <div id="deleteCategoryWrapper" style="display:none; text-align:center; margin-top:20px;">
         <button onclick="deleteCurrentCategory()" style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; text-decoration:underline;">🗑️ Delete Custom Category</button>
       </div>
-
-      <div style="text-align:center; margin-top:25px; border-top:1px solid rgba(0,0,0,0.05); padding-top:15px;">
-        <a href="https://buymeacoffee.com/mjcpro" target="_blank" style="text-decoration:none; background:#FFDD00; color:black; padding:10px 20px; border-radius:999px; font-weight:bold; font-size:13px;">☕ Support NexusList</a>
-      </div>
     </div>
   </div>
 
@@ -196,15 +192,14 @@
   </div>
 
 <script>
+  // Service Worker Registration
   if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // Note the path matches your manifest "id" and "start_url"
-    navigator.serviceWorker.register('/nexuslist/sw.js')
-      .then(reg => console.log('Service Worker registered!'))
-      .catch(err => console.log('Service Worker failed: ', err));
-  });
-}
-  if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/nexuslist/sw.js')
+        .then(reg => console.log('Service Worker registered!'))
+        .catch(err => console.log('Service Worker failed: ', err));
+    });
+  }
 
   const firebaseConfig = { 
     apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY", 
@@ -260,7 +255,7 @@
 
   function renderWorkspaceSwitcher(activeId) {
     const container = document.getElementById('workspaceSwitcher');
-    let html = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">🏠 My list</button>`;
+    let html = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">🏠 Me</button>`;
     sharedGroups.forEach((groupId, index) => {
       html += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Shared ${index + 1}</button>`;
     });
@@ -312,12 +307,7 @@
         const item = child.val();
         if(child.key === 'metadata') return;
         const li = document.createElement('li');
-        
-        let priorityDot = '';
-        if (item.priority) {
-          priorityDot = `<span class="priority-dot dot-${item.priority}"></span>`;
-        }
-
+        let priorityDot = item.priority ? `<span class="priority-dot dot-${item.priority}"></span>` : '';
         let qtyText = item.qty ? `<span class="qty-tag">(${item.qty})</span>` : '';
 
         li.innerHTML = `
@@ -386,7 +376,14 @@
     navigator.clipboard.writeText(url).then(() => alert("Link Copied!"));
   }
   document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
+  
+  // Modal Escape handler
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      hideCustomModal();
+      hideDeleteModal();
+    }
+  });
 </script>
 </body>
 </html>
-
