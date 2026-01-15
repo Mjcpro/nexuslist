@@ -68,7 +68,10 @@
       background: var(--input-bg); color: var(--text-primary); outline: none; 
     }
     #itemInput { flex: 2; }
-    #qtyInput, #priorityInput { width: 85px; text-align: center; }
+    
+    /* Stretched Input Widths */
+    #qtyInput { width: 60px; text-align: center; }
+    #priorityInput { width: 110px; text-align: left; padding-left: 15px; }
 
     .primary-btn { 
       background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; 
@@ -82,11 +85,11 @@
     }
     .done { text-decoration: line-through; opacity: 0.5; }
     
-    /* Dot System */
+    /* Dot System - Traffic Light Colors */
     .priority-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-    .dot-High { background-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
-    .dot-Med { background-color: #f59e0b; box-shadow: 0 0 5px #f59e0b; }
-    .dot-Low { background-color: #3b82f6; box-shadow: 0 0 5px #3b82f6; }
+    .dot-High { background-color: #ef4444; box-shadow: 0 0 5px #ef4444; } /* Red */
+    .dot-Med { background-color: #f59e0b; box-shadow: 0 0 5px #f59e0b; }  /* Yellow */
+    .dot-Low { background-color: #22c55e; box-shadow: 0 0 5px #22c55e; }  /* Green */
     
     .qty-tag { color: #0369a1; font-weight: bold; font-size: 12px; margin-left: 5px; }
 
@@ -138,7 +141,7 @@
       <div class="input-row" style="margin-top:25px;">
         <input id="qtyInput" type="text" placeholder="Qty" style="display:block;">
         <select id="priorityInput" style="display:none;">
-          <option value="Low">🔵 Low</option>
+          <option value="Low">🟢 Low</option>
           <option value="Med">🟡 Med</option>
           <option value="High">🔴 High</option>
         </select>
