@@ -271,12 +271,11 @@ function addItem() {
 function toggleDone(key) { listRef.child(key).once('value', snap => listRef.child(key).update({ done: !snap.val().done })); }
 function deleteItem(key) { listRef.child(key).remove(); }
 function clearCompleted() { listRef.once('value', snap => { snap.forEach(c => { if(c.val().done) listRef.child(c.key).remove(); }); }); }
-function loadListTypes() {
+277
+    () {
   const dropdown = document.getElementById('customListDropdown');
   dropdown.innerHTML = `<option value="" selected disabled>Select other lists...</option><option value="__new__">➕ New list type...</option>`;
   listTypesRef.on('child_added', snap => {
-    const t = snap.val(); const opt = document.createElement('option'); opt.value = t.key; opt.textContent = t.label;
-    dropdown.insertBefore(opt, dropdown.lastElementChild);
               
         // Create bubble button for custom list
         const btn = document.createElement('button');
@@ -327,5 +326,6 @@ document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') ad
           gtag('config', 'G-XXXXXXXXXX');
         </script>
 </html>
+
 
 
