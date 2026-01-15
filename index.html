@@ -68,7 +68,7 @@
       background: var(--input-bg); color: var(--text-primary); outline: none; 
     }
     #itemInput { flex: 2; }
-    #qtyInput, #priorityInput { width: 70px; text-align: center; }
+    #qtyInput, #priorityInput { width: 85px; text-align: center; }
 
     .primary-btn { 
       background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; 
@@ -81,9 +81,14 @@
       display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px var(--shadow-color);
     }
     .done { text-decoration: line-through; opacity: 0.5; }
-    .badge { font-size: 10px; font-weight: bold; padding: 2px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
-    .priority-high { background: #fee2e2; color: #b91c1c; }
-    .qty-badge { background: #e0f2fe; color: #0369a1; }
+    
+    /* Dot System */
+    .priority-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+    .dot-High { background-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
+    .dot-Med { background-color: #f59e0b; box-shadow: 0 0 5px #f59e0b; }
+    .dot-Low { background-color: #3b82f6; box-shadow: 0 0 5px #3b82f6; }
+    
+    .qty-tag { color: #0369a1; font-weight: bold; font-size: 12px; margin-left: 5px; }
 
     .check-btn { background: #e5f6ff; color: #0369a1; padding: 6px 12px; border-radius: 999px; border: none; font-size: 12px; cursor: pointer; }
     .check-btn.checked { background: #dcfce7; color: #166534; }
@@ -96,7 +101,7 @@
 
     #sync-status { font-size: 10px; color: var(--text-secondary); text-align: center; margin-top: 5px; opacity: 0.8; }
 
-    #customListModal {
+    .modal-overlay {
       display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
       background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center;
     }
@@ -133,9 +138,9 @@
       <div class="input-row" style="margin-top:25px;">
         <input id="qtyInput" type="text" placeholder="Qty" style="display:block;">
         <select id="priorityInput" style="display:none;">
-          <option value="Low">Low</option>
-          <option value="Med">Med</option>
-          <option value="High">High</option>
+          <option value="Low">🔵 Low</option>
+          <option value="Med">🟡 Med</option>
+          <option value="High">🔴 High</option>
         </select>
         <input id="itemInput" placeholder="Add item...">
         <button class="primary-btn" onclick="addItem()">Add</button>
@@ -165,13 +170,24 @@
     </div>
   </div>
 
-  <div id="customListModal">
+  <div id="customListModal" class="modal-overlay">
     <div class="card" style="width:90%; max-width:400px; margin-top:0;">
       <h3>Create New List</h3>
       <input id="newListName" placeholder="List name (e.g. Projects)" style="width:100%; box-sizing:border-box; border-radius:12px;" onkeyup="if(event.key === 'Enter') createNewList()">
       <div style="display:flex; gap:10px; margin-top:20px;">
         <button onclick="hideCustomModal()" class="tab-btn" style="flex:1">Cancel</button>
         <button onclick="createNewList()" class="primary-btn" style="flex:1">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deleteConfirmModal" class="modal-overlay" style="z-index:3000;">
+    <div class="card" style="width:90%; max-width:400px; margin-top:0; text-align:center;">
+      <h3 style="color:#ef4444;">Delete List?</h3>
+      <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">This will permanently remove this category and all items inside it.</p>
+      <div style="display:flex; gap:10px;">
+        <button onclick="hideDeleteModal()" class="tab-btn" style="flex:1">Cancel</button>
+        <button onclick="executeDeleteCategory()" class="primary-btn" style="flex:1; background:linear-gradient(135deg, #ef4444, #b91c1c);">Delete</button>
       </div>
     </div>
   </div>
@@ -261,7 +277,6 @@
     currentType = type;
     document.querySelectorAll('.bubble-btn').forEach(b => b.classList.toggle('active', b.dataset.list === type));
     
-    // Toggle Inputs visibility
     const isShopping = type === 'shopping';
     const isPriorityNeeded = ['reminder', 'todo'].includes(type);
     document.getElementById('qtyInput').style.display = isShopping ? 'block' : 'none';
@@ -286,12 +301,19 @@
         const item = child.val();
         if(child.key === 'metadata') return;
         const li = document.createElement('li');
-        let metaHtml = '';
-        if (item.qty) metaHtml += `<span class="badge qty-badge">${item.qty}</span>`;
-        if (item.priority && item.priority !== 'Low') metaHtml += `<span class="badge priority-high">${item.priority}</span>`;
         
+        let priorityDot = '';
+        if (item.priority) {
+          priorityDot = `<span class="priority-dot dot-${item.priority}"></span>`;
+        }
+
+        let qtyText = item.qty ? `<span class="qty-tag">(${item.qty})</span>` : '';
+
         li.innerHTML = `
-          <span class="${item.done ? 'done' : ''}">${item.text}${metaHtml}</span>
+          <div style="display:flex; align-items:center;">
+            ${priorityDot}
+            <span class="${item.done ? 'done' : ''}">${item.text}${qtyText}</span>
+          </div>
           <div style="display:flex; gap: 8px;">
             <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">${item.done ? 'Uncheck' : 'Check'}</button>
             <button onclick="deleteItem('${child.key}')" class="remove-btn">Remove</button>
@@ -303,6 +325,8 @@
 
   function showCustomModal() { document.getElementById('customListModal').style.display = 'flex'; document.getElementById('newListName').focus(); }
   function hideCustomModal() { document.getElementById('customListModal').style.display = 'none'; }
+  function deleteCurrentCategory() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
+  function hideDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'none'; }
 
   function createNewList() {
     const name = document.getElementById('newListName').value.trim();
@@ -315,12 +339,11 @@
     });
   }
 
-  function deleteCurrentCategory() {
-    if (confirm("Delete forever?")) {
-      db.ref(baseDataPath + '/' + currentType).remove();
-      db.ref(baseDataPath + '/custom_categories/' + currentType).remove();
-      changeToBubbleList('shopping');
-    }
+  function executeDeleteCategory() {
+    db.ref(baseDataPath + '/' + currentType).remove();
+    db.ref(baseDataPath + '/custom_categories/' + currentType).remove();
+    hideDeleteModal();
+    changeToBubbleList('shopping');
   }
 
   function addItem() {
