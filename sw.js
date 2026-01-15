@@ -32,8 +32,8 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event: Network-first strategy (best for real-time lists)
-// This ensures users get the latest version if online, but can still load the UI if offline.
+// Fetch Event: Network-first strategy
+// This ensures the app works offline but prioritizes real-time updates when online.
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request).catch(() => {
