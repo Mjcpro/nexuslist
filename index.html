@@ -1,331 +1,273 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>NexusList - Shared Lists</title>
-<meta name="theme-color" content="#4f46e5">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="nexuslist-icon.png">
-    <link rel="apple-touch-icon" href="nexuslist-icon.png">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NexusList - Shared Shopping & To-Do</title>
+  
+  <meta name="description" content="NexusList: Sync shopping lists and tasks in real-time with family.">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" href="nexuslist-icon.png">
+  <link rel="apple-touch-icon" href="nexuslist-icon.png">
 
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Create and share shopping lists, reminders, and to-do lists with your family in real-time. Sync across all your devices with Google sign-in.">
-    <meta name="keywords" content="shared lists, shopping list, todo list, reminder app, collaborative lists, family organizer, grocery list, task manager">
+  <script>
+    // IMMEDIATE DARK MODE: Prevents the "White Flash"
+    (function() {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
+  </script>
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://mjcpro.github.io/nexuslist/">
-    <meta property="og:title" content="NexusList - Shared Lists for Family">
-    <meta property="og:description" content="Create and share shopping lists, reminders, and to-do lists with your family in real-time.">
-    <meta property="og:image" content="https://mjcpro.github.io/nexuslist/nexuslist-icon.png">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://mjcpro.github.io/nexuslist/">
-    <meta property="twitter:title" content="NexusList - Shared Lists for Family">
-    <meta property="twitter:description" content="Create and share shopping lists, reminders, and to-do lists with your family in real-time.">
-    <meta property="twitter:image" content="https://mjcpro.github.io/nexuslist/nexuslist-icon.png">
-
-<script>
-  // IMMEDIATE DARK MODE: Prevents white flash even on sign-in page
-  (function() {
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.documentElement.classList.add('dark-mode');
+  <style>
+    :root {
+      --bg-gradient-start: #e0f2fe; --bg-gradient-end: #f9fafb;
+      --card-bg: white; --card-border: rgba(148, 163, 184, 0.3);
+      --text-primary: #0f172a; --text-secondary: #64748b;
+      --input-bg: #f9fafb; --input-border: #cbd5e1;
+      --item-bg: #f9fafb; --shadow-color: rgba(15, 23, 42, 0.12);
+      --overdue-red: #ef4444;
     }
-  })();
-</script>
 
-<style>
-:root {
-  --bg-gradient-start: #e0f2fe; --bg-gradient-end: #f9fafb;
-  --card-bg: white; --card-border: rgba(148, 163, 184, 0.3);
-  --text-primary: #0f172a; --text-secondary: #64748b;
-  --input-bg: #f9fafb; --input-border: #cbd5e1;
-  --item-bg: #f9fafb; --shadow-color: rgba(15, 23, 42, 0.12);
-  --overdue-red: #ef4444;
-}
+    .dark-mode {
+      --bg-gradient-start: #0f172a; --bg-gradient-end: #020617;
+      --card-bg: #1e293b; --card-border: rgba(255, 255, 255, 0.1);
+      --text-primary: #f8fafc; --text-secondary: #94a3b8; 
+      --input-bg: #334155; --input-border: #475569;
+      --item-bg: #334155; --shadow-color: rgba(0, 0, 0, 0.4);
+    }
 
-.dark-mode {
-  --bg-gradient-start: #0f172a; --bg-gradient-end: #020617;
-  --card-bg: #1e293b; --card-border: rgba(255, 255, 255, 0.1);
-  --text-primary: #f8fafc; --text-secondary: #94a3b8; 
-  --input-bg: #334155; --input-border: #475569;
-  --item-bg: #334155; --shadow-color: rgba(0, 0, 0, 0.4);
-}
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 640px; margin: 0 auto; padding: 0 16px 40px;
+      background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
+      transition: background 0.3s ease; min-height: 100vh; color: var(--text-primary);
+    }
 
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  max-width: 640px; margin: 0 auto; padding: 0 16px 40px;
-  background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
-  transition: background 0.3s ease; min-height: 100vh; overscroll-behavior-y: contain;
-  color: var(--text-primary);
-}
+    .card {
+      background: var(--card-bg); border-radius: 18px; box-shadow: 0 18px 40px var(--shadow-color);
+      padding: 22px 18px 26px; border: 1px solid var(--card-border); margin-top: 24px;
+    }
 
-.dark-mode li span { color: var(--text-primary) !important; }
-.dark-mode select, .dark-mode input { background-color: var(--input-bg); color: var(--text-primary); border-color: var(--input-border); color-scheme: dark; }
+    .logo-wrapper { display: flex; justify-content: center; margin-bottom: 12px; }
+    .logo-wrapper img { height: 160px; border-radius: 20px; }
 
-.card {
-  background: var(--card-bg); border-radius: 18px; box-shadow: 0 18px 40px var(--shadow-color);
-  padding: 22px 18px 26px; border: 1px solid var(--card-border); margin-top: 24px;
-}
+    /* Empty State Polish */
+    #list:empty::after {
+      content: "Your list is empty! Add something above 👆";
+      display: block; text-align: center; color: var(--text-secondary);
+      padding: 40px 20px; font-size: 14px; font-style: italic;
+    }
 
-.logo-wrapper { display: flex; justify-content: center; align-items: center; margin-bottom: 12px; }
-.logo-wrapper img { height: 160px; border-radius: 20px; }
+    .bubble-btn { 
+      padding: 12px 20px; border-radius: 25px; border: 2px solid #cbd5e1; 
+      background: #f8fafc; color: #1e293b; font-size: 14px; cursor: pointer;
+      text-transform: capitalize; 
+    }
+    .bubble-btn.active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; }
 
-h2 { text-align: center; color: var(--text-primary); font-size: 20px; margin: 0 0 10px; }
+    .tab-btn {
+      padding: 8px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
+      background: #f8fafc; color: #64748b; font-size: 12px; cursor: pointer; white-space: nowrap;
+    }
+    .tab-btn.active-tab { background: #3b82f6; color: white; border-color: #3b82f6; }
 
-.tab-btn {
-  padding: 8px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
-  background: #f8fafc; color: #64748b; font-size: 12px; cursor: pointer; transition: 0.2s;
-}
-.tab-btn.active-tab { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .input-row { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+    input, select { 
+      padding: 12px; border-radius: 12px; border: 1px solid var(--input-border); 
+      background: var(--input-bg); color: var(--text-primary); outline: none; 
+    }
 
-.input-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
-input#itemInput { flex: 2; min-width: 150px; padding: 12px 14px; border: 1px solid var(--input-border); border-radius: 999px; font-size: 14px; outline: none; background: var(--input-bg); color: var(--text-primary);}
+    .primary-btn { 
+      background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; 
+      border: none; font-weight: bold; cursor: pointer; padding: 12px 20px; border-radius: 999px; 
+    }
 
-.field-pill { padding: 10px; border-radius: 999px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary); font-size: 13px; outline: none; }
+    ul { list-style: none; padding: 0; margin-top: 20px; }
+    li { 
+      padding: 12px; background: var(--item-bg); margin: 8px 0; border-radius: 12px; 
+      display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px var(--shadow-color);
+    }
+    .done { text-decoration: line-through; opacity: 0.5; }
 
-button { padding: 10px 18px; border-radius: 999px; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: transform 0.08s ease; }
-.primary-btn { background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; }
-.check-btn { background: #e5f6ff; color: #0369a1; }
-.check-btn.checked { background: #dcfce7; color: #166534; }
-.Remove-btn { background: #fee2e2; color: #b91c1c; }
+    #sync-status { font-size: 10px; color: var(--text-secondary); text-align: center; margin-top: 15px; }
 
-.bubble-btn { padding: 12px 24px; border-radius: 25px; border: 2px solid #cbd5e1; background: #f8fafc; color: #1e293b; font-size: 14px; cursor: pointer; }
-.bubble-btn.active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; }
+    #customListModal, #deleteConfirmModal {
+      display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+      background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center;
+    }
+  </style>
 
-ul { list-style: none; padding: 0; margin-top: 8px; }
-li { padding: 12px 12px; background: var(--item-bg); margin: 8px 0; border-radius: 12px; box-shadow: 0 4px 6px var(--shadow-color); display: flex; justify-content: space-between; align-items: center; }
-.done { text-decoration: line-through; opacity: 0.6; }
-.date-badge { display: block; font-size: 11px; color: #6366f1; margin-top: 2px; font-weight: 600; }
-.date-badge.overdue { color: var(--overdue-red); font-weight: 800; animation: pulse 2s infinite; }
-
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-
-#customListModal, #deleteConfirmModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; }
-</style>
-
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-auth-compat.js"></script>
 </head>
 
 <body>
   <div id="signin-container" style="display:none;">
     <div class="card" style="text-align:center;">
       <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
-      <h2>Welcome to NexusList</h2>
-      <p style="color: var(--text-secondary); font-size: 14px;">Organize your life together.</p>
-      <button class="primary-btn" onclick="signInWithGoogle()" style="margin-top:20px; width: 100%;">🔐 Sign in with Google</button>
-      
-      <div style="margin-top: 30px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;">
-        <a href="privacy.html" style="color: #94a3b8; font-size: 11px; text-decoration: none;">Privacy Policy & Terms</a>
-      </div>
+      <h2>NexusList</h2>
+      <button class="primary-btn" onclick="signInWithGoogle()" style="width:100%; margin-top:20px;">🔐 Sign in with Google</button>
+      <div style="margin-top:30px;"><a href="privacy.html" style="color:var(--text-secondary); font-size:11px; text-decoration:none;">Privacy Policy</a></div>
     </div>
   </div>
 
   <div id="app-container" style="display:none;">
-    <div id="sharedBanner" style="display:none; background:#dcfce7; color:#166534; padding:10px; border-radius:12px; margin:15px 0; text-align:center; font-weight:600; font-size:13px;">🌍 Viewing SHARED List</div>
+    <div id="sharedBanner" style="display:none; background:#dcfce7; color:#166534; padding:10px; border-radius:12px; margin-bottom:15px; text-align:center; font-weight:600; font-size:13px;">🌍 Viewing SHARED List</div>
+    
     <div class="card">
       <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
-      <div id="workspaceSwitcher" style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:10px;"></div>
       
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+      <div id="workspaceSwitcher" style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:5px;"></div>
+      
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
         <button class="bubble-btn active" onclick="changeToBubbleList('shopping')" data-list="shopping">🛒 Shopping</button>
         <button class="bubble-btn" onclick="changeToBubbleList('reminder')" data-list="reminder">📝 Reminder</button>
         <button class="bubble-btn" onclick="changeToBubbleList('todo')" data-list="todo">✓ To-do</button>
-                          <span id="customListButtons"></span>
       </div>
 
-      <div class="input-row" style="margin-top:20px;">
-        <input id="itemInput" placeholder="Add item...">
-        <input id="quantityInput" placeholder="Qty" class="field-pill" style="width:45px; text-align:center;">
-        <input id="dateInput" type="date" class="field-pill" style="display:none;">
-        <select id="priorityInput" class="field-pill" style="display:none;">
-          <option value="">Prio</option>
-          <option value="high">🔴 High</option>
-          <option value="medium">🟡 Med</option>
-          <option value="low">🟢 Low</option>
-        </select>
+      <div class="input-row">
+        <input id="itemInput" placeholder="Add item..." style="flex:2">
+        <input id="quantityInput" placeholder="Qty" style="width:45px; text-align:center;">
         <button class="primary-btn" onclick="addItem()">Add</button>
       </div>
 
       <ul id="list"></ul>
+      <div id="sync-status">Syncing...</div>
 
-      <div style="text-align: center; margin-top: 15px;">
-        <button onclick="clearCompleted()" style="background: none; color: #94a3b8; font-size: 12px; border: 1px solid #cbd5e1; padding: 6px 12px;">🧹 Clear checked Items</button>
+      <div style="text-align:center; margin-top:20px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+        <button onclick="copyShareLink()" class="tab-btn" style="background:#3b82f6; color:white;">🔗 Share List</button>
+        <button onclick="toggleDarkMode()" id="darkModeBtn" class="tab-btn">🌙 Dark</button>
+        <button onclick="signOut()" class="tab-btn">Sign Out</button>
       </div>
 
-      <div style="text-align:center;margin-top:16px;">
-        <select id="customListDropdown" onchange="handleDropdownChange()" class="field-pill" style="width:200px; font-size: 12px;">
-          <option value="" selected disabled>Select other lists...</option>
-          <option value="__new__">➕ New list type...</option>
-        </select>
-      </div>
-
-      <div style="text-align:center;margin-top:20px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
-        <button onclick="copyShareLink()" style="background:#3b82f6; color:white; font-size:12px;">🔗 Share List</button>
-        <button id="darkModeBtn" onclick="toggleDarkMode()" style="background:#64748b; color:white; font-size:12px;">🌙 Dark</button>
-        <button onclick="signOut()" style="background:#94a3b8; color:white; font-size:12px;">Sign Out</button>
-      </div>
-
-      <div style="text-align:center; margin-top:25px; border-top: 1px solid rgba(0,0,0,0.05); padding-top:15px;">
-        <a href="https://buymeacoffee.com/mjcpro" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #FFDD00; color: #000000; padding: 10px 20px; border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">☕ Support NexusList</a>
-        <br><button id="deleteCustomListBtn" onclick="openDeleteModal()" style="display: none; background: none; color: #f87171; font-size: 11px; margin-top: 15px;">🗑️ Delete Custom Category</button>
-        <br><a href="privacy.html" style="color: #94a3b8; font-size: 10px; text-decoration: none; display: inline-block; margin-top:10px;">Privacy Policy</a>
+      <div style="text-align:center; margin-top:25px; border-top:1px solid rgba(0,0,0,0.05); padding-top:15px;">
+        <a href="https://buymeacoffee.com/mjcpro" target="_blank" style="text-decoration:none; background:#FFDD00; color:black; padding:10px 20px; border-radius:999px; font-weight:bold; font-size:13px;">☕ Support NexusList</a>
       </div>
     </div>
   </div>
 
-  <div id="customListModal"><div class="card" style="width:90%; max-width:400px; text-align:center;"><h2>New List Name</h2><input id="newListInput" class="field-pill" style="width:85%; margin:15px 0;"><div style="display:flex; gap:10px; justify-content:center;"><button onclick="closeModal('customListModal')">Cancel</button><button onclick="submitNewList()" class="primary-btn">Create</button></div></div></div>
-  <div id="deleteConfirmModal"><div class="card" style="width:90%; max-width:400px; text-align:center;"><h2>Delete Category?</h2><div style="display:flex; gap:10px; justify-content:center; margin-top: 20px;"><button onclick="closeModal('deleteConfirmModal')">Cancel</button><button onclick="confirmDeleteList()" style="background:#ef4444; color:white;">Delete</button></div></div></div>
-
 <script>
-const firebaseConfig = { apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY", authDomain: "nexuslist-380ff.firebaseapp.com", databaseURL: "https://nexuslist-380ff-default-rtdb.firebaseio.com", projectId: "nexuslist-380ff", storageBucket: "nexuslist-380ff.firebasestorage.app", messagingSenderId: "950145923798", appId: "1:950145923798:web:050a4a08f99cae13e72777" };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database(), auth = firebase.auth();
+  const firebaseConfig = { 
+    apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY", 
+    authDomain: "nexuslist-380ff.firebaseapp.com", 
+    databaseURL: "https://nexuslist-380ff-default-rtdb.firebaseio.com", 
+    projectId: "nexuslist-380ff", 
+    storageBucket: "nexuslist-380ff.firebasestorage.app", 
+    messagingSenderId: "950145923798", 
+    appId: "1:950145923798:web:050a4a08f99cae13e72777" 
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database(), auth = firebase.auth();
 
-let currentUser = null, currentType = 'shopping', listRef = null, listTypesRef = null, baseDataPath = "";
-let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
+  let currentUser = null, currentType = 'shopping', listRef = null, baseDataPath = "";
+  let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
-function applyDarkMode() {
-  const isDark = localStorage.getItem('darkMode') === 'true';
-  document.documentElement.classList.toggle('dark-mode', isDark);
-  const btn = document.getElementById('darkModeBtn');
-  if(btn) btn.textContent = isDark ? '☀️ Light' : '🌙 Dark';
-}
-function toggleDarkMode() {
-  localStorage.setItem('darkMode', localStorage.getItem('darkMode') !== 'true');
-  applyDarkMode();
-}
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user; applyDarkMode();
-    const groupParam = new URLSearchParams(window.location.search).get('group');
-    if (groupParam && groupParam !== user.uid && !sharedGroups.includes(groupParam)) {
-      sharedGroups.push(groupParam);
-      localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
-    }
-    switchToWorkspace(groupParam || user.uid);
-    document.getElementById('signin-container').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
-  } else {
-    document.getElementById('signin-container').style.display = 'block';
-    document.getElementById('app-container').style.display = 'none';
-    applyDarkMode(); // Keep dark mode active on login page
+  // DARK MODE LOGIC
+  function applyDarkMode() {
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
   }
-});
+  function toggleDarkMode() {
+    localStorage.setItem('darkMode', localStorage.getItem('darkMode') !== 'true');
+    applyDarkMode();
+  }
 
-function switchToWorkspace(id) {
-  baseDataPath = 'nexuslist/' + id;
-  document.getElementById('sharedBanner').style.display = (id === currentUser.uid) ? 'none' : 'block';
-  if (listTypesRef) listTypesRef.off();
-  listTypesRef = db.ref(baseDataPath + '/listTypes');
-  loadListTypes();
-  changeToBubbleList('shopping');
-  renderWorkspaceSwitcher(id);
-}
-
-function changeToBubbleList(type) {
-  currentType = type;
-  document.querySelectorAll('.bubble-btn').forEach(b => b.classList.toggle('active', b.dataset.list === type));
-  document.getElementById('quantityInput').style.display = (type === 'shopping') ? 'block' : 'none';
-  document.getElementById('dateInput').style.display = (type === 'reminder') ? 'block' : 'none';
-  document.getElementById('priorityInput').style.display = (type === 'reminder' || type === 'todo') ? 'block' : 'none';
-  document.getElementById('deleteCustomListBtn').style.display = (['shopping', 'reminder', 'todo'].includes(type)) ? 'none' : 'inline-block';
-  if (listRef) listRef.off();
-  listRef = db.ref(baseDataPath + '/' + currentType);
-  attachListeners();
-}
-
-function attachListeners() {
-  listRef.on('value', snap => {
-    const listUI = document.getElementById('list');
-    listUI.innerHTML = '';
-    const items = [];
-    snap.forEach(child => { items.push({ key: child.key, ...child.val() }); });
-    items.sort((a, b) => {
-      if (a.done !== b.done) return a.done ? 1 : -1;
-      const prioMap = { high: 1, medium: 2, low: 3, '': 4 };
-      return (prioMap[a.priority] || 4) - (prioMap[b.priority] || 4);
-    });
-    items.forEach(item => {
-      const li = document.createElement('li');
-      const dots = {high:'🔴 ', medium:'🟡 ', low:'🟢 '};
-      let details = (currentType === 'shopping' && item.quantity && item.quantity !== '1') ? `<b style="color:#4f46e5">${item.quantity}×</b> ` : "";
-      let isOverdue = item.dueDate && !item.done && item.dueDate < new Date().toISOString().split('T')[0];
-      let dateLabel = (item.dueDate) ? `<span class="date-badge ${isOverdue ? 'overdue' : ''}">📅 ${item.dueDate}</span>` : "";
-      li.innerHTML = `<div><span class="${item.done ? 'done' : ''}">${dots[item.priority] || ''}${details}${item.text}</span>${dateLabel}</div><div style="display:flex; gap:5px;"><button class="check-btn ${item.done ? 'checked' : ''}" onclick="toggleDone('${item.key}')">${item.done ? 'Uncheck' : 'Check'}</button><button class="Remove-btn" onclick="deleteItem('${item.key}')">Remove</button></div>`;
-      listUI.appendChild(li);
-    });
+  // AUTH OBSERVER
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+      applyDarkMode();
+      const groupParam = new URLSearchParams(window.location.search).get('group');
+      if (groupParam && groupParam !== user.uid && !sharedGroups.includes(groupParam)) {
+        sharedGroups.push(groupParam);
+        localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
+      }
+      switchToWorkspace(groupParam || user.uid);
+      document.getElementById('signin-container').style.display = 'none';
+      document.getElementById('app-container').style.display = 'block';
+    } else {
+      document.getElementById('signin-container').style.display = 'block';
+      document.getElementById('app-container').style.display = 'none';
+    }
   });
-}
 
-function addItem() {
-  const input = document.getElementById('itemInput');
-  if (!input.value.trim()) return;
-  listRef.push({ text: input.value.trim(), quantity: document.getElementById('quantityInput').value || '1', priority: document.getElementById('priorityInput').value || '', dueDate: document.getElementById('dateInput').value || '', done: false });
-  input.value = ''; document.getElementById('quantityInput').value = ''; document.getElementById('dateInput').value = ''; document.getElementById('priorityInput').value = '';
-}
-function toggleDone(key) { listRef.child(key).once('value', snap => listRef.child(key).update({ done: !snap.val().done })); }
-function deleteItem(key) { listRef.child(key).remove(); }
-function clearCompleted() { listRef.once('value', snap => { snap.forEach(c => { if(c.val().done) listRef.child(c.key).remove(); }); }); }
-277
-    () {
-  const dropdown = document.getElementById('customListDropdown');
-  dropdown.innerHTML = `<option value="" selected disabled>Select other lists...</option><option value="__new__">➕ New list type...</option>`;
-  listTypesRef.on('child_added', snap => {
-              
-        // Create bubble button for custom list
-        const btn = document.createElement('button');
-        btn.className = 'bubble-btn';
-        btn.dataset.list = t.key;
-        btn.textContent = t.label;
-        btn.onclick = () => changeToBubbleList(t.key);
-        document.getElementById('customListButtons').appendChild(btn);
-  });
-}
-function handleDropdownChange() {
-  const sel = document.getElementById('customListDropdown');
-  if(sel.value === '__new__') { document.getElementById('customListModal').style.display = 'flex'; sel.value = ""; }
-  else changeToBubbleList(sel.value);
-}
-function submitNewList() {
-  const name = document.getElementById('newListInput').value.trim();
-  if(name) { const key = name.toLowerCase().replace(/\s+/g, '-'); listTypesRef.push({ key, label: name }); closeModal('customListModal'); changeToBubbleList(key); }
-}
-function openDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-function confirmDeleteList() {
-  db.ref(baseDataPath + '/' + currentType).remove();
-  listTypesRef.once('value', snap => snap.forEach(c => { if(c.val().key === currentType) c.ref.remove(); }));
-  closeModal('deleteConfirmModal'); changeToBubbleList('shopping');
-}
-function renderWorkspaceSwitcher(activeId) {
-  const container = document.getElementById('workspaceSwitcher');
-  container.innerHTML = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">🏠 Me</button>`;
-  sharedGroups.forEach((groupId, index) => { container.innerHTML += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Group ${index + 1}</button>`; });
-}
-function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-function signOut() { auth.signOut(); }
-function copyShareLink() {
-  const url = window.location.origin + window.location.pathname + "?group=" + currentUser.uid;
-  navigator.clipboard.writeText(url).then(() => { alert("Link Copied!"); });
-}
-document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
+  function switchToWorkspace(id) {
+    baseDataPath = 'nexuslist/' + id;
+    document.getElementById('sharedBanner').style.display = (id === currentUser.uid) ? 'none' : 'block';
+    renderWorkspaceSwitcher(id);
+    changeToBubbleList('shopping');
+  }
+
+  function renderWorkspaceSwitcher(activeId) {
+    const container = document.getElementById('workspaceSwitcher');
+    // Renamed Me to "My list"
+    let html = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">🏠 My list</button>`;
+    
+    sharedGroups.forEach((groupId, index) => {
+      html += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Shared List ${index + 1}</button>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function changeToBubbleList(type) {
+    currentType = type;
+    document.querySelectorAll('.bubble-btn').forEach(b => b.classList.toggle('active', b.dataset.list === type));
+    if (listRef) listRef.off();
+    listRef = db.ref(baseDataPath + '/' + currentType);
+    attachListeners();
+  }
+
+  function attachListeners() {
+    listRef.on('value', snap => {
+      const listUI = document.getElementById('list');
+      listUI.innerHTML = '';
+      
+      // Update Sync Timestamp
+      const now = new Date();
+      const timeStr = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+      document.getElementById('sync-status').textContent = `✅ Last synced: ${timeStr}`;
+
+      if (!snap.exists()) return;
+
+      const items = [];
+      snap.forEach(child => { items.push({ key: child.key, ...child.val() }); });
+      items.sort((a, b) => (a.done === b.done) ? 0 : a.done ? 1 : -1);
+
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="${item.done ? 'done' : ''}">${item.text} ${item.quantity !== '1' ? '('+item.quantity+')' : ''}</span>
+          <div style="display:flex; gap:5px;">
+            <button onclick="toggleDone('${item.key}')" class="tab-btn">${item.done ? '↩️' : '✅'}</button>
+            <button onclick="deleteItem('${item.key}')" class="tab-btn" style="color:red">🗑️</button>
+          </div>`;
+        listUI.appendChild(li);
+      });
+    });
+  }
+
+  function addItem() {
+    const input = document.getElementById('itemInput');
+    const qty = document.getElementById('quantityInput').value || '1';
+    if (!input.value.trim()) return;
+    listRef.push({ text: input.value.trim(), quantity: qty, done: false });
+    input.value = ''; document.getElementById('quantityInput').value = '';
+  }
+
+  function toggleDone(key) { listRef.child(key).once('value', s => listRef.child(key).update({ done: !s.val().done })); }
+  function deleteItem(key) { listRef.child(key).remove(); }
+  function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+  function signOut() { auth.signOut(); }
+  function copyShareLink() {
+    const url = window.location.origin + window.location.pathname + "?group=" + currentUser.uid;
+    navigator.clipboard.writeText(url).then(() => alert("Link Copied! Share this with your family."));
+  }
+  document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
 </script>
 </body>
-
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-XXXXXXXXXX');
-        </script>
 </html>
-
-
-
