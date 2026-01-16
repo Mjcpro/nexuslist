@@ -263,14 +263,16 @@
     if (user) {
       currentUser = user;
       applyDarkMode();
-      const groupParam = new URLSearchParams(window.location.search).get('group');
+      const params = new URLSearchParams(window.location.search);
+      const groupParam = params.get('group');
       if (groupParam && groupParam !== user.uid && !sharedGroups.find(g => g.id === groupParam)) {
-        // First join: Add with placeholder, then fetch real name
         sharedGroups.push({ id: groupParam, name: "Loading..." });
         localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
         fetchWorkspaceName(groupParam);
       }
       switchToWorkspace(groupParam || user.uid);
+      // Clean URL after joining
+      if (groupParam) window.history.replaceState({}, document.title, window.location.pathname);
       document.getElementById('signin-container').style.display = 'none';
       document.getElementById('app-container').style.display = 'block';
     } else {
@@ -294,6 +296,7 @@
   }
 
   function switchToWorkspace(id) {
+    // CRITICAL: Clean up old listeners before switching paths
     if (listRef) listRef.off(); 
     if (bubbleRef) bubbleRef.off();
     
@@ -307,7 +310,7 @@
     document.getElementById('wsName').textContent = displayName;
     document.getElementById('sharedBanner').style.display = isPrivate ? 'none' : 'block';
     
-    // UI Visibility logic
+    // Hide/Show context buttons
     document.getElementById('createWsBtn').style.display = isPrivate ? 'inline-block' : 'none';
     document.getElementById('shareBtn').style.display = isPrivate ? 'none' : 'inline-block';
     
@@ -413,7 +416,7 @@
             <span class="${item.done ? 'done' : ''}">${item.text}${qtyText}</span>
           </div>
           <div style="display:flex; gap: 8px;">
-            <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">${item.done ? 'Check' : 'Check'}</button>
+            <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">${item.done ? 'Uncheck' : 'Check'}</button>
             <button onclick="deleteItem('${child.key}')" class="remove-btn">Remove</button>
           </div>`;
         listUI.appendChild(li);
@@ -426,9 +429,11 @@
     const qty = document.getElementById('qtyInput').value.trim();
     const priority = document.getElementById('priorityInput').value;
     if (!input.value.trim()) return;
+    
     let itemData = { text: input.value.trim(), done: false };
     if (currentType === 'shopping' && qty) itemData.qty = qty;
     if (['reminder', 'todo'].includes(currentType)) itemData.priority = priority;
+
     listRef.push(itemData);
     input.value = '';
     document.getElementById('qtyInput').value = '';
