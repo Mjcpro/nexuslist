@@ -245,7 +245,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database(), auth = firebase.auth();
 
-  let currentUser = null, currentType = 'shopping', listRef = null, bubbleRef = null, baseDataPath = "", currentWorkspaceId = "";
+  let currentUser = null, currentType = 'shopping', baseDataPath = "", currentWorkspaceId = "";
   let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
   function applyDarkMode() {
@@ -263,8 +263,7 @@
     if (user) {
       currentUser = user;
       applyDarkMode();
-      const params = new URLSearchParams(window.location.search);
-      const groupParam = params.get('group');
+      const groupParam = new URLSearchParams(window.location.search).get('group');
       if (groupParam && groupParam !== user.uid && !sharedGroups.find(g => g.id === groupParam)) {
         sharedGroups.push({ id: groupParam, name: "Loading..." });
         localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
@@ -295,13 +294,9 @@
   }
 
   function switchToWorkspace(id) {
-    // Kill previous listeners to prevent bleed and lockup
-    if (listRef) listRef.off(); 
-    if (bubbleRef) bubbleRef.off();
-    
-    // Reset visual list immediately
-    document.getElementById('list').innerHTML = '';
-    document.getElementById('dynamicBubbles').innerHTML = '';
+    // Clear listeners before changing path
+    db.ref(baseDataPath + '/' + currentType).off();
+    db.ref(baseDataPath + '/custom_categories').off();
     
     currentWorkspaceId = id;
     baseDataPath = 'nexuslist/' + id;
@@ -334,9 +329,6 @@
     container.innerHTML = html;
   }
 
-  function showSharedWorkspaceModal() { document.getElementById('sharedWorkspaceModal').style.display = 'flex'; document.getElementById('newSharedName').focus(); }
-  function hideSharedWorkspaceModal() { document.getElementById('sharedWorkspaceModal').style.display = 'none'; }
-
   function executeCreateSharedWorkspace() {
     const name = document.getElementById('newSharedName').value.trim();
     if (!name) return;
@@ -349,22 +341,8 @@
     switchToWorkspace(newId);
   }
 
-  function copyShareLink() {
-    const url = window.location.origin + window.location.pathname + "?group=" + currentWorkspaceId;
-    navigator.clipboard.writeText(url).then(() => alert("Invite Link Copied!"));
-  }
-
-  function clearWorkspaceHistory() {
-    if(confirm("Clear shared lists from view?")) {
-      localStorage.setItem('sharedGroups', "[]");
-      sharedGroups = [];
-      switchToWorkspace(currentUser.uid);
-    }
-  }
-
   function loadCustomBubbles() {
-    bubbleRef = db.ref(baseDataPath + '/custom_categories');
-    bubbleRef.on('value', snap => {
+    db.ref(baseDataPath + '/custom_categories').on('value', snap => {
       const dynamicContainer = document.getElementById('dynamicBubbles');
       dynamicContainer.innerHTML = '';
       snap.forEach(child => {
@@ -381,6 +359,7 @@
   }
 
   function changeToBubbleList(type) {
+    db.ref(baseDataPath + '/' + currentType).off(); // clean old sub-path
     currentType = type;
     document.querySelectorAll('.bubble-btn').forEach(b => b.classList.toggle('active', b.dataset.list === type));
     
@@ -391,13 +370,11 @@
     const isDefault = ['shopping', 'reminder', 'todo'].includes(type);
     document.getElementById('deleteCategoryWrapper').style.display = isDefault ? 'none' : 'block';
 
-    if (listRef) listRef.off();
-    listRef = db.ref(baseDataPath + '/' + currentType);
     attachListeners();
   }
 
   function attachListeners() {
-    listRef.on('value', snap => {
+    db.ref(baseDataPath + '/' + currentType).on('value', snap => {
       const listUI = document.getElementById('list');
       listUI.innerHTML = '';
       if (!snap.exists()) return;
@@ -405,46 +382,52 @@
         const item = child.val();
         if(child.key === 'metadata') return;
         const li = document.createElement('li');
-        let priorityDot = item.priority ? `<span class="priority-dot dot-${item.priority}"></span>` : '';
-        let qtyText = item.qty ? `<span class="qty-tag">(${item.qty})</span>` : '';
+        let pDot = item.priority ? `<span class="priority-dot dot-${item.priority}"></span>` : '';
+        let qTag = item.qty ? `<span class="qty-tag">(${item.qty})</span>` : '';
         li.innerHTML = `
-          <div style="display:flex; align-items:center;">
-            ${priorityDot}
-            <span class="${item.done ? 'done' : ''}">${item.text}${qtyText}</span>
-          </div>
+          <div style="display:flex; align-items:center;"><pDot>${pDot}</pDot><span class="${item.done ? 'done' : ''}">${item.text}${qTag}</span></div>
           <div style="display:flex; gap: 8px;">
-            <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">${item.done ? 'Uncheck' : 'Check'}</button>
+            <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">Check</button>
             <button onclick="deleteItem('${child.key}')" class="remove-btn">Remove</button>
           </div>`;
         listUI.appendChild(li);
       });
-      const now = new Date();
-      document.getElementById('sync-status').textContent = `✅ Last synced: ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
     });
   }
 
   function addItem() {
     const input = document.getElementById('itemInput');
+    const text = input.value.trim();
+    if (!text) return;
+    
     const qty = document.getElementById('qtyInput').value.trim();
     const priority = document.getElementById('priorityInput').value;
-    if (!input.value.trim()) return;
-    let itemData = { text: input.value.trim(), done: false };
+    
+    let itemData = { text: text, done: false };
     if (currentType === 'shopping' && qty) itemData.qty = qty;
     if (currentType === 'reminder' || currentType === 'todo') itemData.priority = priority;
-    listRef.push(itemData);
+
+    // DIRECT REF CALL ensures it hits the right spot
+    db.ref(baseDataPath + '/' + currentType).push(itemData);
+    
     input.value = '';
     document.getElementById('qtyInput').value = '';
   }
 
-  function toggleDone(key) { listRef.child(key).once('value', s => listRef.child(key).update({ done: !s.val().done })); }
-  function deleteItem(key) { listRef.child(key).remove(); }
+  function toggleDone(key) { 
+    const ref = db.ref(baseDataPath + '/' + currentType + '/' + key);
+    ref.once('value', s => ref.update({ done: !s.val().done })); 
+  }
+
+  function deleteItem(key) { db.ref(baseDataPath + '/' + currentType + '/' + key).remove(); }
+
   function clearCompleted() {
-    listRef.once('value', snap => {
-      snap.forEach(child => { if (child.val().done) listRef.child(child.key).remove(); });
+    const ref = db.ref(baseDataPath + '/' + currentType);
+    ref.once('value', snap => {
+      snap.forEach(child => { if (child.val().done) ref.child(child.key).remove(); });
     });
   }
-  function showCustomModal() { document.getElementById('customListModal').style.display = 'flex'; document.getElementById('newListName').focus(); }
-  function hideCustomModal() { document.getElementById('customListModal').style.display = 'none'; }
+
   function createNewList() {
     const name = document.getElementById('newListName').value.trim();
     if (!name) return;
@@ -453,14 +436,25 @@
       document.getElementById('newListName').value = '';
     });
   }
-  function deleteCurrentCategory() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
-  function hideDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'none'; }
+
   function executeDeleteCategory() {
     db.ref(baseDataPath + '/' + currentType).remove();
     db.ref(baseDataPath + '/custom_categories/' + currentType).remove();
     hideDeleteModal();
     changeToBubbleList('shopping');
   }
+
+  function showSharedWorkspaceModal() { document.getElementById('sharedWorkspaceModal').style.display = 'flex'; document.getElementById('newSharedName').focus(); }
+  function hideSharedWorkspaceModal() { document.getElementById('sharedWorkspaceModal').style.display = 'none'; }
+  function showCustomModal() { document.getElementById('customListModal').style.display = 'flex'; document.getElementById('newListName').focus(); }
+  function hideCustomModal() { document.getElementById('customListModal').style.display = 'none'; }
+  function deleteCurrentCategory() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
+  function hideDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'none'; }
+  function copyShareLink() {
+    const url = window.location.origin + window.location.pathname + "?group=" + currentWorkspaceId;
+    navigator.clipboard.writeText(url).then(() => alert("Invite Link Copied!"));
+  }
+  function clearWorkspaceHistory() { if(confirm("Clear shared lists from view?")) { localStorage.setItem('sharedGroups', "[]"); sharedGroups = []; switchToWorkspace(currentUser.uid); } }
   function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
   function signOut() { auth.signOut(); }
   document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
