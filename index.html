@@ -142,7 +142,7 @@
   </div>
 
   <div id="app-container" style="display:none;">
-    <div id="sharedBanner" style="display:none; background:#dcfce7; color:#166534; padding:10px; border-radius:12px; margin-bottom:15px; text-align:center; font-weight:600; font-size:13px;">🌍 Using SHARED Workspace</div>
+    <div id="sharedBanner" style="display:none; background:#dcfce7; color:#166534; padding:10px; border-radius:12px; margin-bottom:15px; text-align:center; font-weight:600; font-size:13px;">🌍 Workspace: <span id="wsName"></span></div>
     <div class="card">
       <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
       
@@ -157,7 +157,7 @@
       </div>
 
       <div class="input-row" style="margin-top:25px;">
-        <input id="qtyInput" type="text" placeholder="Qty" style="display:block;">
+        <input id="qtyInput" type="text" placeholder="Qty">
         <select id="priorityInput" style="display:none;">
           <option value="Low">🟢 Low</option>
           <option value="Med">🟡 Med</option>
@@ -170,13 +170,13 @@
       <ul id="list"></ul>
       
       <div style="text-align: center;">
-        <button onclick="clearCompleted()" class="clear-btn">🧹 Clear checked Items</button>
+        <button onclick="clearCompleted()" class="clear-btn">Sweep Checked</button>
       </div>
 
       <div id="sync-status"></div>
 
       <div style="text-align:center; margin-top:20px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-        <button onclick="createSharedWorkspace()" class="tab-btn" style="background:#22c55e; color:white;">✨ Create Shared List</button>
+        <button onclick="showSharedWorkspaceModal()" id="createWsBtn" class="tab-btn" style="background:#22c55e; color:white;">✨ Create Shared List</button>
         <button onclick="copyShareLink()" id="shareBtn" class="tab-btn" style="background:#3b82f6; color:white; display:none;">🔗 Copy Invite Link</button>
         <button onclick="toggleDarkMode()" id="darkModeBtn" class="tab-btn">🌙 Dark</button>
         <button onclick="signOut()" class="tab-btn">Sign Out</button>
@@ -201,8 +201,8 @@
 
   <div id="customListModal" class="modal-overlay">
     <div class="card" style="width:90%; max-width:400px; margin-top:0;">
-      <h3>Create New List</h3>
-      <input id="newListName" placeholder="List name (e.g. Projects)" style="width:100%; box-sizing:border-box; border-radius:12px;" onkeyup="if(event.key === 'Enter') createNewList()">
+      <h3>Create New Category</h3>
+      <input id="newListName" placeholder="Name (e.g. Projects)" style="width:100%; box-sizing:border-box; border-radius:12px;" onkeyup="if(event.key === 'Enter') createNewList()">
       <div style="display:flex; gap:10px; margin-top:20px;">
         <button onclick="hideCustomModal()" class="tab-btn" style="flex:1">Cancel</button>
         <button onclick="createNewList()" class="primary-btn" style="flex:1">Create</button>
@@ -210,9 +210,20 @@
     </div>
   </div>
 
+  <div id="sharedWorkspaceModal" class="modal-overlay">
+    <div class="card" style="width:90%; max-width:400px; margin-top:0;">
+      <h3>Create Shared List</h3>
+      <input id="newSharedName" placeholder="Name (e.g. Family List)" style="width:100%; box-sizing:border-box; border-radius:12px;" onkeyup="if(event.key === 'Enter') executeCreateSharedWorkspace()">
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button onclick="hideSharedWorkspaceModal()" class="tab-btn" style="flex:1">Cancel</button>
+        <button onclick="executeCreateSharedWorkspace()" class="primary-btn" style="flex:1">Create</button>
+      </div>
+    </div>
+  </div>
+
   <div id="deleteConfirmModal" class="modal-overlay" style="z-index:3000;">
     <div class="card" style="width:90%; max-width:400px; margin-top:0; text-align:center;">
-      <h3 style="color:#ef4444;">Delete List?</h3>
+      <h3 style="color:#ef4444;">Delete Category?</h3>
       <p style="color:var(--text-secondary); font-size:14px; margin-bottom:20px;">This will permanently remove this category and all items inside it.</p>
       <div style="display:flex; gap:10px;">
         <button onclick="hideDeleteModal()" class="tab-btn" style="flex:1">Cancel</button>
@@ -234,7 +245,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database(), auth = firebase.auth();
 
-  let currentUser = null, currentType = 'shopping', listRef = null, baseDataPath = "", currentWorkspaceId = "";
+  let currentUser = null, currentType = 'shopping', listRef = null, bubbleRef = null, baseDataPath = "", currentWorkspaceId = "";
   let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
 
   function applyDarkMode() {
@@ -253,9 +264,11 @@
       currentUser = user;
       applyDarkMode();
       const groupParam = new URLSearchParams(window.location.search).get('group');
-      if (groupParam && groupParam !== user.uid && !sharedGroups.includes(groupParam)) {
-        sharedGroups.push(groupParam);
+      if (groupParam && groupParam !== user.uid && !sharedGroups.find(g => g.id === groupParam)) {
+        // First join: Add with placeholder, then fetch real name
+        sharedGroups.push({ id: groupParam, name: "Loading..." });
         localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
+        fetchWorkspaceName(groupParam);
       }
       switchToWorkspace(groupParam || user.uid);
       document.getElementById('signin-container').style.display = 'none';
@@ -266,12 +279,36 @@
     }
   });
 
+  function fetchWorkspaceName(id) {
+    db.ref('nexuslist/' + id + '/metadata/name').once('value', snap => {
+      if (snap.exists()) {
+        const idx = sharedGroups.findIndex(g => g.id === id);
+        if (idx !== -1) {
+          sharedGroups[idx].name = snap.val();
+          localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
+          renderWorkspaceSwitcher(currentWorkspaceId);
+          if (currentWorkspaceId === id) document.getElementById('wsName').textContent = snap.val();
+        }
+      }
+    });
+  }
+
   function switchToWorkspace(id) {
+    if (listRef) listRef.off(); 
+    if (bubbleRef) bubbleRef.off();
+    
     currentWorkspaceId = id;
     baseDataPath = 'nexuslist/' + id;
     
     const isPrivate = (id === currentUser.uid);
+    const workspaceObj = sharedGroups.find(g => g.id === id);
+    const displayName = isPrivate ? "My Lists" : (workspaceObj ? workspaceObj.name : "Shared List");
+    
+    document.getElementById('wsName').textContent = displayName;
     document.getElementById('sharedBanner').style.display = isPrivate ? 'none' : 'block';
+    
+    // UI Visibility logic
+    document.getElementById('createWsBtn').style.display = isPrivate ? 'inline-block' : 'none';
     document.getElementById('shareBtn').style.display = isPrivate ? 'none' : 'inline-block';
     
     renderWorkspaceSwitcher(id);
@@ -286,37 +323,46 @@
       return;
     }
     container.style.display = 'flex';
-    let html = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">📂 My Lists</button>`;
-    sharedGroups.forEach((groupId, index) => {
-      html += `<button onclick="switchToWorkspace('${groupId}')" class="tab-btn ${activeId === groupId ? 'active-tab' : ''}">👥 Shared List ${index + 1}</button>`;
+    let html = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">My Lists</button>`;
+    sharedGroups.forEach((g) => {
+      html += `<button onclick="switchToWorkspace('${g.id}')" class="tab-btn ${activeId === g.id ? 'active-tab' : ''}">${g.name}</button>`;
     });
     container.innerHTML = html;
   }
 
-  function createSharedWorkspace() {
+  function showSharedWorkspaceModal() { document.getElementById('sharedWorkspaceModal').style.display = 'flex'; document.getElementById('newSharedName').focus(); }
+  function hideSharedWorkspaceModal() { document.getElementById('sharedWorkspaceModal').style.display = 'none'; }
+
+  function executeCreateSharedWorkspace() {
+    const name = document.getElementById('newSharedName').value.trim();
+    if (!name) return;
     const newId = "group_" + Math.random().toString(36).substr(2, 9);
-    sharedGroups.push(newId);
+    sharedGroups.push({ id: newId, name: name });
     localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
+    
+    db.ref('nexuslist/' + newId + '/metadata').set({ name: name });
+    
+    hideSharedWorkspaceModal();
+    document.getElementById('newSharedName').value = '';
     switchToWorkspace(newId);
-    alert("Shared Workspace Created! Use the 'Copy Invite Link' button to invite others.");
   }
 
   function copyShareLink() {
     const url = window.location.origin + window.location.pathname + "?group=" + currentWorkspaceId;
-    navigator.clipboard.writeText(url).then(() => alert("Invite Link Copied! Send this to the person you want to share with."));
+    navigator.clipboard.writeText(url).then(() => alert("Invite Link Copied!"));
   }
 
   function clearWorkspaceHistory() {
-    if(confirm("This will remove all shared lists from your view. You can rejoin using their invite links. Continue?")) {
+    if(confirm("Clear shared lists from view?")) {
       localStorage.setItem('sharedGroups', "[]");
       sharedGroups = [];
       switchToWorkspace(currentUser.uid);
     }
   }
 
-  // --- REST OF THE LOGIC REMAINS UNCHANGED ---
   function loadCustomBubbles() {
-    db.ref(baseDataPath + '/custom_categories').on('value', snap => {
+    bubbleRef = db.ref(baseDataPath + '/custom_categories');
+    bubbleRef.on('value', snap => {
       const dynamicContainer = document.getElementById('dynamicBubbles');
       dynamicContainer.innerHTML = '';
       snap.forEach(child => {
@@ -335,12 +381,14 @@
   function changeToBubbleList(type) {
     currentType = type;
     document.querySelectorAll('.bubble-btn').forEach(b => b.classList.toggle('active', b.dataset.list === type));
+    
     const isShopping = type === 'shopping';
     const isPriorityNeeded = ['reminder', 'todo'].includes(type);
     document.getElementById('qtyInput').style.display = isShopping ? 'block' : 'none';
     document.getElementById('priorityInput').style.display = isPriorityNeeded ? 'block' : 'none';
     const isDefault = ['shopping', 'reminder', 'todo'].includes(type);
     document.getElementById('deleteCategoryWrapper').style.display = isDefault ? 'none' : 'block';
+
     if (listRef) listRef.off();
     listRef = db.ref(baseDataPath + '/' + currentType);
     attachListeners();
@@ -365,35 +413,12 @@
             <span class="${item.done ? 'done' : ''}">${item.text}${qtyText}</span>
           </div>
           <div style="display:flex; gap: 8px;">
-            <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">${item.done ? 'Uncheck' : 'Check'}</button>
+            <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">${item.done ? 'Check' : 'Check'}</button>
             <button onclick="deleteItem('${child.key}')" class="remove-btn">Remove</button>
           </div>`;
         listUI.appendChild(li);
       });
     });
-  }
-
-  function showCustomModal() { document.getElementById('customListModal').style.display = 'flex'; document.getElementById('newListName').focus(); }
-  function hideCustomModal() { document.getElementById('customListModal').style.display = 'none'; }
-  function deleteCurrentCategory() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
-  function hideDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'none'; }
-
-  function createNewList() {
-    const name = document.getElementById('newListName').value.trim();
-    if (!name) return;
-    const newRef = db.ref(baseDataPath + '/custom_categories').push();
-    newRef.set({ name: name }).then(() => {
-      hideCustomModal();
-      document.getElementById('newListName').value = '';
-      changeToBubbleList(newRef.key);
-    });
-  }
-
-  function executeDeleteCategory() {
-    db.ref(baseDataPath + '/' + currentType).remove();
-    db.ref(baseDataPath + '/custom_categories/' + currentType).remove();
-    hideDeleteModal();
-    changeToBubbleList('shopping');
   }
 
   function addItem() {
@@ -415,6 +440,24 @@
     listRef.once('value', snap => {
       snap.forEach(child => { if (child.val().done) listRef.child(child.key).remove(); });
     });
+  }
+  function showCustomModal() { document.getElementById('customListModal').style.display = 'flex'; document.getElementById('newListName').focus(); }
+  function hideCustomModal() { document.getElementById('customListModal').style.display = 'none'; }
+  function createNewList() {
+    const name = document.getElementById('newListName').value.trim();
+    if (!name) return;
+    db.ref(baseDataPath + '/custom_categories').push({ name: name }).then(() => {
+      hideCustomModal();
+      document.getElementById('newListName').value = '';
+    });
+  }
+  function deleteCurrentCategory() { document.getElementById('deleteConfirmModal').style.display = 'flex'; }
+  function hideDeleteModal() { document.getElementById('deleteConfirmModal').style.display = 'none'; }
+  function executeDeleteCategory() {
+    db.ref(baseDataPath + '/' + currentType).remove();
+    db.ref(baseDataPath + '/custom_categories/' + currentType).remove();
+    hideDeleteModal();
+    changeToBubbleList('shopping');
   }
   function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
   function signOut() { auth.signOut(); }
