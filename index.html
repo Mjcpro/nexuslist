@@ -91,6 +91,12 @@
       display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px var(--shadow-color);
     }
     .done { text-decoration: line-through; opacity: 0.5; }
+    
+    .priority-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+    .dot-High { background-color: #ef4444; } 
+    .dot-Med { background-color: #f59e0b; }  
+    .dot-Low { background-color: #22c55e; }  
+
     .qty-tag { color: var(--qty-text); font-weight: bold; font-size: 12px; margin-left: 5px; }
 
     .check-btn { background: #e5f6ff; color: #0369a1; padding: 6px 12px; border-radius: 999px; border: none; font-size: 12px; cursor: pointer; }
@@ -102,13 +108,20 @@
       padding: 6px 12px; border-radius: 999px; cursor: pointer; margin: 15px 0;
     }
 
+    #sync-status { font-size: 10px; color: var(--text-secondary); text-align: center; margin-top: 5px; opacity: 0.8; }
+
+    .coffee-btn {
+      display: inline-flex; align-items: center; background: #FFDD00; color: #000000;
+      padding: 10px 20px; border-radius: 12px; text-decoration: none; font-weight: bold;
+      font-size: 14px; margin: 20px auto; border: 1px solid #e2e8f0; width: fit-content;
+    }
+    .footer-links { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--card-border); text-align: center; }
+    .footer-links a, .footer-links button { color: var(--text-secondary); font-size: 11px; text-decoration: underline; background: none; border: none; cursor: pointer; margin: 0 5px; }
+
     .modal-overlay {
       display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
       background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center;
     }
-
-    .footer-links { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--card-border); text-align: center; }
-    .footer-links button { color: var(--text-secondary); font-size: 11px; background: none; border: none; cursor: pointer; }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -142,9 +155,9 @@
       <div class="input-row">
         <input id="qtyInput" type="text" placeholder="Qty">
         <select id="priorityInput" style="display:none;">
-          <option value="Low">🟢 Low</option>
-          <option value="Med">🟡 Med</option>
-          <option value="High">🔴 High</option>
+          <option value="Low">Low</option>
+          <option value="Med">Med</option>
+          <option value="High">High</option>
         </select>
         <input id="itemInput" placeholder="Add item...">
         <button class="primary-btn" onclick="addItem()">Add</button>
@@ -156,6 +169,8 @@
         <button onclick="clearCompleted()" class="clear-btn">🧹 Clear checked Items</button>
       </div>
 
+      <div id="sync-status"></div>
+
       <div style="text-align:center; margin-top:20px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
         <button onclick="showSharedWorkspaceModal()" id="createWsBtn" class="tab-btn" style="background:#22c55e; color:white;">✨ Create Shared List</button>
         <button onclick="copyShareLink()" id="shareBtn" class="tab-btn" style="background:#3b82f6; color:white; display:none;">🔗 Copy Invite Link</button>
@@ -163,11 +178,16 @@
         <button onclick="signOut()" class="tab-btn">Sign Out</button>
       </div>
 
-      <div id="deleteCategoryWrapper" style="display:none; text-align:center; margin-top:10px;">
+      <div style="text-align:center;">
+        <a href="https://www.buymeacoffee.com/mjcpro" target="_blank" class="coffee-btn">☕ Buy me a coffee</a>
+      </div>
+
+      <div id="deleteCategoryWrapper" style="display:none; text-align:center;">
         <button onclick="deleteCurrentCategory()" style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer; text-decoration:underline;">🗑️ Delete Category</button>
       </div>
 
       <div class="footer-links">
+        <a href="privacy.html" target="_blank">Privacy Policy</a>
         <button onclick="clearWorkspaceHistory()">Clear Shared History</button>
       </div>
     </div>
@@ -175,7 +195,7 @@
 
   <div id="customListModal" class="modal-overlay"><div class="card"><h3>New Category</h3><input id="newListName" placeholder="Name"><button onclick="createNewList()" class="primary-btn">Create</button><button onclick="hideCustomModal()">Cancel</button></div></div>
   <div id="sharedWorkspaceModal" class="modal-overlay"><div class="card"><h3>Shared List Name</h3><input id="newSharedName" placeholder="Family List"><button onclick="executeCreateSharedWorkspace()" class="primary-btn">Create</button><button onclick="hideSharedWorkspaceModal()">Cancel</button></div></div>
-  <div id="deleteConfirmModal" class="modal-overlay"><div class="card"><h3>Delete?</h3><button onclick="executeDeleteCategory()" class="primary-btn">Delete</button><button onclick="hideDeleteModal()">Cancel</button></div></div>
+  <div id="deleteConfirmModal" class="modal-overlay"><div class="card"><h3>Delete Category?</h3><button onclick="executeDeleteCategory()" class="primary-btn">Delete</button><button onclick="hideDeleteModal()">Cancel</button></div></div>
 
 <script>
   const firebaseConfig = { 
@@ -192,17 +212,6 @@
 
   let currentUser = null, currentType = 'shopping', baseDataPath = "", currentWorkspaceId = "";
   let sharedGroups = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
-
-  function applyDarkMode() {
-    const isDark = localStorage.getItem('darkMode') === 'true';
-    document.documentElement.classList.toggle('dark-mode', isDark);
-    document.getElementById('darkModeBtn').textContent = isDark ? '☀️ Light' : '🌙 Dark';
-  }
-
-  function toggleDarkMode() {
-    localStorage.setItem('darkMode', localStorage.getItem('darkMode') !== 'true');
-    applyDarkMode();
-  }
 
   auth.onAuthStateChanged(user => {
     if (user) {
@@ -224,45 +233,18 @@
     }
   });
 
-  function fetchWorkspaceName(id) {
-    db.ref('nexuslist/' + id + '/metadata/name').once('value', snap => {
-      if (snap.exists()) {
-        const idx = sharedGroups.findIndex(g => g.id === id);
-        if (idx !== -1) {
-          sharedGroups[idx].name = snap.val();
-          localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
-          renderWorkspaceSwitcher(currentWorkspaceId);
-          if (currentWorkspaceId === id) document.getElementById('wsName').textContent = snap.val();
-        }
-      }
-    });
-  }
-
   function switchToWorkspace(id) {
-    // 1. CLEAR ALL PREVIOUS LISTENERS
     if (baseDataPath) {
       db.ref(baseDataPath + '/custom_categories').off();
       db.ref(baseDataPath + '/' + currentType).off();
     }
-    
-    // 2. WIPE UI CLEAN
-    document.getElementById('list').innerHTML = '';
-    document.getElementById('dynamicBubbles').innerHTML = '';
-    
-    // 3. SET NEW PATH
     currentWorkspaceId = id;
     baseDataPath = 'nexuslist/' + id;
-    currentType = 'shopping'; // Reset category to default
-    
     const isPrivate = (id === currentUser.uid);
-    const workspaceObj = sharedGroups.find(g => g.id === id);
-    const displayName = isPrivate ? "My Lists" : (workspaceObj ? workspaceObj.name : "Shared List");
-    
-    document.getElementById('wsName').textContent = displayName;
+    document.getElementById('wsName').textContent = isPrivate ? "My Lists" : "Shared List";
     document.getElementById('sharedBanner').style.display = isPrivate ? 'none' : 'block';
     document.getElementById('createWsBtn').style.display = isPrivate ? 'inline-block' : 'none';
     document.getElementById('shareBtn').style.display = isPrivate ? 'none' : 'inline-block';
-    
     renderWorkspaceSwitcher(id);
     loadCustomBubbles();
     changeToBubbleList('shopping');
@@ -273,48 +255,32 @@
     if (sharedGroups.length === 0) { container.style.display = 'none'; return; }
     container.style.display = 'flex';
     let html = `<button onclick="switchToWorkspace(currentUser.uid)" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">My Lists</button>`;
-    sharedGroups.forEach((g) => {
-      html += `<button onclick="switchToWorkspace('${g.id}')" class="tab-btn ${activeId === g.id ? 'active-tab' : ''}">${g.name}</button>`;
-    });
+    sharedGroups.forEach(g => { html += `<button onclick="switchToWorkspace('${g.id}')" class="tab-btn ${activeId === g.id ? 'active-tab' : ''}">${g.name}</button>`; });
     container.innerHTML = html;
-  }
-
-  function executeCreateSharedWorkspace() {
-    const name = document.getElementById('newSharedName').value.trim();
-    if (!name) return;
-    const newId = "group_" + Math.random().toString(36).substr(2, 9);
-    sharedGroups.push({ id: newId, name: name });
-    localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
-    db.ref('nexuslist/' + newId + '/metadata').set({ name: name });
-    hideSharedWorkspaceModal();
-    switchToWorkspace(newId);
   }
 
   function loadCustomBubbles() {
     db.ref(baseDataPath + '/custom_categories').on('value', snap => {
-      const dynamicContainer = document.getElementById('dynamicBubbles');
-      dynamicContainer.innerHTML = '';
+      const container = document.getElementById('dynamicBubbles');
+      container.innerHTML = '';
       snap.forEach(child => {
         const btn = document.createElement('button');
         btn.className = `bubble-btn ${currentType === child.key ? 'active' : ''}`;
         btn.onclick = () => changeToBubbleList(child.key);
         btn.setAttribute('data-list', child.key);
         btn.textContent = child.val().name;
-        dynamicContainer.appendChild(btn);
+        container.appendChild(btn);
       });
     });
   }
 
   function changeToBubbleList(type) {
-    db.ref(baseDataPath + '/' + currentType).off(); // kill previous sub-list listener
+    db.ref(baseDataPath + '/' + currentType).off();
     currentType = type;
-    
     document.querySelectorAll('.bubble-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-list') === type));
-    
     document.getElementById('qtyInput').style.display = (type === 'shopping') ? 'block' : 'none';
     document.getElementById('priorityInput').style.display = (type === 'reminder' || type === 'todo') ? 'block' : 'none';
     document.getElementById('deleteCategoryWrapper').style.display = ['shopping','reminder','todo'].includes(type) ? 'none' : 'block';
-
     attachListeners();
   }
 
@@ -322,29 +288,29 @@
     db.ref(baseDataPath + '/' + currentType).on('value', snap => {
       const listUI = document.getElementById('list');
       listUI.innerHTML = '';
-      if (!snap.exists()) return;
       snap.forEach(child => {
         const item = child.val();
         if(child.key === 'metadata') return;
         const li = document.createElement('li');
-        let pDot = item.priority ? `[${item.priority}] ` : '';
+        let pDot = item.priority ? `<span class="priority-dot dot-${item.priority}"></span>` : '';
         let qTag = item.qty ? `<span class="qty-tag">(${item.qty})</span>` : '';
         li.innerHTML = `
-          <span class="${item.done ? 'done' : ''}">${pDot}${item.text}${qTag}</span>
+          <div style="display:flex; align-items:center;">${pDot}<span class="${item.done ? 'done' : ''}">${item.text}${qTag}</span></div>
           <div style="display:flex; gap: 8px;">
-            <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">Check</button>
+            <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">${item.done ? 'Uncheck' : 'Check'}</button>
             <button onclick="deleteItem('${child.key}')" class="remove-btn">Remove</button>
           </div>`;
         listUI.appendChild(li);
       });
+      const now = new Date();
+      document.getElementById('sync-status').textContent = `✅ Last synced: ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
     });
   }
 
   function addItem() {
     const input = document.getElementById('itemInput');
-    const text = input.value.trim();
-    if (!text) return;
-    let data = { text: text, done: false };
+    if (!input.value.trim()) return;
+    let data = { text: input.value.trim(), done: false };
     if (currentType === 'shopping') data.qty = document.getElementById('qtyInput').value;
     if (['reminder','todo'].includes(currentType)) data.priority = document.getElementById('priorityInput').value;
     db.ref(baseDataPath + '/' + currentType).push(data);
@@ -355,29 +321,14 @@
     const ref = db.ref(baseDataPath + '/' + currentType + '/' + key);
     ref.once('value', s => ref.update({ done: !s.val().done })); 
   }
-
   function deleteItem(key) { db.ref(baseDataPath + '/' + currentType + '/' + key).remove(); }
-
-  function clearCompleted() {
-    db.ref(baseDataPath + '/' + currentType).once('value', snap => {
-      snap.forEach(child => { if (child.val().done) child.ref.remove(); });
-    });
-  }
-
-  function createNewList() {
-    const name = document.getElementById('newListName').value.trim();
-    if (!name) return;
-    db.ref(baseDataPath + '/custom_categories').push({ name: name }).then(() => hideCustomModal());
-  }
-
-  function executeDeleteCategory() {
-    db.ref(baseDataPath + '/' + currentType).remove();
-    db.ref(baseDataPath + '/custom_categories/' + currentType).remove();
-    hideDeleteModal();
-    changeToBubbleList('shopping');
-  }
-
-  // UI Helper functions
+  function clearCompleted() { db.ref(baseDataPath + '/' + currentType).once('value', snap => { snap.forEach(child => { if (child.val().done) child.ref.remove(); }); }); }
+  function createNewList() { const n = document.getElementById('newListName').value.trim(); if(n) db.ref(baseDataPath + '/custom_categories').push({name:n}).then(() => hideCustomModal()); }
+  function executeDeleteCategory() { db.ref(baseDataPath + '/' + currentType).remove(); db.ref(baseDataPath + '/custom_categories/' + currentType).remove(); hideDeleteModal(); changeToBubbleList('shopping'); }
+  function executeCreateSharedWorkspace() { const n = document.getElementById('newSharedName').value.trim(); if(!n) return; const id = "group_"+Math.random().toString(36).substr(2,9); sharedGroups.push({id, name:n}); localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups)); db.ref('nexuslist/'+id+'/metadata').set({name:n}); hideSharedWorkspaceModal(); switchToWorkspace(id); }
+  function fetchWorkspaceName(id) { db.ref('nexuslist/'+id+'/metadata/name').once('value', s => { if(s.exists()){ const i = sharedGroups.findIndex(g=>g.id===id); if(i!==-1){ sharedGroups[i].name = s.val(); localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups)); renderWorkspaceSwitcher(currentWorkspaceId); } } }); }
+  function applyDarkMode() { const d = localStorage.getItem('darkMode') === 'true'; document.documentElement.classList.toggle('dark-mode', d); document.getElementById('darkModeBtn').textContent = d ? '☀️ Light' : '🌙 Dark'; }
+  function toggleDarkMode() { localStorage.setItem('darkMode', localStorage.getItem('darkMode') !== 'true'); applyDarkMode(); }
   function showSharedWorkspaceModal() { document.getElementById('sharedWorkspaceModal').style.display='flex'; }
   function hideSharedWorkspaceModal() { document.getElementById('sharedWorkspaceModal').style.display='none'; }
   function showCustomModal() { document.getElementById('customListModal').style.display='flex'; }
