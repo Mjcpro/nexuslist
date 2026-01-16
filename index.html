@@ -213,8 +213,7 @@
     if (user) {
       currentUser = user;
       applyDarkMode();
-      const params = new URLSearchParams(window.location.search);
-      const groupParam = params.get('group');
+      const groupParam = new URLSearchParams(window.location.search).get('group');
       if (groupParam && groupParam !== user.uid && !sharedGroups.find(g => g.id === groupParam)) {
         sharedGroups.push({ id: groupParam, name: "Joined List" });
         localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
@@ -229,20 +228,18 @@
   });
 
   function switchToWorkspace(id) {
-    // 1. HARD KILL all existing listeners
     db.ref('nexuslist/' + currentWorkspaceId).off();
     db.ref('nexuslist/' + currentWorkspaceId + '/custom_categories').off();
     db.ref('nexuslist/' + currentWorkspaceId + '/' + currentType).off();
-
-    // 2. RESET UI and Path
+    
     document.getElementById('list').innerHTML = '';
     document.getElementById('dynamicBubbles').innerHTML = '';
     currentWorkspaceId = id;
     currentType = 'shopping';
 
     const isPrivate = (id === currentUser.uid);
-    const workspaceObj = sharedGroups.find(g => g.id === id);
-    document.getElementById('wsName').textContent = isPrivate ? "My Lists" : (workspaceObj ? workspaceObj.name : "Shared List");
+    const ws = sharedGroups.find(g => g.id === id);
+    document.getElementById('wsName').textContent = isPrivate ? "My Lists" : (ws ? ws.name : "Shared List");
     document.getElementById('sharedBanner').style.display = isPrivate ? 'none' : 'block';
     document.getElementById('createWsBtn').style.display = isPrivate ? 'inline-block' : 'none';
     document.getElementById('shareBtn').style.display = isPrivate ? 'none' : 'inline-block';
@@ -257,9 +254,7 @@
     if (sharedGroups.length === 0) { container.style.display = 'none'; return; }
     container.style.display = 'flex';
     let html = `<button onclick="switchToWorkspace('${currentUser.uid}')" class="tab-btn ${activeId === currentUser.uid ? 'active-tab' : ''}">My Lists</button>`;
-    sharedGroups.forEach(g => {
-      html += `<button onclick="switchToWorkspace('${g.id}')" class="tab-btn ${activeId === g.id ? 'active-tab' : ''}">${g.name}</button>`;
-    });
+    sharedGroups.forEach(g => { html += `<button onclick="switchToWorkspace('${g.id}')" class="tab-btn ${activeId === g.id ? 'active-tab' : ''}">${g.name}</button>`; });
     container.innerHTML = html;
   }
 
@@ -314,13 +309,14 @@
   function addItem() {
     const input = document.getElementById('itemInput');
     if (!input.value.trim()) return;
-    const path = 'nexuslist/' + currentWorkspaceId + '/' + currentType;
+    const ref = db.ref('nexuslist/' + currentWorkspaceId + '/' + currentType);
     let data = { text: input.value.trim(), done: false };
     if (currentType === 'shopping') data.qty = document.getElementById('qtyInput').value;
     if (['reminder','todo'].includes(currentType)) data.priority = document.getElementById('priorityInput').value;
     
-    db.ref(path).push(data).catch(e => alert("Error adding item: " + e.message));
-    input.value = ''; document.getElementById('qtyInput').value = '';
+    ref.push(data).then(() => {
+        input.value = ''; document.getElementById('qtyInput').value = '';
+    }).catch(e => alert("Permission Error: Please check your Firebase Rules. " + e.message));
   }
 
   function toggleDone(key) { 
@@ -329,7 +325,13 @@
   }
   function deleteItem(key) { db.ref('nexuslist/' + currentWorkspaceId + '/' + currentType + '/' + key).remove(); }
   function clearCompleted() { db.ref('nexuslist/' + currentWorkspaceId + '/' + currentType).once('value', snap => { snap.forEach(child => { if (child.val().done) child.ref.remove(); }); }); }
-  function createNewList() { const n = document.getElementById('newListName').value.trim(); if(n) db.ref('nexuslist/' + currentWorkspaceId + '/custom_categories').push({name:n}).then(() => hideCustomModal()); }
+  
+  function createNewList() { 
+    const n = document.getElementById('newListName').value.trim(); 
+    if(!n) return; 
+    db.ref('nexuslist/' + currentWorkspaceId + '/custom_categories').push({name:n}).then(() => hideCustomModal()); 
+  }
+
   function executeDeleteCategory() { db.ref('nexuslist/' + currentWorkspaceId + '/' + currentType).remove(); db.ref('nexuslist/' + currentWorkspaceId + '/custom_categories/' + currentType).remove(); hideDeleteModal(); changeToBubbleList('shopping'); }
   function executeCreateSharedWorkspace() { const n = document.getElementById('newSharedName').value.trim(); if(!n) return; const id = "group_"+Math.random().toString(36).substr(2,9); sharedGroups.push({id, name:n}); localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups)); db.ref('nexuslist/'+id+'/metadata').set({name:n}); hideSharedWorkspaceModal(); switchToWorkspace(id); }
   function applyDarkMode() { const d = localStorage.getItem('darkMode') === 'true'; document.documentElement.classList.toggle('dark-mode', d); document.getElementById('darkModeBtn').textContent = d ? '☀️ Light' : '🌙 Dark'; }
