@@ -91,11 +91,6 @@
       display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px var(--shadow-color);
     }
     .done { text-decoration: line-through; opacity: 0.5; }
-    
-    .priority-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-    .dot-High { background-color: #ef4444; } 
-    .dot-Med { background-color: #f59e0b; }  
-    .dot-Low { background-color: #22c55e; }  
     .qty-tag { color: var(--qty-text); font-weight: bold; font-size: 12px; margin-left: 5px; }
 
     .check-btn { background: #e5f6ff; color: #0369a1; padding: 6px 12px; border-radius: 999px; border: none; font-size: 12px; cursor: pointer; }
@@ -113,6 +108,7 @@
     .footer-links a, .footer-links button { color: var(--text-secondary); font-size: 11px; text-decoration: underline; background: none; border: none; cursor: pointer; margin: 0 5px; }
 
     .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; }
+    .member-list { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; background: var(--item-bg); padding: 10px; border-radius: 10px; }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -176,7 +172,10 @@
       </div>
 
       <div class="footer-links">
-        <span id="memberCount" style="font-size: 10px; color: var(--text-secondary); display:block; margin-bottom: 10px;"></span>
+        <div id="memberSection" style="display:none;">
+            <p style="font-size: 11px; font-weight: bold; margin-bottom: 5px;">List Members:</p>
+            <div id="memberNames" class="member-list"></div>
+        </div>
         <a href="privacy.html" target="_blank">Privacy Policy</a>
         <button onclick="clearWorkspaceHistory()">Clear Shared History</button>
       </div>
@@ -213,6 +212,7 @@
         localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
       }
       switchToWorkspace(groupParam || user.uid);
+      if (groupParam) window.history.replaceState({}, document.title, window.location.pathname);
       document.getElementById('signin-container').style.display = 'none';
       document.getElementById('app-container').style.display = 'block';
     } else {
@@ -221,7 +221,7 @@
     }
   });
 
-  function switchToWorkspace(id) {
+  async function switchToWorkspace(id) {
     db.ref('nexuslist/' + currentWorkspaceId).off();
     db.ref('nexuslist/' + currentWorkspaceId + '/custom_categories').off();
     db.ref('nexuslist/' + currentWorkspaceId + '/' + currentType).off();
@@ -232,14 +232,19 @@
     currentWorkspaceId = id;
     currentType = 'shopping';
 
-    // SECURITY: Register user as a member if it's a shared group
+    // 1. SECURE JOIN (Happens before loading to avoid race condition)
     if (id !== currentUser.uid) {
-      db.ref('nexuslist/' + id + '/members/' + currentUser.uid).set(true);
+      await db.ref('nexuslist/' + id + '/members/' + currentUser.uid).set({
+          name: currentUser.displayName || "Unknown User",
+          email: currentUser.email
+      });
+      document.getElementById('memberSection').style.display = 'block';
       monitorMembers(id);
     } else {
-      document.getElementById('memberCount').textContent = "";
+      document.getElementById('memberSection').style.display = 'none';
     }
 
+    // 2. LOAD DATA
     const isPrivate = (id === currentUser.uid);
     const ws = sharedGroups.find(g => g.id === id);
     document.getElementById('wsName').textContent = isPrivate ? "My Lists" : (ws ? ws.name : "Shared List");
@@ -254,8 +259,9 @@
 
   function monitorMembers(id) {
     db.ref('nexuslist/' + id + '/members').on('value', snap => {
-        const count = snap.numChildren();
-        document.getElementById('memberCount').textContent = `👥 ${count} member(s) have access`;
+        let names = [];
+        snap.forEach(m => { names.push(m.val().name); });
+        document.getElementById('memberNames').textContent = names.join(', ');
     });
   }
 
@@ -280,7 +286,9 @@
         btn.textContent = child.val().name;
         container.appendChild(btn);
       });
-    }, e => { if(e.code === "PERMISSION_DENIED") alert("Access Denied: You are not a member of this list."); });
+    }, e => { 
+        if(e.code === "PERMISSION_DENIED") console.log("Still waiting for membership sync..."); 
+    });
   }
 
   function changeToBubbleList(type) {
@@ -298,13 +306,12 @@
       const listUI = document.getElementById('list');
       listUI.innerHTML = '';
       snap.forEach(child => {
-        const item = child.val();
         if(['metadata','members','custom_categories'].includes(child.key)) return;
+        const item = child.val();
         const li = document.createElement('li');
-        let pDot = item.priority ? `<span class="priority-dot dot-${item.priority}"></span>` : '';
         let qTag = item.qty ? `<span class="qty-tag">(${item.qty})</span>` : '';
         li.innerHTML = `
-          <div style="display:flex; align-items:center;">${pDot}<span class="${item.done ? 'done' : ''}">${item.text}${qTag}</span></div>
+          <div style="display:flex; align-items:center;"><span class="${item.done ? 'done' : ''}">${item.text}${qTag}</span></div>
           <div style="display:flex; gap: 8px;">
             <button onclick="toggleDone('${child.key}')" class="check-btn ${item.done ? 'checked' : ''}">${item.done ? 'Uncheck' : 'Check'}</button>
             <button onclick="deleteItem('${child.key}')" class="remove-btn">Remove</button>
@@ -322,8 +329,7 @@
     const ref = db.ref('nexuslist/' + currentWorkspaceId + '/' + currentType);
     let data = { text: input.value.trim(), done: false };
     if (currentType === 'shopping') data.qty = document.getElementById('qtyInput').value;
-    if (['reminder','todo'].includes(currentType)) data.priority = document.getElementById('priorityInput').value;
-    ref.push(data).then(() => { input.value = ''; document.getElementById('qtyInput').value = ''; }).catch(e => alert("Permission Error: " + e.message));
+    ref.push(data).then(() => { input.value = ''; document.getElementById('qtyInput').value = ''; });
   }
 
   function toggleDone(key) { const ref = db.ref('nexuslist/' + currentWorkspaceId + '/' + currentType + '/' + key); ref.once('value', s => ref.update({ done: !s.val().done })); }
@@ -336,7 +342,10 @@
     const n = document.getElementById('newSharedName').value.trim(); 
     if(!n) return; 
     const id = "group_"+Math.random().toString(36).substr(2,9); 
-    const initial = { metadata: { name: n, owner: currentUser.uid }, members: { [currentUser.uid]: true } };
+    const initial = { 
+        metadata: { name: n, owner: currentUser.uid }, 
+        members: { [currentUser.uid]: { name: currentUser.displayName, email: currentUser.email } } 
+    };
     db.ref('nexuslist/'+id).set(initial).then(() => {
         sharedGroups.push({id, name:n}); 
         localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups)); 
