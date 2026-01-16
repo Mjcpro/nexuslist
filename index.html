@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>NexusList - Full Control</title>
+  <title>NexusList - Interactive Edition</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="nexuslist-icon.png">
 
@@ -36,89 +36,53 @@
       font-family: system-ui, -apple-system, sans-serif;
       max-width: 640px; margin: 0 auto; padding: 0 16px 40px;
       background: radial-gradient(circle at top left, var(--bg-gradient-start), var(--bg-gradient-end));
-      min-height: 100vh; color: var(--text-primary); transition: all 0.3s ease;
+      min-height: 100vh; color: var(--text-primary); transition: background 0.3s ease;
     }
     .card {
       background: var(--card-bg); border-radius: 18px; box-shadow: 0 18px 40px var(--shadow-color);
       padding: 22px 18px 26px; border: 1px solid var(--card-border); margin-top: 24px;
     }
-    .logo-wrapper { display: flex; justify-content: center; margin-bottom: 12px; }
+    .logo-wrapper { display: flex; justify-content: center; margin-bottom: 12px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .logo-wrapper img { height: 160px; border-radius: 20px; object-fit: contain; }
+    .logo-bounce { transform: scale(1.2) rotate(5deg); }
     
-    #list:empty::after {
-      content: "List is empty! Add something above 👆";
-      display: block; text-align: center; color: var(--text-secondary);
-      padding: 40px 20px; font-size: 14px; font-style: italic;
-    }
-
     .bubble-btn { 
       padding: 10px 18px; border-radius: 25px; border: 2px solid #cbd5e1; 
       background: #f8fafc; color: #1e293b; font-size: 13px; cursor: pointer;
       text-transform: capitalize; transition: all 0.2s;
     }
     .bubble-btn.active { background: #3b82f6 !important; border-color: #3b82f6 !important; color: white !important; }
-
-    .tab-btn {
-      padding: 8px 16px; border-radius: 12px; border: 1px solid #cbd5e1;
-      background: #f8fafc; color: #64748b; font-size: 12px; cursor: pointer; white-space: nowrap;
-    }
-    .tab-btn.active-tab { background: #3b82f6; color: white; border-color: #3b82f6; }
+    .bubble-btn:active { transform: scale(0.95); }
 
     .input-row { display: flex; gap: 8px; margin-top: 20px; align-items: center; }
-    input { 
-      padding: 12px; border-radius: 999px; border: 1px solid var(--input-border); 
-      background: var(--input-bg); color: var(--text-primary); outline: none; 
-    }
+    input { padding: 12px; border-radius: 999px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary); outline: none; }
     #itemInput { flex: 2; }
     #qtyInput { width: 65px; min-width: 65px; text-align: center; }
 
-    .primary-btn { 
-      background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; 
-      border: none; font-weight: bold; cursor: pointer; padding: 12px 20px; border-radius: 999px; 
-    }
-    .secondary-btn { 
-      background: none; color: var(--text-secondary); 
-      border: 2px solid var(--input-border); font-weight: bold; cursor: pointer; padding: 10px 20px; border-radius: 999px; 
-    }
-
+    .primary-btn { background: linear-gradient(135deg, #4f46e5, #22c55e); color: white; border: none; font-weight: bold; cursor: pointer; padding: 12px 20px; border-radius: 999px; transition: transform 0.1s; }
+    .primary-btn:active { transform: scale(0.95); }
+    
     ul { list-style: none; padding: 0; margin-top: 20px; }
-    li { 
-      padding: 12px; background: var(--item-bg); margin: 8px 0; border-radius: 12px; 
-      display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px var(--shadow-color);
-    }
-    .done { text-decoration: line-through; opacity: 0.5; }
-    .qty-tag { color: var(--qty-text); font-weight: bold; font-size: 12px; margin-left: 5px; }
+    li { padding: 12px; background: var(--item-bg); margin: 8px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px var(--shadow-color); animation: slideIn 0.3s ease-out; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .check-btn { background: #e5f6ff; color: #0369a1; padding: 6px 12px; border-radius: 999px; border: none; font-size: 12px; cursor: pointer; }
+    .done { text-decoration: line-through; opacity: 0.5; }
+    .check-btn { background: #e5f6ff; color: #0369a1; padding: 6px 12px; border-radius: 999px; border: none; font-size: 12px; cursor: pointer; position: relative; }
     .check-btn.checked { background: #dcfce7; color: #166534; }
     .remove-btn { background: #fee2e2; color: #b91c1c; padding: 6px 12px; border-radius: 999px; border: none; font-size: 12px; cursor: pointer; }
-    
-    .clear-btn { 
-      background: none; color: #94a3b8; font-size: 12px; border: 1px solid #cbd5e1; 
-      padding: 6px 12px; border-radius: 999px; cursor: pointer; margin: 15px 0;
-    }
 
-    .delete-cat-btn {
-      background: none; color: #ef4444; font-size: 11px; border: 1px solid #fee2e2; 
-      padding: 6px 12px; border-radius: 999px; cursor: pointer; margin-top: 10px;
-    }
+    .confetti { position: absolute; width: 5px; height: 5px; border-radius: 50%; pointer-events: none; animation: fly 0.6s ease-out forwards; }
+    @keyframes fly { to { transform: translate(var(--x), var(--y)); opacity: 0; } }
 
-    .coffee-btn { 
-      display: block; width: fit-content; margin: 25px auto 10px; 
-      background: #FFDD00; color: #000; padding: 12px 24px; border-radius: 12px; 
-      text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+    .coffee-btn { display: block; width: fit-content; margin: 25px auto 10px; background: #FFDD00; color: #000; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s; }
+    .coffee-btn:hover { transform: translateY(-2px); }
 
-    #sync-status { font-size: 10px; color: var(--text-secondary); text-align: center; margin-top: 5px; opacity: 0.8; }
     .footer-links { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--card-border); text-align: center; }
     .footer-links button, .footer-links a { color: var(--text-secondary); font-size: 11px; text-decoration: underline; background: none; border: none; cursor: pointer; margin: 0 5px; }
 
     .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:2000; align-items:center; justify-content:center; }
-    .modal-card { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; }
-    .modal-card h3 { margin-top: 0; color: var(--text-primary); }
-    .modal-card input { width: 80%; margin-bottom: 20px; text-align: center; }
-    .modal-btn-row { display: flex; gap: 10px; justify-content: center; }
-    .member-list-card { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; background: var(--item-bg); padding: 10px; border-radius: 10px; text-align: left; }
+    .modal-card { background: var(--card-bg); padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--card-border); }
+    .modal-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js"></script>
@@ -129,7 +93,7 @@
 <body>
   <div id="signin-container" style="display:none; padding: 20px;">
     <div class="card" style="text-align:center;">
-      <div class="logo-wrapper"><img src="nexuslist-icon.png" alt="NexusList Logo"></div>
+      <div class="logo-wrapper"><img src="nexuslist-icon.png"></div>
       <button class="primary-btn" onclick="signInWithGoogle()" style="width:100%; margin-top:20px;">🔐 Sign in with Google</button>
     </div>
   </div>
@@ -137,16 +101,16 @@
   <div id="app-container" style="display:none;">
     <div id="sharedBanner" style="display:none; background:#dcfce7; color:#166534; padding:10px; border-radius:12px; margin-bottom:15px; text-align:center; font-weight:600;">🌍 Workspace: <span id="wsName"></span></div>
     <div class="card">
-      <div class="logo-wrapper"><img src="nexuslist-icon.png" alt="NexusList Logo"></div>
+      <div class="logo-wrapper" id="mainLogo"><img src="nexuslist-icon.png" alt="NexusList Logo"></div>
       
       <div id="workspaceSwitcher" style="display:none; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:10px; border-bottom: 1px solid var(--card-border);"></div>
       
-      <div id="bubbleContainer" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:center;">
-        <button class="bubble-btn active" onclick="changeList('shopping')" data-list="shopping">🛒 Shopping</button>
-        <button class="bubble-btn" onclick="changeList('reminder')" data-list="reminder">📝 Reminder</button>
-        <button class="bubble-btn" onclick="changeList('todo')" data-list="todo">✓ To-do</button>
+      <div id="bubbleContainer" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="bubble-btn active" onclick="changeList('shopping')">🛒 Shopping</button>
+        <button class="bubble-btn" onclick="changeList('reminder')">📝 Reminder</button>
+        <button class="bubble-btn" onclick="changeList('todo')">✓ To-do</button>
         <span id="customBubbles" style="display:contents;"></span>
-        <button onclick="showModal('customModal')" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--input-border);background:var(--input-bg);color:var(--text-secondary);cursor:pointer;font-size:20px;line-height:1;">+</button>
+        <button onclick="showModal('customModal')" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--input-border);background:var(--input-bg);color:var(--text-secondary);cursor:pointer;font-size:20px;">+</button>
       </div>
 
       <div class="input-row">
@@ -158,31 +122,27 @@
       <ul id="list"></ul>
       
       <div style="text-align: center;">
-        <button onclick="clearDone()" class="clear-btn">🧹 Clear checked Items</button>
+        <button onclick="clearDone()" style="background:none; color:#94a3b8; font-size:12px; border:1px solid #cbd5e1; padding:6px 12px; border-radius:999px; cursor:pointer; margin:15px 0;">🧹 Clear checked Items</button>
         <div id="deleteCatContainer"></div>
       </div>
 
-      <div id="sync-status"></div>
+      <div id="sync-status" style="font-size:10px; color:var(--text-secondary); text-align:center; margin-top:5px; opacity:0.8;"></div>
 
       <div style="text-align:center; margin-top:20px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-        <button id="createWsBtn" class="tab-btn" style="background:#22c55e; color:white;" onclick="showModal('wsModal')">✨ Create Shared List</button>
-        <button id="shareBtn" class="tab-btn" style="background:#3b82f6; color:white; display:none;" onclick="copyLink()">🔗 Copy Invite Link</button>
-        <button onclick="toggleDark()" id="darkModeBtn" class="tab-btn">🌙 Dark</button>
-        <button onclick="auth.signOut()" class="tab-btn">Sign Out</button>
+        <button id="createWsBtn" class="tab-btn" style="background:#22c55e; color:white; padding:8px 16px; border-radius:12px; border:none; font-size:12px; cursor:pointer;" onclick="showModal('wsModal')">✨ Create Shared List</button>
+        <button id="shareBtn" class="tab-btn" style="background:#3b82f6; color:white; padding:8px 16px; border-radius:12px; border:none; font-size:12px; display:none;" onclick="copyLink()">🔗 Copy Link</button>
+        <button onclick="toggleDark()" id="darkModeBtn" style="padding:8px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:12px; cursor:pointer; background:var(--input-bg); color:var(--text-primary);">🌙 Dark</button>
+        <button onclick="auth.signOut()" style="padding:8px 16px; border-radius:12px; border:1px solid #cbd5e1; font-size:12px; cursor:pointer; background:var(--input-bg); color:var(--text-primary);">Sign Out</button>
       </div>
 
       <a href="https://www.buymeacoffee.com/mjcpro" target="_blank" class="coffee-btn">☕ Buy me a coffee</a>
 
       <div class="footer-links">
         <div id="memberSection" style="display:none; text-align: left;">
-            <p style="font-size: 11px; font-weight: bold; margin-bottom: 5px; text-align: center;">Active Members:</p>
-            <div id="memberList" class="member-list-card"></div>
-            <div style="text-align: center;">
-                <button onclick="leaveGroup()" style="color:#ef4444; font-weight:bold; margin-bottom:15px;">🚪 Leave this Group</button>
-            </div>
+            <div id="memberList" style="font-size: 12px; color: var(--text-secondary); background: var(--item-bg); padding: 10px; border-radius: 10px; margin-bottom: 10px;"></div>
+            <button onclick="leaveGroup()" style="color:#ef4444; width:100%; font-weight:bold; margin-bottom:15px;">🚪 Leave this Group</button>
         </div>
         <a href="privacy.html" target="_blank">Privacy Policy</a>
-        <button onclick="clearHistory()">Clear History</button>
       </div>
     </div>
   </div>
@@ -193,7 +153,7 @@
       <input id="newCatName" placeholder="Category Name">
       <div class="modal-btn-row">
         <button class="primary-btn" onclick="createCat()">Create</button>
-        <button class="secondary-btn" onclick="hideModal('customModal')">Cancel</button>
+        <button onclick="hideModal('customModal')" style="background:none; border:2px solid #cbd5e1; padding:10px 20px; border-radius:999px; cursor:pointer; color:var(--text-secondary); font-weight:bold;">Cancel</button>
       </div>
     </div>
   </div>
@@ -204,21 +164,13 @@
       <input id="newWsName" placeholder="Family List">
       <div class="modal-btn-row">
         <button class="primary-btn" onclick="createWs()">Create</button>
-        <button class="secondary-btn" onclick="hideModal('wsModal')">Cancel</button>
+        <button onclick="hideModal('wsModal')" style="background:none; border:2px solid #cbd5e1; padding:10px 20px; border-radius:999px; cursor:pointer; color:var(--text-secondary); font-weight:bold;">Cancel</button>
       </div>
     </div>
   </div>
 
 <script>
-  const firebaseConfig = { 
-    apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY", 
-    authDomain: "nexuslist-380ff.firebaseapp.com", 
-    databaseURL: "https://nexuslist-380ff-default-rtdb.firebaseio.com", 
-    projectId: "nexuslist-380ff", 
-    storageBucket: "nexuslist-380ff.firebasestorage.app", 
-    messagingSenderId: "950145923798", 
-    appId: "1:950145923798:web:050a4a08f99cae13e72777" 
-  };
+  const firebaseConfig = { apiKey: "AIzaSyA9VVZ6Cj-2zm52FZyEI_kpg3J9LKFpTPY", authDomain: "nexuslist-380ff.firebaseapp.com", databaseURL: "https://nexuslist-380ff-default-rtdb.firebaseio.com", projectId: "nexuslist-380ff", storageBucket: "nexuslist-380ff.firebasestorage.app", messagingSenderId: "950145923798", appId: "1:950145923798:web:050a4a08f99cae13e72777" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database(), auth = firebase.auth();
 
@@ -228,12 +180,8 @@
     if (u) {
       user = u; applyDark();
       const urlG = new URLSearchParams(window.location.search).get('group');
-      if (urlG && urlG !== u.uid && !shared.find(s=>s.id===urlG)) {
-        shared.push({id:urlG, name:"Joined List"});
-        localStorage.setItem('sharedGroups', JSON.stringify(shared));
-      }
+      if (urlG && urlG !== u.uid && !shared.find(s=>s.id===urlG)) { shared.push({id:urlG, name:"Joined List"}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); }
       switchWs(urlG || u.uid);
-      if (urlG) window.history.replaceState({}, document.title, window.location.pathname);
       document.getElementById('signin-container').style.display='none';
       document.getElementById('app-container').style.display='block';
     } else {
@@ -247,39 +195,35 @@
     db.ref(`nexuslist/${currentWs}/custom_categories`).off();
     db.ref(`nexuslist/${currentWs}/${currentType}`).off();
     db.ref(`nexuslist/${currentWs}/members`).off();
-    
     currentWs = id;
     const isPrivate = id === user.uid;
-    
     if (!isPrivate) {
       await db.ref(`nexuslist/${id}/members/${user.uid}`).set({name: user.displayName || "User"});
       document.getElementById('memberSection').style.display = 'block';
       db.ref(`nexuslist/${id}/members`).on('value', s => {
-        let h = ''; s.forEach(m => { h += `<div style="padding:4px 0; border-bottom:1px solid rgba(0,0,0,0.05);">${m.val().name}</div>`; });
+        let h = '<p style="text-align:center; font-weight:bold; margin-top:0;">Members</p>'; s.forEach(m => { h += `<div style="padding:4px 0; border-bottom:1px solid rgba(0,0,0,0.05);">${m.val().name}</div>`; });
         document.getElementById('memberList').innerHTML = h;
       });
     } else { document.getElementById('memberSection').style.display = 'none'; }
-
     document.getElementById('wsName').textContent = isPrivate ? "My Lists" : (shared.find(s=>s.id===id)?.name || "Shared List");
     document.getElementById('sharedBanner').style.display = isPrivate ? 'none' : 'block';
     document.getElementById('shareBtn').style.display = isPrivate ? 'none' : 'inline-block';
     document.getElementById('createWsBtn').style.display = isPrivate ? 'inline-block' : 'none';
-    document.getElementById('workspaceSwitcher').style.display = shared.length > 0 ? 'flex' : 'none';
-
-    renderSwitch();
-    loadCats();
-    changeList('shopping');
+    renderSwitch(); loadCats(); changeList('shopping');
   }
 
   function renderSwitch() {
-    let h = `<button class="tab-btn ${currentWs===user.uid?'active-tab':''}" onclick="switchWs('${user.uid}')">Private</button>`;
-    shared.forEach(g => { h += `<button class="tab-btn ${currentWs===g.id?'active-tab':''}" onclick="switchWs('${g.id}')">${g.name}</button>`; });
-    document.getElementById('workspaceSwitcher').innerHTML = h;
+    const container = document.getElementById('workspaceSwitcher');
+    if (shared.length === 0) { container.style.display = 'none'; return; }
+    container.style.display = 'flex';
+    let h = `<button class="tab-btn ${currentWs===user.uid?'active-tab':''}" style="padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; font-size:11px; cursor:pointer; background:white; margin-right:5px;" onclick="switchWs('${user.uid}')">Private</button>`;
+    shared.forEach(g => { h += `<button class="tab-btn ${currentWs===g.id?'active-tab':''}" style="padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; font-size:11px; cursor:pointer; background:white; margin-right:5px;" onclick="switchWs('${g.id}')">${g.name}</button>`; });
+    container.innerHTML = h;
   }
 
   function loadCats() {
     db.ref(`nexuslist/${currentWs}/custom_categories`).on('value', s => {
-      let h = ''; s.forEach(c => { h += `<button class="bubble-btn ${currentType===c.key?'active':''}" onclick="changeList('${c.key}')" data-id="${c.key}">${c.val().name}</button>`; });
+      let h = ''; s.forEach(c => { h += `<button class="bubble-btn ${currentType===c.key?'active':''}" onclick="changeList('${c.key}')">${c.val().name}</button>`; });
       document.getElementById('customBubbles').innerHTML = h;
     });
   }
@@ -287,45 +231,49 @@
   function changeList(t) {
     db.ref(`nexuslist/${currentWs}/${currentType}`).off();
     currentType = t;
-    
-    // Update active UI for bubbles
     document.querySelectorAll('.bubble-btn').forEach(b => {
         const text = b.innerText.toLowerCase();
-        const matches = text.includes(t) || b.getAttribute('onclick')?.includes(t);
-        b.classList.toggle('active', matches);
+        b.classList.toggle('active', text.includes(t) || b.getAttribute('onclick')?.includes(t));
     });
-
-    // Handle delete button for custom categories
     const delContainer = document.getElementById('deleteCatContainer');
-    const isCore = ['shopping', 'reminder', 'todo'].includes(t);
-    if (!isCore) {
+    if (!['shopping', 'reminder', 'todo'].includes(t)) {
         db.ref(`nexuslist/${currentWs}/custom_categories/${t}`).once('value', s => {
             const name = s.val() ? s.val().name : "Category";
-            delContainer.innerHTML = `<button class="delete-cat-btn" onclick="deleteCategory('${t}', '${name}')">🗑️ Delete ${name} Category</button>`;
+            delContainer.innerHTML = `<button style="background:none; color:#ef4444; border:1px solid #fee2e2; padding:6px 12px; border-radius:999px; cursor:pointer; font-size:11px; margin-top:10px;" onclick="deleteCategory('${t}', '${name}')">🗑️ Delete ${name}</button>`;
         });
-    } else {
-        delContainer.innerHTML = '';
-    }
-
+    } else { delContainer.innerHTML = ''; }
     document.getElementById('qtyInput').style.display = t === 'shopping' ? 'block' : 'none';
-    
     db.ref(`nexuslist/${currentWs}/${currentType}`).on('value', s => {
       let h = ''; s.forEach(i => {
         if (['members','metadata','custom_categories'].includes(i.key)) return;
         const d = i.val();
-        h += `<li><span class="${d.done?'done':''}">${d.text} ${d.qty?`<span class="qty-tag">(${d.qty})</span>`:''}</span><div style="display:flex; gap:8px;"><button class="check-btn ${d.done?'checked':''}" onclick="toggleItem('${i.key}',${d.done})">${d.done?'Uncheck':'Check'}</button><button class="remove-btn" onclick="delItem('${i.key}')">Remove</button></div></li>`;
+        h += `<li><span class="${d.done?'done':''}">${d.text} ${d.qty?`<span style="color:var(--qty-text); font-weight:bold; font-size:12px; margin-left:5px;">(${d.qty})</span>`:''}</span><div style="display:flex; gap:8px;"><button class="check-btn ${d.done?'checked':''}" onclick="toggleItem('${i.key}',${d.done}, event)">${d.done?'Uncheck':'Check'}</button><button class="remove-btn" onclick="delItem('${i.key}')">Remove</button></div></li>`;
       });
       document.getElementById('list').innerHTML = h;
       document.getElementById('sync-status').innerText = "✅ Last synced: " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     });
   }
 
-  function deleteCategory(id, name) {
-    if(confirm(`Are you sure you want to delete the "${name}" category? All items inside will be lost.`)) {
-        db.ref(`nexuslist/${currentWs}/${id}`).remove();
-        db.ref(`nexuslist/${currentWs}/custom_categories/${id}`).remove().then(() => {
-            changeList('shopping');
-        });
+  function toggleItem(k, s, e) {
+    if (!s) {
+        const logo = document.getElementById('mainLogo');
+        logo.classList.add('logo-bounce');
+        setTimeout(() => logo.classList.remove('logo-bounce'), 400);
+        createConfetti(e.target);
+    }
+    db.ref(`nexuslist/${currentWs}/${currentType}/${k}`).update({done: !s});
+  }
+
+  function createConfetti(target) {
+    for (let i = 0; i < 8; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.backgroundColor = ['#3b82f6', '#22c55e', '#fbbf24', '#ef4444'][Math.floor(Math.random() * 4)];
+        c.style.setProperty('--x', (Math.random() * 60 - 30) + 'px');
+        c.style.setProperty('--y', (Math.random() * -60 - 20) + 'px');
+        c.style.left = '50%'; c.style.top = '50%';
+        target.appendChild(c);
+        setTimeout(() => c.remove(), 600);
     }
   }
 
@@ -336,37 +284,17 @@
     i.value = ''; q.value = '';
   }
 
-  function toggleItem(k, s) { db.ref(`nexuslist/${currentWs}/${currentType}/${k}`).update({done: !s}); }
   function delItem(k) { db.ref(`nexuslist/${currentWs}/${currentType}/${k}`).remove(); }
   function clearDone() { db.ref(`nexuslist/${currentWs}/${currentType}`).once('value', s => { s.forEach(i => { if(i.val().done) i.ref.remove(); }); }); }
-  
-  function createCat() { 
-    const n = document.getElementById('newCatName').value.trim(); 
-    if(n) db.ref(`nexuslist/${currentWs}/custom_categories`).push({name:n}); 
-    hideModal('customModal'); 
-    document.getElementById('newCatName').value=''; 
-  }
-  
-  function createWs() {
-    const n = document.getElementById('newWsName').value.trim(), id = "group_"+Math.random().toString(36).substr(2,9);
-    if(!n) return;
-    db.ref(`nexuslist/${id}`).set({metadata:{name:n, owner:user.uid}, members:{[user.uid]:{name:user.displayName}}}).then(() => {
-      shared.push({id, name:n}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(id); hideModal('wsModal'); document.getElementById('newWsName').value='';
-    });
-  }
-
-  function leaveGroup() { if(confirm("Are you sure you want to leave this group?")) { db.ref(`nexuslist/${currentWs}/members/${user.uid}`).remove(); shared = shared.filter(s=>s.id!==currentWs); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(user.uid); } }
+  function deleteCategory(id, name) { if(confirm(`Delete "${name}"?`)) { db.ref(`nexuslist/${currentWs}/${id}`).remove(); db.ref(`nexuslist/${currentWs}/custom_categories/${id}`).remove().then(() => changeList('shopping')); } }
+  function createCat() { const n = document.getElementById('newCatName').value.trim(); if(n) db.ref(`nexuslist/${currentWs}/custom_categories`).push({name:n}); hideModal('customModal'); document.getElementById('newCatName').value=''; }
+  function createWs() { const n = document.getElementById('newWsName').value.trim(), id = "group_"+Math.random().toString(36).substr(2,9); if(!n) return; db.ref(`nexuslist/${id}`).set({metadata:{name:n, owner:user.uid}, members:{[user.uid]:{name:user.displayName}}}).then(() => { shared.push({id, name:n}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(id); hideModal('wsModal'); }); }
+  function leaveGroup() { if(confirm("Leave group?")) { db.ref(`nexuslist/${currentWs}/members/${user.uid}`).remove(); shared = shared.filter(s=>s.id!==currentWs); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(user.uid); } }
   function applyDark() { const isDark = localStorage.getItem('darkMode')==='true'; document.documentElement.classList.toggle('dark-mode', isDark); document.getElementById('darkModeBtn').innerText = isDark ? '☀️ Light' : '🌙 Dark'; }
   function toggleDark() { localStorage.setItem('darkMode', localStorage.getItem('darkMode')!=='true'); applyDark(); }
-  
-  function showModal(m) { 
-    document.getElementById(m).style.display='flex';
-    const inputId = (m === 'customModal' ? 'newCatName' : 'newWsName');
-    setTimeout(() => document.getElementById(inputId).focus(), 10);
-  }
+  function showModal(m) { document.getElementById(m).style.display='flex'; setTimeout(() => document.getElementById(m === 'customModal' ? 'newCatName' : 'newWsName').focus(), 10); }
   function hideModal(m) { document.getElementById(m).style.display='none'; }
-  function copyLink() { navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?group=" + currentWs); alert("Share link copied!"); }
-  function clearHistory() { if(confirm("Clear local history?")) { localStorage.setItem('sharedGroups', '[]'); location.reload(); } }
+  function copyLink() { navigator.clipboard.writeText(window.location.origin + window.location.pathname + "?group=" + currentWs); alert("Copied!"); }
   function signInWithGoogle() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
 
   document.getElementById('itemInput').onkeyup = (e) => { if(e.key === 'Enter') addItem(); };
