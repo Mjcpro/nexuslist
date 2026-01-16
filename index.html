@@ -170,7 +170,7 @@
       <ul id="list"></ul>
       
       <div style="text-align: center;">
-        <button onclick="clearCompleted()" class="clear-btn">Sweep Checked</button>
+        <button onclick="clearCompleted()" class="clear-btn">🧹 Clear checked Items</button>
       </div>
 
       <div id="sync-status"></div>
@@ -271,7 +271,6 @@
         fetchWorkspaceName(groupParam);
       }
       switchToWorkspace(groupParam || user.uid);
-      // Clean URL after joining
       if (groupParam) window.history.replaceState({}, document.title, window.location.pathname);
       document.getElementById('signin-container').style.display = 'none';
       document.getElementById('app-container').style.display = 'block';
@@ -296,9 +295,13 @@
   }
 
   function switchToWorkspace(id) {
-    // CRITICAL: Clean up old listeners before switching paths
+    // Kill previous listeners to prevent bleed and lockup
     if (listRef) listRef.off(); 
     if (bubbleRef) bubbleRef.off();
+    
+    // Reset visual list immediately
+    document.getElementById('list').innerHTML = '';
+    document.getElementById('dynamicBubbles').innerHTML = '';
     
     currentWorkspaceId = id;
     baseDataPath = 'nexuslist/' + id;
@@ -309,8 +312,6 @@
     
     document.getElementById('wsName').textContent = displayName;
     document.getElementById('sharedBanner').style.display = isPrivate ? 'none' : 'block';
-    
-    // Hide/Show context buttons
     document.getElementById('createWsBtn').style.display = isPrivate ? 'inline-block' : 'none';
     document.getElementById('shareBtn').style.display = isPrivate ? 'none' : 'inline-block';
     
@@ -342,9 +343,7 @@
     const newId = "group_" + Math.random().toString(36).substr(2, 9);
     sharedGroups.push({ id: newId, name: name });
     localStorage.setItem('sharedGroups', JSON.stringify(sharedGroups));
-    
     db.ref('nexuslist/' + newId + '/metadata').set({ name: name });
-    
     hideSharedWorkspaceModal();
     document.getElementById('newSharedName').value = '';
     switchToWorkspace(newId);
@@ -385,8 +384,8 @@
     currentType = type;
     document.querySelectorAll('.bubble-btn').forEach(b => b.classList.toggle('active', b.dataset.list === type));
     
-    const isShopping = type === 'shopping';
-    const isPriorityNeeded = ['reminder', 'todo'].includes(type);
+    const isShopping = (type === 'shopping');
+    const isPriorityNeeded = (type === 'reminder' || type === 'todo');
     document.getElementById('qtyInput').style.display = isShopping ? 'block' : 'none';
     document.getElementById('priorityInput').style.display = isPriorityNeeded ? 'block' : 'none';
     const isDefault = ['shopping', 'reminder', 'todo'].includes(type);
@@ -401,8 +400,6 @@
     listRef.on('value', snap => {
       const listUI = document.getElementById('list');
       listUI.innerHTML = '';
-      const now = new Date();
-      document.getElementById('sync-status').textContent = `✅ Last synced: ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
       if (!snap.exists()) return;
       snap.forEach(child => {
         const item = child.val();
@@ -421,6 +418,8 @@
           </div>`;
         listUI.appendChild(li);
       });
+      const now = new Date();
+      document.getElementById('sync-status').textContent = `✅ Last synced: ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
     });
   }
 
@@ -429,11 +428,9 @@
     const qty = document.getElementById('qtyInput').value.trim();
     const priority = document.getElementById('priorityInput').value;
     if (!input.value.trim()) return;
-    
     let itemData = { text: input.value.trim(), done: false };
     if (currentType === 'shopping' && qty) itemData.qty = qty;
-    if (['reminder', 'todo'].includes(currentType)) itemData.priority = priority;
-
+    if (currentType === 'reminder' || currentType === 'todo') itemData.priority = priority;
     listRef.push(itemData);
     input.value = '';
     document.getElementById('qtyInput').value = '';
