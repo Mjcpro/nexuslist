@@ -1,10 +1,8 @@
 [{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.yourname.nexuslist",
-    "sha256_cert_fingerprints": [
-      "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00"
-    ]
-  }
-}]
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.mjcpro.twa",
+        "sha256_cert_fingerprints": ["67:82:CC:49:06:A3:F9:C4:5E:4A:95:EB:FC:CC:42:EF:67:CD:3D:00:A7:AD:9D:C5:2B:B0:4E:12:57:57:73:A5"]
+      }
+    }]
