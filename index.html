@@ -47,7 +47,6 @@
     .logo-wrapper img { height: 160px; border-radius: 20px; object-fit: contain; }
     .logo-bounce { transform: scale(1.2) rotate(5deg); }
     
-    /* EMPTY LIST STYLES */
     #list:empty::after {
       content: "List is empty! Add something above 👆";
       display: block; text-align: center; color: var(--text-secondary);
@@ -227,7 +226,6 @@
     const container = document.getElementById('workspaceSwitcher');
     if (shared.length === 0) { container.style.display = 'none'; return; }
     container.style.display = 'flex';
-    
     let h = `<button class="tab-btn ${currentWs===user.uid?'active-tab':''}" onclick="switchWs('${user.uid}')">Private</button>`;
     shared.forEach(g => { h += `<button class="tab-btn ${currentWs===g.id?'active-tab':''}" onclick="switchWs('${g.id}')">${g.name}</button>`; });
     container.innerHTML = h;
@@ -244,7 +242,6 @@
     db.ref(`nexuslist/${currentWs}/${currentType}`).off();
     currentType = t;
     
-    // Highlight active bubble
     document.querySelectorAll('.bubble-btn').forEach(b => {
         b.classList.remove('active');
         if(b.id === `btn-${t}` || b.innerText.toLowerCase().includes(t)) b.classList.add('active');
@@ -303,7 +300,20 @@
   function delItem(k) { db.ref(`nexuslist/${currentWs}/${currentType}/${k}`).remove(); }
   function clearDone() { db.ref(`nexuslist/${currentWs}/${currentType}`).once('value', s => { s.forEach(i => { if(i.val().done) i.ref.remove(); }); }); }
   function deleteCategory(id, name) { if(confirm(`Delete "${name}"?`)) { db.ref(`nexuslist/${currentWs}/${id}`).remove(); db.ref(`nexuslist/${currentWs}/custom_categories/${id}`).remove().then(() => changeList('shopping')); } }
-  function createCat() { const n = document.getElementById('newCatName').value.trim(); if(n) db.ref(`nexuslist/${currentWs}/custom_categories`).push({name:n}); hideModal('customModal'); document.getElementById('newCatName').value=''; }
+  
+  // FIXED CREATE CAT FUNCTION
+  function createCat() { 
+    const n = document.getElementById('newCatName').value.trim(); 
+    if(!n) return;
+    const newCatRef = db.ref(`nexuslist/${currentWs}/custom_categories`).push();
+    const newId = newCatRef.key;
+    newCatRef.set({name: n}).then(() => {
+        changeList(newId);
+        hideModal('customModal');
+        document.getElementById('newCatName').value = '';
+    });
+  }
+
   function createWs() { const n = document.getElementById('newWsName').value.trim(), id = "group_"+Math.random().toString(36).substr(2,9); if(!n) return; db.ref(`nexuslist/${id}`).set({metadata:{name:n, owner:user.uid}, members:{[user.uid]:{name:user.displayName}}}).then(() => { shared.push({id, name:n}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(id); hideModal('wsModal'); }); }
   function leaveGroup() { if(confirm("Leave group?")) { db.ref(`nexuslist/${currentWs}/members/${user.uid}`).remove(); shared = shared.filter(s=>s.id!==currentWs); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(user.uid); } }
   function applyDark() { const isDark = localStorage.getItem('darkMode')==='true'; document.documentElement.classList.toggle('dark-mode', isDark); document.getElementById('darkModeBtn').innerText = isDark ? '☀️ Light' : '🌙 Dark'; }
