@@ -183,13 +183,13 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database(), auth = firebase.auth();
 
-  let user = null, currentWs = "", currentType = "shopping", shared = JSON.parse(localStorage.getItem('sharedGroups') || "[]");
+  let user = null, currentWs = "", currentType = "shopping", shared = [];
 
   auth.onAuthStateChanged(u => {
     if (u) {
-      user = u; applyDark();
+      user = u; applyDark(); db.ref(`userCreatedGroups/${u.uid}`).on('value', s => { const groups = s.val() || {}; shared = Object.entries(groups).map(([id, name]) => ({id, name})); renderSwitch(); });
       const urlG = new URLSearchParams(window.location.search).get('group');
-      if (urlG && urlG !== u.uid && !shared.find(s=>s.id===urlG)) { shared.push({id:urlG, name:"Joined List"}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); }
+      if (urlG && urlG !== u.uid && !shared.find(s=>s.id===urlG)) { shared.push({id:urlG, name:"Joined List"}); db.ref(`userCreatedGroups/${user.uid}/${id}`).set(n); }
       switchWs(urlG || u.uid);
       document.getElementById('signin-container').style.display='none';
       document.getElementById('app-container').style.display='block';
@@ -314,8 +314,8 @@
     });
   }
 
-  function createWs() { const n = document.getElementById('newWsName').value.trim(), id = "group_"+Math.random().toString(36).substr(2,9); if(!n) return; db.ref(`nexuslist/${id}`).set({metadata:{name:n, owner:user.uid}, members:{[user.uid]:{name:user.displayName}}}).then(() => { shared.push({id, name:n}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(id); hideModal('wsModal'); }); }
-  function leaveGroup() { if(confirm("Leave group?")) { db.ref(`nexuslist/${currentWs}/members/${user.uid}`).remove(); shared = shared.filter(s=>s.id!==currentWs); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(user.uid); } }
+  function createWs() { const n = document.getElementById('newWsName').value.trim(), id = "group_"+Math.random().toString(36).substr(2,9); if(!n) return; db.ref(`nexuslist/${id}`).set({metadata:{name:n, owner:user.uid}, members:{[user.uid]:{name:user.displayName}}}).then(() => {  db.ref(`userCreatedGroups/${user.uid}/${id}`).set(n); switchWs(id); hideModal('wsModal'); }); }
+  function leaveGroup() { if(confirm("Leave group?")) { db.ref(`nexuslist/${currentWs}/members/${user.uid}`).remove(); shared = shared.filter(s=>s.id!==currentWs); db.ref(`userCreatedGroups/${user.uid}/${id}`).set(n); db.ref(`userCreatedGroups/${user.uid}/${currentWs}`).remove(); switchWs(user.uid); } }
   function applyDark() { const isDark = localStorage.getItem('darkMode')==='true'; document.documentElement.classList.toggle('dark-mode', isDark); document.getElementById('darkModeBtn').innerText = isDark ? '☀️ Light' : '🌙 Dark'; }
   function toggleDark() { localStorage.setItem('darkMode', localStorage.getItem('darkMode')!=='true'); applyDark(); }
   function showModal(m) { document.getElementById(m).style.display='flex'; setTimeout(() => document.getElementById(m === 'customModal' ? 'newCatName' : 'newWsName').focus(), 10); }
@@ -329,3 +329,4 @@
 </script>
 </body>
 </html>
+
