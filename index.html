@@ -315,7 +315,7 @@
     });
   }
 
-  function createWs() { const n = document.getElementById('newWsName').value.trim(), id = "group_"+Math.random().toString(36).substr(2,9); if(!n) return; db.ref(`nexuslist/${id}`).set({metadata:{name:n, owner:user.uid}, members:{[user.uid]:{name:user.displayName}}}).then(() => { shared.push({id, name:n}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(id); hideModal('wsModal'); }); }
+  function createWs() { const n = document.getElementById('newWsName').value.trim(), id = "group_"+Math.random().toString(36).substr(2,9); if(!n) return; db.ref(`nexuslist/${id}`).set({metadata:{name:n, owner:user.uid}, members:{[user.uid]:{name:user.displayName}}}).then(() => { shared.push({id, name:n}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); db.ref(`userCreatedGroups/${user.uid}/${id}`).set(n); switchWs(id); hideModal('wsModal'); }); }
   function leaveGroup() { if(confirm("Leave group?")) { db.ref(`nexuslist/${currentWs}/members/${user.uid}`).remove(); shared = shared.filter(s=>s.id!==currentWs); localStorage.setItem('sharedGroups', JSON.stringify(shared)); switchWs(user.uid); } }
   function applyDark() { const isDark = localStorage.getItem('darkMode')==='true'; document.documentElement.classList.toggle('dark-mode', isDark); document.getElementById('darkModeBtn').innerText = isDark ? '☀️ Light' : '🌙 Dark'; }
   function toggleDark() { localStorage.setItem('darkMode', localStorage.getItem('darkMode')!=='true'); applyDark(); }
@@ -330,6 +330,7 @@
 </script>
 </body>
 </html>
+
 
 
 
