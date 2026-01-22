@@ -189,7 +189,7 @@
     if (u) {
       user = u; applyDark(); db.ref(`userCreatedGroups/${u.uid}`).on('value', s => { const groups = s.val() || {}; shared = Object.entries(groups).map(([id, name]) => ({id, name})); renderSwitch(); });
       const urlG = new URLSearchParams(window.location.search).get('group');
-      if (urlG && urlG !== u.uid && !shared.find(s=>s.id===urlG)) { shared.push({id:urlG, name:"Joined List"}); db.ref(`userCreatedGroups/${user.uid}/${id}`).set(n); }
+      if (userCreatedGroups/${user.uid}/${id}`).set(n)  userCreatedGroups/${user.uid}/${urlG}`).set("Joined List") urlG !== u.uid && !shared.find(s=>s.id===urlG)) { shared.push({id:urlG, name:"Joined List"}); db.ref(`userCreatedGroups/${user.uid}/${id}`).set(n); }
       switchWs(urlG || u.uid);
       document.getElementById('signin-container').style.display='none';
       document.getElementById('app-container').style.display='block';
@@ -218,14 +218,14 @@
     document.getElementById('sharedBanner').style.display = isPrivate ? 'none' : 'block';
     document.getElementById('shareBtn').style.display = isPrivate ? 'none' : 'inline-block';
     document.getElementById('createWsBtn').style.display = isPrivate ? 'inline-block' : 'none';
+     document.querySelectorAll('#btn-shopping, #btn-reminder, #btn-todo').forEach(b => b.style.display = isPrivate ? 'inline-block' : 'none');
     
     renderSwitch(); loadCats(); changeList('shopping');
   }
 
   function renderSwitch() {
     const container = document.getElementById('workspaceSwitcher');
-    if (shared.length === 0) { container.style.display = 'none'; return; }
-    container.style.display = 'flex';
+shareBtn').style.display = isPrivate ? 'none' : 'inline-block'    container.style.display = 'flex';
     let h = `<button class="tab-btn ${currentWs===user.uid?'active-tab':''}" onclick="switchWs('${user.uid}')">Private</button>`;
     shared.forEach(g => { h += `<button class="tab-btn ${currentWs===g.id?'active-tab':''}" onclick="switchWs('${g.id}')">${g.name}</button>`; });
     container.innerHTML = h;
@@ -329,4 +329,5 @@
 </script>
 </body>
 </html>
+
 
