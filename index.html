@@ -190,7 +190,7 @@
       user = u; applyDark();
       const urlG = new URLSearchParams(window.location.search).get('group');
       if (urlG && urlG !== u.uid && !shared.find(s=>s.id===urlG)) { shared.push({id:urlG, name:"Joined List"}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); }
-      db.ref(`userCreatedGroups/${u.uid}`).once('value', s => { shared = Object.entries(s.val() || {}).map(([id, name]) => ({id, name})); renderSwitch(); });
+      db.ref(`userCreatedGroups/${u.uid}`).on('value', s => { shared = Object.entries(s.val() || {}).map(([id, name]) => ({id, name})); renderSwitch(); });
       switchWs(urlG || u.uid);
       document.getElementById('signin-container').style.display='none';
       document.getElementById('app-container').style.display='block';
@@ -250,7 +250,7 @@
 
     const delContainer = document.getElementById('deleteCatContainer');
     if (!['shopping', 'reminder', 'todo'].includes(t)) {
-        db.ref(`nexuslist/${currentWs}/custom_categories/${t}`).once('value', s => {
+        db.ref(`nexuslist/${currentWs}/custom_categories/${t}`).on('value', s => {
             const name = s.val() ? s.val().name : "Category";
             delContainer.innerHTML = `<button style="background:none; color:#ef4444; border:1px solid #fee2e2; padding:6px 12px; border-radius:999px; cursor:pointer; font-size:11px; margin-top:10px;" onclick="deleteCategory('${t}', '${name}')">🗑️ Delete ${name}</button>`;
         });
@@ -299,7 +299,7 @@
   }
 
   function delItem(k) { db.ref(`nexuslist/${currentWs}/${currentType}/${k}`).remove(); }
-  function clearDone() { db.ref(`nexuslist/${currentWs}/${currentType}`).once('value', s => { s.forEach(i => { if(i.val().done) i.ref.remove(); }); }); }
+  function clearDone() { db.ref(`nexuslist/${currentWs}/${currentType}`).on('value', s => { s.forEach(i => { if(i.val().done) i.ref.remove(); }); }); }
   function deleteCategory(id, name) { if(confirm(`Delete "${name}"?`)) { db.ref(`nexuslist/${currentWs}/${id}`).remove(); db.ref(`nexuslist/${currentWs}/custom_categories/${id}`).remove().then(() => changeList('shopping')); } }
   
   // FIXED CREATE CAT FUNCTION
@@ -330,6 +330,7 @@
 </script>
 </body>
 </html>
+
 
 
 
