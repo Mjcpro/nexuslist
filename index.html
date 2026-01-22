@@ -190,6 +190,7 @@
       user = u; applyDark();
       const urlG = new URLSearchParams(window.location.search).get('group');
       if (urlG && urlG !== u.uid && !shared.find(s=>s.id===urlG)) { shared.push({id:urlG, name:"Joined List"}); localStorage.setItem('sharedGroups', JSON.stringify(shared)); }
+      db.ref(`userCreatedGroups/${u.uid}`).once('value', s => { shared = Object.entries(s.val() || {}).map(([id, name]) => ({id, name})); renderSwitch(); });
       switchWs(urlG || u.uid);
       document.getElementById('signin-container').style.display='none';
       document.getElementById('app-container').style.display='block';
@@ -329,3 +330,4 @@
 </script>
 </body>
 </html>
+
